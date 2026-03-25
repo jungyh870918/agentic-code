@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>에이전트 코딩에서 자유도 설정과 목표 제시</title>
+  <style>
+    :root{
+      --bg:#f7f4ee;
+      --paper:#fffdfa;
+      --ink:#2c2926;
+      --muted:#6d655d;
+      --line:#e7dfd3;
+      --accent:#9a7a3f;
+      --accent-soft:#f3ebdd;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#f5f1e9 0%, #f9f7f2 100%);
+      color:var(--ink);
+      font-family:"Iowan Old Style","Georgia","Times New Roman",serif;
+      line-height:1.75;
+    }
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:56px 24px 80px;
+    }
+    .hero{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:40px 36px;
+      box-shadow:0 8px 30px rgba(50,35,10,.04);
+      margin-bottom:28px;
+    }
+    h1,h2,h3{
+      margin:0 0 12px;
+      letter-spacing:.01em;
+      line-height:1.2;
+      font-weight:700;
+    }
+    h1{font-size:38px}
+    h2{
+      font-size:28px;
+      padding-top:8px;
+      margin-top:38px;
+      border-top:1px solid var(--line);
+    }
+    h3{font-size:21px;margin-top:28px}
+    p{margin:10px 0 0}
+    .lead{
+      color:var(--muted);
+      font-size:18px;
+    }
+    .card{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:26px 24px;
+      margin-top:18px;
+    }
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:var(--accent-soft);
+      color:#7d6131;
+      font-size:13px;
+      margin-bottom:14px;
+      letter-spacing:.02em;
+    }
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-top:16px;
+    }
+    .box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px 18px 16px;
+    }
+    .label{
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:8px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    }
+    .prompt{
+      background:#fbf8f2;
+      border-left:4px solid var(--accent);
+      padding:16px 18px;
+      border-radius:10px;
+      margin-top:14px;
+      white-space:pre-wrap;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:14px;
+      line-height:1.65;
+      color:#403932;
+    }
+    ul{
+      margin:10px 0 0 20px;
+      padding:0;
+    }
+    li{margin:6px 0}
+    .quote{
+      font-size:20px;
+      color:#403932;
+      background:#faf5ea;
+      border-left:4px solid var(--accent);
+      padding:18px 20px;
+      border-radius:12px;
+      margin-top:14px;
+    }
+    .small{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:8px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    }
+    .footer{
+      margin-top:42px;
+      color:var(--muted);
+      font-size:14px;
+      border-top:1px solid var(--line);
+      padding-top:18px;
+    }
+    @media (max-width: 820px){
+      h1{font-size:30px}
+      h2{font-size:24px}
+      .hero{padding:28px 22px}
+      .two-col{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="badge">Agent Coding Guide</div>
+      <h1>에이전트 코딩에서 자유도를 정확히 설정하는 법</h1>
+      <p class="lead">
+        오버엔지니어링은 막고, 지나친 소극성도 피하면서, 원하는 결과를 비교적 안정적으로 얻기 위해
+        어떤 식으로 요청을 구성해야 하는지 정리한 문서다. 실제 Butter 프로젝트에서 사용한 요청 방식과
+        그에 대한 응답 방식을 예시로 설명한다.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>1. 핵심 원리</h2>
+      <div class="quote">
+        에이전트는 “얼마나 잘 시키느냐”보다, “어디까지 자유롭게 움직일 수 있는지 얼마나 정확히 정해주느냐”에서 결과 품질이 갈린다.
+      </div>
+      <p>
+        개발 에이전트는 기본적으로 문제를 크게 풀려는 성향이 있다. 그래서 요청이 모호하면 구조를 갈아엎거나,
+        반대로 너무 막연한 제한만 있으면 거의 아무것도 하지 않는 소극적 결과가 나온다.
+      </p>
+      <p>그래서 요청에는 아래 다섯 가지가 함께 들어가야 한다.</p>
+      <ul>
+        <li><strong>목표</strong>: 무엇을 만들고 싶은지</li>
+        <li><strong>범위</strong>: 어디까지 바꿔도 되는지</li>
+        <li><strong>금지사항</strong>: 절대 건드리면 안 되는 것</li>
+        <li><strong>작업 방식</strong>: add / modify / refactor 중 무엇인지</li>
+        <li><strong>의도</strong>: 왜 이 수정을 하는지</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>2. 실제 상황 예시: Butter 아카이브 페이지</h2>
+      <p>
+        상황은 이랬다. Butter의 Archive 페이지는 이미 전체 구조와 분위기가 잘 잡혀 있었지만,
+        사용자가 “계속 쓰고 싶다”는 감정을 느끼게 만드는 요소를 추가하고 싶었다.
+      </p>
+      <p>여기서 위험한 선택지는 두 가지였다.</p>
+      <div class="two-col">
+        <div class="box">
+          <div class="label">실패 패턴 A</div>
+          <p><strong>너무 자유롭게 맡기기</strong></p>
+          <p>“Archive 페이지 UX를 개선해줘”처럼 요청하면, 에이전트가 레이아웃을 갈아엎거나 카드와 박스를 잔뜩 추가해 오버엔지니어링할 수 있다.</p>
+        </div>
+        <div class="box">
+          <div class="label">실패 패턴 B</div>
+          <p><strong>너무 애매하게 제한하기</strong></p>
+          <p>“기존 유지하면서 조금 개선해줘”처럼 쓰면, 에이전트가 안전하게만 움직여 거의 아무 변화도 만들지 못할 수 있다.</p>
+        </div>
+      </div>
+      <p>그래서 실제로는 다음처럼 범위를 고정했다.</p>
+      <div class="prompt">- 기존 레이아웃 변경 금지
+- 기존 컴포넌트 이동 금지
+- 기존 UI 삭제 금지
+
+👉 additive 방식으로 구현할 것</div>
+      <p>
+        이 한 블록으로 “새로 만들지 말고, 이미 있는 것 위에 얹어라”는 행동 공간을 정의했다.
+        그다음에는 어떤 요소를 어디에 놓을지까지 구체적으로 지정했다.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>3. 요청은 어떻게 썼고, 어떻게 응답했는가</h2>
+
+      <h3>상황</h3>
+      <p>
+        Archive 페이지에는 이미 좌측 상세 패널과 우측 캘린더/리스트 구조가 있었다.
+        이 구조는 유지한 채, “축적감”, “다시 보기”, “부담 없는 CTA” 같은 리텐션 요소만 자연스럽게 얹고 싶었다.
+      </p>
+
+      <h3>사용한 요청 방식</h3>
+      <div class="prompt">이번 작업은 기존 Archive 페이지에 “새로운 UI를 추가”하는 작업이다.
+
+중요:
+- 기존 레이아웃을 절대 변경하지 말 것
+- 기존 컴포넌트의 위치를 이동하지 말 것
+- 기존 UI를 삭제하지 말 것
+
+👉 반드시 “additive 방식”으로 구현할 것</div>
+
+      <h3>거기에 대한 응답 방식</h3>
+      <p>여기서 응답은 단순한 “좋다/나쁘다”가 아니라, 에이전트가 실제로 움직일 수 있게 세분화했다.</p>
+      <ul>
+        <li>현재 레이아웃을 먼저 명시: 좌측은 상세, 우측은 캘린더와 리스트</li>
+        <li>새 요소의 위치를 지정: 캘린더 아래, 본문 아래, 리스트 하단</li>
+        <li>스타일 제한을 걸어둠: 카드 금지, 박스 금지, 대시보드 스타일 금지</li>
+        <li>목적을 설명: 사용자가 “내 기록이 쌓이고 있다”고 느끼게 하기 위함</li>
+      </ul>
+
+      <div class="two-col">
+        <div class="box">
+          <div class="label">좋은 지시</div>
+          <p>“캘린더 바로 아래에 작은 텍스트 블록 형태로 축적감 요소를 추가해라. 카드나 박스 금지.”</p>
+        </div>
+        <div class="box">
+          <div class="label">애매한 지시</div>
+          <p>“조금 더 예쁘게 리텐션 요소를 넣어줘.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4. 에이전트의 자유도를 정하는 실전 규칙</h2>
+      <h3>규칙 1. 목표만 주지 말고, 작업 방식까지 지정하라</h3>
+      <p>
+        “개선해줘”가 아니라, 이 작업이 <strong>추가(add)</strong>인지, <strong>수정(modify)</strong>인지,
+        <strong>리팩터(refactor)</strong>인지 명시해야 한다.
+      </p>
+
+      <h3>규칙 2. 금지사항은 구체적으로 써라</h3>
+      <p>
+        “과하게 바꾸지 마”보다 “레이아웃 변경 금지 / 컴포넌트 이동 금지 / 기존 UI 삭제 금지”가 훨씬 강력하다.
+      </p>
+
+      <h3>규칙 3. 위치를 지정하면 오버엔지니어링이 줄어든다</h3>
+      <p>
+        에이전트는 의외로 “무엇을 넣을지”보다 “어디에 넣을지”에서 흔들린다. 위치를 지정해주면 구조를 덜 건드린다.
+      </p>
+
+      <h3>규칙 4. 의도는 기능이 아니라 사용자 감정으로 설명하라</h3>
+      <p>
+        예를 들어 “리텐션 높여줘”보다 “내 기록이 쌓이고 있다는 느낌을 주고 싶다”가 훨씬 좋은 기준이 된다.
+      </p>
+
+      <h3>규칙 5. 완성된 부분은 ‘건드리지 말라’고 분명히 말하라</h3>
+      <p>
+        잘 나온 디자인은 그대로 두고, 빈 부분만 메우게 해야 한다. 그렇지 않으면 에이전트가 성공한 요소까지 다시 만지기 쉽다.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>5. 최근 에이전트 코딩 화두와 연결되는 개념</h2>
+      <p>
+        요즘 에이전트 코딩에서 많이 언급되는 개념들과도 이 방식이 연결된다.
+      </p>
+
+      <h3>1) Context engineering</h3>
+      <p>
+        프롬프트를 길게 쓰는 것이 아니라, 에이전트가 판단하는 데 필요한 맥락을 잘 구조화해서 주는 방식이다.
+        “무엇이 목표인지, 무엇이 금지인지, 현재 구조가 어떤지”를 명확히 주는 게 여기에 해당한다.
+      </p>
+
+      <h3>2) Evals</h3>
+      <p>
+        결과가 좋은지 나쁜지를 사람 느낌으로만 보지 않고, “레이아웃 안 건드렸는가”, “기존 기능을 유지했는가” 같은 평가 기준을
+        미리 정해두는 방식이다.
+      </p>
+
+      <h3>3) Guardrails / governance</h3>
+      <p>
+        에이전트의 자유도를 제한하는 안전장치다. “additive 방식”, “기존 UI 삭제 금지” 같은 지시가 사실상 guardrail 역할을 한다.
+      </p>
+
+      <h3>4) Human-in-the-loop</h3>
+      <p>
+        에이전트가 한 번에 완벽한 해답을 내는 게 아니라, 사람이 방향을 잡고 검수하면서 단계적으로 발전시키는 방식이다.
+        Butter 프로젝트에서 디자인 → 프론트 반영 → 미세 조정 순으로 갔던 흐름이 여기에 가깝다.
+      </p>
+
+      <h3>5) Scaffolding / orchestration</h3>
+      <p>
+        에이전트에게 막연히 “해줘”라고 하기보다, 작업 단위를 나누고 순서를 정해주는 방식이다.
+        예를 들어 “백엔드 먼저, 프론트는 그 반영만”, “디자인은 구조 유지한 채 additive로” 같은 식의 통제가 여기에 해당한다.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>6. 실무에서 바로 쓸 수 있는 요청 템플릿</h2>
+      <div class="prompt">[목표]
+무엇을 바꾸고 싶은지
+
+[현재 상태]
+현재 구조와 이미 잘 된 요소
+
+[절대 금지]
+레이아웃 변경 금지 / 컴포넌트 이동 금지 / 기존 UI 삭제 금지
+
+[작업 방식]
+add / modify / refactor 중 하나 명시
+
+[구체 지시]
+어디에 무엇을 넣을지
+
+[디자인 규칙]
+카드 금지 / 박스 금지 / 기존 톤 유지
+
+[의도]
+사용자가 무엇을 느끼게 하고 싶은지</div>
+      <p class="small">
+        이 템플릿은 에이전트의 행동 공간을 좁히면서도, 필요한 창의성은 남겨두는 데 목적이 있다.
+      </p>
+    </section>
+
+    <section class="footer">
+      이 문서는 Butter 프로젝트에서 실제로 사용한 요청 방식과 응답 원리를 바탕으로 정리되었다.
+      핵심은 “목표를 명확하게 주는 것”이 아니라, “자유도의 범위와 금지사항까지 함께 설계하는 것”이다.
+    </section>
+  </div>
+</body>
+</html>
