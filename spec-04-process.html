@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voyage 분해 — 에이전틱 오케스트레이션 정착 명세</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+  :root{
+    --paper:#f4f0e6;
+    --paper-2:#faf6ec;
+    --surface:#ffffff;
+    --ink:#1a1f26;
+    --ink-2:#4a5260;
+    --ink-3:#7a8493;
+    --ink-4:#a6aebb;
+    --rule:#d8d0bf;
+    --rule-soft:#e6dfce;
+    --accent:#1e5f55;
+    --accent-2:#103d36;
+    --accent-soft:#d9e8e3;
+    --warn:#a26420;
+    --warn-soft:#f3e6cf;
+    --danger:#94372d;
+    --danger-soft:#f0d8d2;
+    --serif:"Fraunces","Noto Sans KR",serif;
+    --sans:"Inter","Noto Sans KR",-apple-system,sans-serif;
+    --kr:"Noto Sans KR",-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:32px}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--kr);
+    font-size:15px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  ::selection{background:var(--accent);color:var(--paper)}
+
+  .layout{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1220px;margin:0 auto}
+  @media(max-width:980px){.layout{grid-template-columns:1fr}}
+
+  /* ============ MOBILE TOPBAR ============ */
+  .mobilebar{
+    display:none;
+    position:sticky;top:0;z-index:30;
+    background:var(--paper);
+    border-bottom:1px solid var(--rule);
+    padding:14px 24px;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .mobilebar .mtitle{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
+  .mobilebar .mtitle b{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.14em;display:block;margin-bottom:3px;font-weight:500}
+  .toctoggle{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    background:var(--paper-2);color:var(--accent);
+    border:1px solid var(--rule);border-radius:3px;
+    padding:9px 14px;cursor:pointer;
+    display:flex;align-items:center;gap:10px;
+    text-transform:uppercase;font-weight:500;
+  }
+  .toctoggle .bars{display:inline-flex;flex-direction:column;gap:3px}
+  .toctoggle .bars span{display:block;width:14px;height:1.5px;background:var(--accent);transition:.2s}
+  .toctoggle.open .bars span:nth-child(1){transform:translateY(4.5px) rotate(45deg)}
+  .toctoggle.open .bars span:nth-child(2){opacity:0}
+  .toctoggle.open .bars span:nth-child(3){transform:translateY(-4.5px) rotate(-45deg)}
+  @media(max-width:980px){.mobilebar{display:flex}}
+
+  /* ============ SIDEBAR ============ */
+  aside{
+    border-right:1px solid var(--rule);
+    padding:48px 28px 80px 28px;
+    position:sticky;top:0;align-self:start;
+    height:100vh;overflow-y:auto;
+    background:var(--paper);
+  }
+  @media(max-width:980px){
+    aside{
+      position:fixed;top:0;left:0;right:0;bottom:0;
+      z-index:40;
+      border-right:none;
+      padding:84px 28px 60px;
+      height:100vh;
+      transform:translateY(-100%);
+      transition:transform .32s cubic-bezier(.4,0,.2,1);
+      overflow-y:auto;
+      visibility:hidden;
+    }
+    aside.open{transform:translateY(0);visibility:visible}
+    aside .docmeta{margin-bottom:20px}
+    aside .doctitle{font-size:18px;margin-bottom:6px}
+    aside .docsubtitle{margin-bottom:24px}
+  }
+  .docmeta{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:18px;line-height:1.6}
+  .docmeta .row{display:flex;justify-content:space-between;gap:8px}
+  .docmeta b{color:var(--ink-2);font-weight:500}
+  .doctitle{font-family:var(--serif);font-weight:500;font-size:21px;letter-spacing:-.01em;line-height:1.2;margin-bottom:6px;color:var(--ink)}
+  .docsubtitle{font-family:var(--kr);font-size:12px;color:var(--ink-3);line-height:1.55;margin-bottom:34px}
+  .toc-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase;border-top:1px solid var(--rule);padding-top:18px;margin-bottom:14px}
+  nav ol{list-style:none;counter-reset:toc}
+  nav li{counter-increment:toc;margin:1px 0}
+  nav a{
+    display:grid;
+    grid-template-columns:24px 1fr;
+    gap:10px;
+    text-decoration:none;
+    color:var(--ink-2);
+    font-size:13px;
+    padding:8px 8px 8px 4px;
+    border-left:2px solid transparent;
+    transition:.15s;
+    line-height:1.5;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  nav a::before{
+    content:counter(toc,decimal-leading-zero);
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--ink-4);
+    letter-spacing:.04em;
+    padding-top:1px;
+  }
+  nav a:hover{color:var(--ink);background:var(--paper-2)}
+  nav a.on{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+  nav a.on::before{color:var(--accent)}
+
+  .signoff{margin-top:30px;padding-top:18px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10.5px;color:var(--ink-3);line-height:1.7}
+  .signoff b{color:var(--ink-2);font-weight:500;letter-spacing:.04em}
+
+  /* ============ MAIN ============ */
+  main{padding:48px 56px 120px 56px;min-width:0}
+  @media(max-width:980px){main{padding:24px 22px 60px}}
+  @media(max-width:560px){main{padding:18px 18px 50px}}
+
+  /* document header */
+  header.doc{margin-bottom:60px}
+  .deptline{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+  .deptline::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h1.bigtitle{font-family:var(--serif);font-weight:500;font-size:clamp(30px,5.5vw,52px);line-height:1.1;letter-spacing:-.025em;color:var(--ink);max-width:18ch;word-break:keep-all}
+  h1.bigtitle em{font-style:italic;color:var(--accent);font-weight:500}
+  .ledesum{margin-top:28px;font-size:16.5px;color:var(--ink-2);max-width:58ch;line-height:1.8;word-break:keep-all}
+  @media(max-width:560px){.ledesum{font-size:15px;line-height:1.75}}
+  .leadout{margin-top:38px;display:flex;gap:30px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-3);text-transform:uppercase}
+  .leadout div b{display:block;font-family:var(--kr);font-size:14px;color:var(--ink);text-transform:none;letter-spacing:0;margin-top:4px;font-weight:500;word-break:keep-all}
+
+  /* sections */
+  section{margin:88px 0 0 0;padding-top:36px;border-top:1px solid var(--rule)}
+  @media(max-width:560px){section{margin-top:64px;padding-top:28px}}
+  section:first-of-type{border-top:none;padding-top:0;margin-top:0}
+  .sec-marker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;font-weight:500}
+  h2.h{font-family:var(--serif);font-weight:500;font-size:clamp(24px,4vw,36px);letter-spacing:-.015em;line-height:1.2;color:var(--ink);max-width:22ch;margin-bottom:14px;word-break:keep-all}
+  .h-sub{font-size:14.5px;color:var(--ink-3);margin-bottom:38px;max-width:60ch;line-height:1.75;word-break:keep-all}
+
+  h3{font-family:var(--kr);font-weight:700;font-size:17px;letter-spacing:-.005em;margin:36px 0 12px;color:var(--ink);display:flex;align-items:baseline;gap:10px;word-break:keep-all;flex-wrap:wrap}
+  h3 .h3num{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.04em;flex:none}
+
+  p{color:var(--ink-2);font-size:14.5px;max-width:72ch;margin:0 0 14px;line-height:1.85;word-break:keep-all}
+  p strong{color:var(--ink);font-weight:500}
+  p code, li code{font-family:var(--mono);font-size:12.5px;background:var(--paper-2);border:1px solid var(--rule-soft);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+
+  ul.cln{list-style:none;margin:14px 0 18px;max-width:72ch}
+  ul.cln li{position:relative;padding:6px 0 6px 22px;color:var(--ink-2);font-size:14.5px;line-height:1.75}
+  ul.cln li::before{content:"";position:absolute;left:6px;top:16px;width:6px;height:1px;background:var(--accent)}
+  ul.cln li strong{color:var(--ink);font-weight:500}
+
+  /* pull quote / decision callout */
+  .decision{
+    border-left:2px solid var(--accent);
+    padding:18px 22px;
+    margin:24px 0 28px;
+    background:var(--paper-2);
+    max-width:72ch;
+  }
+  .decision .d-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;font-weight:500}
+  .decision p{margin:0;color:var(--ink);font-family:var(--serif);font-size:18px;font-style:italic;font-weight:400;line-height:1.55;max-width:none}
+
+  .note{font-size:13px;color:var(--ink-3);font-style:italic;margin:14px 0;max-width:64ch}
+
+  /* table */
+  .tbl{width:100%;border-collapse:collapse;margin:18px 0 28px;font-size:13.5px;max-width:100%}
+  .tbl th,.tbl td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;word-break:keep-all}
+  .tbl thead th{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);font-family:var(--mono);font-size:11px;letter-spacing:.04em;font-weight:500;color:var(--ink);text-transform:uppercase}
+  .tbl td{color:var(--ink-2);line-height:1.65}
+  .tbl td strong{color:var(--ink);font-weight:500}
+  .tbl tbody tr:last-child td{border-bottom:1px solid var(--ink)}
+  @media(max-width:560px){
+    .tbl{font-size:12.5px}
+    .tbl th,.tbl td{padding:9px 8px}
+  }
+  .badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;padding:2px 7px;border-radius:3px;display:inline-block;font-weight:500}
+  .b-ok{background:var(--accent-soft);color:var(--accent-2)}
+  .b-warn{background:var(--warn-soft);color:var(--warn)}
+  .b-danger{background:var(--danger-soft);color:var(--danger)}
+  .b-neutral{background:var(--paper-2);color:var(--ink-2);border:1px solid var(--rule)}
+
+  /* figures */
+  figure{margin:30px 0 38px;border:1px solid var(--rule);border-radius:2px;background:var(--surface);overflow:hidden}
+  figure .fhead{padding:9px 18px;border-bottom:1px solid var(--rule-soft);background:var(--paper-2);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink-3);text-transform:uppercase}
+  figure .fhead .fnum{color:var(--accent);font-weight:500}
+  figure .fbody{padding:24px 22px 8px}
+  figure figcaption{padding:0 22px 18px;font-size:12.5px;color:var(--ink-3);line-height:1.65;font-style:italic}
+
+  svg.dia{display:block;width:100%;height:auto;max-width:100%}
+  .d-title{font:500 13.5px var(--kr)}
+  .d-sub{font:400 11.5px var(--kr)}
+  .d-mono{font:500 11px var(--mono);letter-spacing:.04em}
+
+  /* code block */
+  pre{
+    background:var(--paper-2);
+    border:1px solid var(--rule);
+    border-left:2px solid var(--accent);
+    border-radius:2px;
+    padding:18px 20px;
+    overflow-x:auto;
+    margin:18px 0 26px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:1.75;
+    color:var(--ink);
+    max-width:100%;
+  }
+  @media(max-width:560px){
+    pre{padding:14px 14px;font-size:11.5px;line-height:1.7}
+  }
+  pre .c{color:var(--ink-3);font-style:italic}
+  pre .k{color:var(--accent-2);font-weight:500}
+  pre .s{color:var(--warn)}
+  pre .v{color:var(--danger)}
+  .codecap{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;margin:24px 0 -10px;display:flex;gap:10px;align-items:baseline}
+  .codecap b{color:var(--accent);font-weight:500;letter-spacing:.06em}
+
+  /* checklist */
+  .checklist{list-style:none;margin:18px 0;max-width:64ch}
+  .checklist li{position:relative;padding:8px 0 8px 30px;color:var(--ink-2);font-size:14px;border-bottom:1px solid var(--rule-soft)}
+  .checklist li:last-child{border-bottom:none}
+  .checklist li::before{content:"□";position:absolute;left:8px;top:9px;font-family:var(--mono);color:var(--accent);font-size:14px}
+
+  /* tab-like phase blocks */
+  .phasebox{border:1px solid var(--rule);border-radius:2px;margin:14px 0;background:var(--surface)}
+  .phasebox + .phasebox{margin-top:14px}
+  .phasebox .ph-head{display:flex;gap:18px;align-items:baseline;padding:16px 20px;border-bottom:1px solid var(--rule-soft);background:var(--paper-2);flex-wrap:wrap}
+  .ph-no{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--accent);font-weight:500}
+  .ph-name{font-size:15.5px;font-weight:700;color:var(--ink)}
+  .ph-when{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+  .phasebox .ph-body{padding:18px 20px 22px}
+  .phasebox .ph-body p{margin-bottom:10px;font-size:13.5px}
+  .phasebox .ph-body ul.cln li{font-size:13.5px;padding:4px 0 4px 22px}
+
+  /* judgment cards */
+  .judge{display:grid;grid-template-columns:auto 1fr;gap:18px 22px;border-top:1px solid var(--rule-soft);padding:18px 0;align-items:start}
+  .judge:first-of-type{border-top:1px solid var(--ink)}
+  .judge:last-of-type{border-bottom:1px solid var(--ink)}
+  .judge .v{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;padding-top:3px;white-space:nowrap}
+  .judge h4{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .judge p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.75}
+
+  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--ink);font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em;line-height:1.7}
+  footer .frow{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer b{color:var(--ink-2);font-weight:500}
+</style>
+<style>
+  /* ===== SPEC 계열 확장 컴포넌트 ===== */
+  .gap{border:1px solid var(--danger);border-left:3px solid var(--danger);border-radius:2px;background:var(--danger-soft);padding:18px 22px;margin:24px 0;max-width:74ch}
+  .gap .g-label{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--danger);text-transform:uppercase;margin-bottom:8px;font-weight:500;display:flex;gap:10px;align-items:center}
+  .gap .g-label::after{content:"";flex:1;height:1px;background:var(--danger);opacity:.3}
+  .gap h4{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px}
+  .gap p{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);max-width:none}
+  .gap p:last-child{margin-bottom:0}
+  .gap .fix{margin-top:12px;padding-top:12px;border-top:1px solid rgba(148,55,45,.25)}
+  .gap .fix b{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+
+  .principle{border:1px solid var(--rule);border-radius:2px;background:var(--surface);padding:20px 22px;margin:20px 0;max-width:74ch}
+  .principle .p-no{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--accent);font-weight:500;margin-bottom:6px}
+  .principle h4{font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);margin-bottom:10px;line-height:1.3;letter-spacing:-.01em}
+  .principle p{font-size:14px;margin-bottom:10px}
+  .principle p:last-child{margin-bottom:0}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  @media(max-width:680px){.twocol{grid-template-columns:1fr}}
+  .col-box{border:1px solid var(--rule);border-radius:2px;padding:16px 18px;background:var(--surface)}
+  .col-box .cb-head{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;font-weight:500}
+  .col-box.good .cb-head{color:var(--accent)}
+  .col-box.bad .cb-head{color:var(--danger)}
+  .col-box p{font-size:13px;margin:0;line-height:1.7}
+  .col-box ul.cln{margin:6px 0 0}
+  .col-box ul.cln li{font-size:13px;padding:4px 0 4px 18px}
+  .col-box ul.cln li::before{top:14px}
+
+  .axis-row{display:grid;grid-template-columns:120px 1fr;gap:18px;padding:14px 0;border-top:1px solid var(--rule-soft);align-items:start}
+  .axis-row:first-of-type{border-top:1px solid var(--ink)}
+  .axis-row:last-of-type{border-bottom:1px solid var(--ink)}
+  .axis-row .ax-name{font-weight:700;font-size:14px;color:var(--ink)}
+  .axis-row .ax-name span{display:block;font-family:var(--mono);font-size:10px;color:var(--ink-3);font-weight:400;letter-spacing:.04em;margin-top:3px;text-transform:uppercase}
+  .axis-row .ax-body{font-size:13.5px;color:var(--ink-2);line-height:1.7}
+
+  .keyline{font-family:var(--serif);font-size:21px;font-style:italic;color:var(--accent-2);line-height:1.5;margin:28px 0;padding-left:20px;border-left:2px solid var(--accent);max-width:64ch;word-break:keep-all}
+  @media(max-width:560px){.keyline{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="mobilebar">
+  <div class="mtitle"><b>SPEC 04</b>Process Mapping</div>
+  <button class="toctoggle" id="toctoggle" aria-label="목차 열기" aria-expanded="false">
+    <span class="bars"><span></span><span></span><span></span></span><span class="ttxt">목차</span>
+  </button>
+</div>
+<div class="layout">
+<aside>
+  <a href="index.html" style="display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;text-decoration:none;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)">&larr; 문서 계열 목차</a>
+  <div class="docmeta">
+    <div class="row"><span>문서</span><b>SPEC&nbsp;04</b></div>
+    <div class="row"><span>유형</span><b>프로세스 적용</b></div>
+    <div class="row"><span>개정</span><b>R1 · 2026.06</b></div>
+    <div class="row"><span>선행</span><b>SPEC 02</b></div>
+  </div>
+  <div class="doctitle">Development Process<br>Under Orchestration</div>
+  <div class="docsubtitle">11개 개발 축을 에이전틱 오케스트레이션으로<br>전환 — 범용 적용 명세</div>
+  <div class="toc-label">목차</div>
+  <nav><ol>
+    <li><a href="#sec-00">11축을 검증 가능성으로 가른다</a></li>
+    <li><a href="#sec-01">기획 · UX — 의도의 자리</a></li>
+    <li><a href="#sec-02">UI · 디자인 — 가치 판정</a></li>
+    <li><a href="#sec-03">API 명세 · 스키마 — 기계의 자리</a></li>
+    <li><a href="#sec-04">백엔드 · 프론트 — 검증 차이</a></li>
+    <li><a href="#sec-05">콘텐츠 생성 · 교차검증</a></li>
+    <li><a href="#sec-06">환경변수 · 배포 환경</a></li>
+    <li><a href="#sec-07">앱 출시 · 버전 관리</a></li>
+    <li><a href="#sec-08">축을 관통하는 흐름</a></li>
+    <li><a href="#sec-09">축별 빈 구멍 지도</a></li>
+  </ol></nav>
+  <div class="signoff">
+    <b>분류 원리</b><br>축마다 검증 주체가 다르다<br><br>
+    <b>안전한 축</b><br>스키마 · API · 백엔드<br><br>
+    <b>빈 구멍 축</b><br>UX · UI · 앱 출시
+  </div>
+</aside>
+<main>
+<header class="doc">
+  <div class="deptline">Process Application</div>
+  <h1 class="bigtitle">같은 파이프라인 안에, <em>전혀 다른 자동화 수준이 공존한다</em></h1>
+  <p class="ledesum">이 문서는 SPEC 02의 보편 원리를 실제 개발의 11개 축 — 기획·UI·UX·API 명세·스키마·프론트·백엔드·콘텐츠 생성/교차검증·환경변수/배포·앱 출시/버전 관리 — 에 적용한다. 핵심 발견은 이것이다. 이 11축은 하나의 자동화 수준으로 다룰 수 없다. 어떤 축은 기계가 완전히 검증해 마음 놓고 맡길 수 있고, 어떤 축은 검증 판독관이 아예 없어 사람이 끝까지 쥐어야 한다. 전환이란 11축을 한꺼번에 자동화하는 게 아니라, 축마다 다른 수준을 정확히 배정하는 일이다.</p>
+  <div class="leadout">
+    <div>적용 대상<b>11개 개발 축</b></div>
+    <div>분류 기준<b>검증 주체</b></div>
+    <div>안전한 축<b>스키마·API·백엔드</b></div>
+    <div>빈 구멍<b>UX·UI·출시</b></div>
+  </div>
+</header>
+
+<!-- 00 -->
+<section id="sec-00">
+  <div class="sec-marker">§ 00 — The Map</div>
+  <h2 class="h">11축을 검증 가능성으로 가른다</h2>
+  <p class="h-sub">먼저 전체 지도를 본다 — 어느 축이 안전하고, 어느 축이 빈 구멍인가.</p>
+
+  <p>SPEC 02의 단 하나의 질문 — "결과를 기계가 검증할 수 있는가" — 을 11축에 던지면, 축들이 자동화 스펙트럼 위에 또렷하게 흩어진다. 이것이 전환 설계의 출발 지도다.</p>
+
+  <table class="tbl">
+    <thead><tr><th>개발 축</th><th>검증 판독관</th><th>주된 자리</th><th>자동화</th></tr></thead>
+    <tbody>
+      <tr><td>API 명세 · 스키마</td><td>타입·계약·스키마 검증</td><td>기계</td><td><span class="badge b-ok">1순위</span></td></tr>
+      <tr><td>백엔드 로직</td><td>유닛·통합·계약 테스트</td><td>기계 + LLM</td><td><span class="badge b-ok">높음</span></td></tr>
+      <tr><td>콘텐츠 교차검증</td><td>임베딩·중복·규칙</td><td>LLM + 닻</td><td><span class="badge b-ok">높음</span></td></tr>
+      <tr><td>콘텐츠 생성</td><td>(생성은 판독 불가)</td><td>LLM → 사람</td><td><span class="badge b-warn">조건부</span></td></tr>
+      <tr><td>환경변수 · 배포</td><td>빌드·헬스체크·정합성</td><td>기계 + 게이트</td><td><span class="badge b-warn">조건부</span></td></tr>
+      <tr><td>프론트 로직</td><td>일부 테스트, 일부 실기</td><td>혼합</td><td><span class="badge b-warn">조건부</span></td></tr>
+      <tr><td>기획</td><td>없음 (가치)</td><td>사람 (의도)</td><td><span class="badge b-danger">보조만</span></td></tr>
+      <tr><td>UI 디테일</td><td>없음 (미적 판단)</td><td>사람 (가치)</td><td><span class="badge b-danger">보조만</span></td></tr>
+      <tr><td>UX 흐름</td><td>없음 (경험)</td><td>사람 (가치)</td><td><span class="badge b-danger">보조만</span></td></tr>
+      <tr><td>앱 출시</td><td>없음 (외부 심사·실기)</td><td>사람 (실기+게이트)</td><td><span class="badge b-danger">제외</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="keyline">11축은 한 덩어리가 아니다. 위쪽은 기계가 거르고, 아래쪽은 사람이 쥔다. 전환은 이 경계를 정확히 긋는 일이다.</div>
+
+  <p>이 지도가 곧 당신의 불안에 대한 진단이다. <strong>표의 위쪽 축에는 안심이 있고, 아래쪽 축에 불안이 있다.</strong> 그 불안은 막연한 게 아니라 — 그 축에 기계 판독관이 없다는 구체적 사실에서 온다. 이 문서는 위에서 아래로, 각 축을 어떻게 다룰지 적는다.</p>
+</section>
+
+<!-- 01 -->
+<section id="sec-01">
+  <div class="sec-marker">§ 01 — Intent</div>
+  <h2 class="h">기획 · UX — 의도의 자리</h2>
+  <p class="h-sub">자동화 스펙트럼의 가장 위. 에이전트는 초안을 내지만 결정하지 않는다.</p>
+
+  <p>기획과 UX 흐름은 "무엇을 왜 만드는가"의 영역이다. 여기엔 기계 판독관이 없다 — "이 기획이 좋은가"를 컴파일러가 말해줄 수 없다. 그래서 이 축은 자동화 대상이 아니라 <strong>의도 레이어</strong>, 사람의 자리다.</p>
+
+  <h3><span class="h3num">01.1</span>에이전트가 할 수 있는 것 / 없는 것</h3>
+  <div class="twocol">
+    <div class="col-box good">
+      <div class="cb-head">에이전트 — 발산과 정리</div>
+      <ul class="cln">
+        <li>여러 방향의 초안·선택지 생성</li>
+        <li>각 선택지의 장단점·트레이드오프 정리</li>
+        <li>경쟁 제품·선례 조사</li>
+        <li>결정에 필요한 근거를 한자리에 모음</li>
+      </ul>
+    </div>
+    <div class="col-box bad">
+      <div class="cb-head">사람 — 수렴과 결정</div>
+      <ul class="cln">
+        <li>어느 방향이 우리 의도에 맞는가</li>
+        <li>무엇을 포기하고 무엇을 지킬까</li>
+        <li>이 경험이 사용자에게 어떻게 느껴질까</li>
+        <li>최종 선택과 그 책임</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>핵심 패턴은 <strong>"에이전트가 선택지를 시각적으로 펼치고, 사람이 클릭으로 결정한다"</strong>는 것이다. 기획을 긴 텍스트로 주고받으면 결정이 흐려진다. 대신 선택지를 나란히 보여주고 — 각각 장단점과 추천을 단 — 사람이 비교해 고르게 한다. 이때 에이전트의 역할은 결정을 대신하는 게 아니라 결정을 쉽게 만드는 것이다.</p>
+
+  <div class="gap">
+    <div class="g-label">이 축의 함정</div>
+    <h4>에이전트가 "더 나은 기획"을 제안하기 시작할 때</h4>
+    <p>에이전트는 종종 요청하지 않은 방향까지 "개선"하려 든다. 이것이 의도 레이어를 침범하는 순간이다. 에이전트가 비즈니스 목표 자체를 재정의하면, 시스템이 "무엇이 좋은지"를 스스로 정하기 시작한다.</p>
+    <div class="fix"><b>해결 방향</b> — 에이전트의 출력을 "제안"으로 명확히 표시하고, 의도 변경은 반드시 사람의 명시적 승인을 거치게 한다. 에이전트가 낸 방향을 사람이 채택하는 행위가 기록으로 남아야, 누가 그 의도를 정했는지 추적된다.</div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section id="sec-02">
+  <div class="sec-marker">§ 02 — Aesthetic Judgment</div>
+  <h2 class="h">UI · 디자인 — 가치 판정</h2>
+  <p class="h-sub">생성은 자동, 판정은 사람. 둘을 섞으면 품질이 무너진다.</p>
+
+  <p>UI는 미묘한 위치에 있다. 에이전트는 컴포넌트·레이아웃·시안을 잘 생성한다. 그러나 "이 디자인이 좋은가, 이 톤이 맞는가"는 미적 가치 판단이고, 기계가 정의할 수 없다. 그래서 UI 축은 <strong>생성(자동)과 판정(사람)을 분리</strong>해야 한다.</p>
+
+  <h3><span class="h3num">02.1</span>기계가 거를 수 있는 부분이 숨어 있다</h3>
+  <p>다만 UI에도 결정론적으로 검증 가능한 부분이 섞여 있다. 이걸 분리해내는 것이 자동화 레버리지다.</p>
+  <div class="axis-row"><div class="ax-name">기계 가능<span>deterministic</span></div><div class="ax-body">접근성 규칙(대비·alt·포커스), 디자인 토큰 일관성, 여러 산출물의 동기화(예: 같은 에셋의 여러 해상도가 같은 세대인가), 계약 이름 준수. → 자동 검증 게이트.</div></div>
+  <div class="axis-row"><div class="ax-name">사람 전용<span>human value</span></div><div class="ax-body">"이 시안이 브랜드에 맞나", "이 인터랙션이 자연스럽나", "이 그림이 이 맥락·인물에 맞나". → 보호할 자리.</div></div>
+
+  <p>즉 UI 작업은 한 덩어리가 아니다 — 미적 판정은 사람이 쥐되, 그 주변의 일관성·동기화·접근성은 기계가 강제할 수 있다. 이 분리만으로도 사람의 검토 부담이 크게 준다.</p>
+
+  <div class="gap">
+    <div class="g-label">이 축의 빈 구멍</div>
+    <h4>"좋아 보임"을 점수로 대체하려는 유혹</h4>
+    <p>UI 품질을 자동화하려고 휴리스틱 점수(예: 정렬·여백 규칙 통과율)를 만들면, 그 점수가 높은데도 못생긴 결과가 나온다. 미적 판단은 점수로 환원되지 않는다. 점수를 신뢰해 사람 눈을 빼면, 1초 게이트의 함정에 그대로 빠진다.</p>
+    <div class="fix"><b>해결 방향</b> — 기계 검증은 "규칙 위반 차단"에만 쓰고(접근성·일관성), 미적 승인은 사람이 실제로 보게 한다. 단, 사람이 매번 모든 화면을 보지 않도록 — 변경된 부분만, 전후 비교로 보여주는 등 검토를 가볍게 만들되 없애지는 않는다.</div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section id="sec-03">
+  <div class="sec-marker">§ 03 — Machine's Home</div>
+  <h2 class="h">API 명세 · 스키마 — 기계의 자리</h2>
+  <p class="h-sub">자동화 1순위. 검증이 완전히 결정론적이고 부작용이 0이다.</p>
+
+  <p>API 명세와 데이터 스키마는 에이전틱 전환에서 가장 안전한 축이다. 이유는 명확하다 — 계약(타입·필드·구조)을 기계가 완전히 검증한다. 스키마에 맞나, 필드 개수가 맞나, 타입이 맞나, 필수 키가 있나. 이 모든 게 결정론적이다. 에이전트가 명세를 생성해도, 검증기가 즉시 거른다.</p>
+
+  <h3><span class="h3num">03.1</span>이 축이 시스템의 척추가 된다</h3>
+  <p>스키마 검증은 단지 한 축의 작업이 아니다. <strong>다른 모든 축이 마지막에 이 게이트를 통과한다.</strong> 콘텐츠가 스키마에 맞나, API 응답이 계약에 맞나, 배포 산출물이 형식에 맞나. 그래서 스키마/계약 검증은 전환의 첫 벽돌이자 가장 단단한 벽돌이다 — 이걸 먼저 세워야 위쪽 자동화가 안전해진다.</p>
+
+  <h3><span class="h3num">03.2</span>정합성 검증으로의 확장</h3>
+  <p>단일 객체 검증을 넘어, 진짜 가치는 <strong>정합성 검증</strong>에 있다. 하나의 소스에서 여러 파생물이 나올 때(예: 스키마 하나에서 타입 정의·문서·목업·검증 규칙이 파생), 그것들이 같은 세대인지 기계가 확인할 수 있다. 소스를 바꿨는데 파생물 하나가 옛날 버전이면 — 그것이 불일치 플래그로 잡힌다. 이 정합성 게이트가 "여러 산출물이 약속을 지켰나"를 보증한다.</p>
+
+  <div class="decision">
+    <div class="d-label">Why Start Here</div>
+    <p>스키마 축은 네 가지 안전 조건을 모두 만족한다 — 기계 검증 가능, 자유 가역, 시크릿 무관, 부작용 0. 그래서 전환의 출발점으로 가장 적합하다.</p>
+  </div>
+</section>
+
+<!-- 04 -->
+<section id="sec-04">
+  <div class="sec-marker">§ 04 — Verification Gap</div>
+  <h2 class="h">백엔드 · 프론트 — 검증 차이</h2>
+  <p class="h-sub">둘 다 코드지만, 검증 가능성이 다르다. 이 차이가 자동화 수준을 가른다.</p>
+
+  <p>백엔드와 프론트는 같은 "코딩"이지만 전환에서 전혀 다르게 다뤄야 한다. 그 이유는 <strong>검증 판독관의 유무</strong>다.</p>
+
+  <div class="twocol">
+    <div class="col-box good">
+      <div class="cb-head">백엔드 — 판독관이 강하다</div>
+      <p>로직이 입력→출력으로 결정되고, 유닛·통합·계약 테스트로 검증된다. 부작용은 격리된 환경에서 확인 가능. 에이전트가 짠 코드의 정확성을 기계가 상당 부분 거른다.</p>
+    </div>
+    <div class="col-box bad">
+      <div class="cb-head">프론트 — 판독관이 약하다</div>
+      <p>일부 로직은 테스트되지만, 실제 렌더링·인터랙션·디바이스별 동작은 실기에서만 드러난다. 테스트가 다 통과해도 화면이 깨질 수 있다.</p>
+    </div>
+  </div>
+
+  <h3><span class="h3num">04.1</span>"테스트 통과"의 함정</h3>
+  <p>여기서 중요한 경고가 있다. 오늘날의 모델은 유닛 테스트에 과도하게 기댄다. 그런데 <strong>모든 유닛 테스트가 통과해도 제품은 깨질 수 있다.</strong> 특히 프론트·통합 지점에서. 그래서 검증을 유닛에만 의존하지 말고, 실제 사용자 흐름의 증거(end-to-end)를 함께 요구해야 한다. 에이전트가 "테스트 다 통과했습니다"라고 보고해도, 그것이 "작동합니다"는 아니다.</p>
+
+  <div class="gap">
+    <div class="g-label">프론트의 빈 구멍</div>
+    <h4>환경 의존 동작은 어떤 자동 검증도 못 잡는다</h4>
+    <p>플랫폼별 렌더링 차이, 모바일 WebView 제약, 디바이스별 오디오·권한·화면 처리. 이것들은 CI도 시뮬레이터도 못 잡고, 실기에서만 드러난다. 에이전트가 코드를 읽어도 "이게 실기에서 작동하는가"는 알 수 없다.</p>
+    <div class="fix"><b>해결 방향</b> — 이 영역은 자동화에서 제외하고 사람의 실기 검증에 남긴다. 에이전트는 코드를 생성하되, 그 동작의 최종 확인은 사람이 실제 디바이스에서 한다. 이건 후순위 자동화가 아니라 영구적인 사람의 자리다.</div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section id="sec-05">
+  <div class="sec-marker">§ 05 — Generation + Cross-check</div>
+  <h2 class="h">콘텐츠 생성 · 교차검증</h2>
+  <p class="h-sub">생성은 흔들리고, 검증은 닻이 필요하다. 이 축의 구조가 가장 정교하다.</p>
+
+  <p>콘텐츠 생성은 전환의 핵심 가치이자 가장 까다로운 축이다. "좋은 콘텐츠"를 기계가 점수 매길 수 없기 때문이다. 그러나 — 여기에 강력한 설계가 있다. <strong>생성은 LLM이 하되, 검증을 세 층으로 쌓는 것</strong>이다.</p>
+
+  <h3><span class="h3num">05.1</span>검증의 세 층</h3>
+  <div class="principle">
+    <div class="p-no">층 1 — 기계 floor</div>
+    <h4>결정론적으로 거를 수 있는 것부터</h4>
+    <p>형식·구조·중복·금칙어. 이건 LLM 판단 이전에 코드가 강제한다. "LLM 출력을 신뢰하지 말라" — 기계가 거를 수 있는 건 기계가 먼저 거른다.</p>
+  </div>
+  <div class="principle">
+    <div class="p-no">층 2 — 교차검증 (생성자≠검증자)</div>
+    <h4>생성한 모델이 자기 것을 채점하지 못하게</h4>
+    <p>여러 모델로 생성하고, 생성하지 않은 모델이 채점한다. 같은 세션이 자기 작업을 옳다고 가정하는 편향을 막는다. 단 주의 — 신선한 컨텍스트가 독립성을 <strong>보장하지는 않는다.</strong> 같은 모델·같은 기준이면 같은 오해를 공유할 수 있다. 만장일치가 곧 정답은 아니다(공유된 맹점일 수 있다).</p>
+  </div>
+  <div class="principle">
+    <div class="p-no">층 3 — 사람이 심은 결정론적 닻</div>
+    <h4>LLM 판단의 흔들림을 고정하는 기준</h4>
+    <p>LLM 평가는 매번 흔들린다. 이를 잡으려면 사람이 미리 심은 고정 기준 — "정답으로 인정할 범위"와 "빠지면 안 되는 핵심"을 양방향으로 둔다. 한쪽은 관대하게 정답을 구제하고, 다른 쪽은 오답을 차단한다. 이 닻이 평가를 매번 기분에 흔들리지 않게 한다.</p>
+  </div>
+
+  <div class="gap">
+    <div class="g-label">이 축의 미묘한 빈 구멍</div>
+    <h4>닻 자체를 LLM이 만든다</h4>
+    <p>검증을 고정하는 "닻"(정답 범위·핵심어)을 대량으로 만들려면 결국 LLM이 생성한다. 그런데 닻이 부정확하면 — 너무 관대한 닻은 오답을 정답으로, 너무 빡빡한 닻은 정답을 오답으로 만든다. "LLM이 검증 기준을 만들고 그 기준으로 LLM을 검증한다"는 순환이 숨어 있다.</p>
+    <div class="fix"><b>해결 방향</b> — 닻 생성은 자동화하되, 닻의 검증은 사람(가치 판정)으로 올린다. 특히 경계 사례 — "이게 같은 의미인가"가 미묘한 것 — 는 사람이 본다. 닻을 만든 경로와 다른 경로로 교차검증하고, 의심스러운 것만 사람에게 에스컬레이션한다.</div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section id="sec-06">
+  <div class="sec-marker">§ 06 — Secrets & Deploy</div>
+  <h2 class="h">환경변수 · 배포 환경</h2>
+  <p class="h-sub">여기서 시크릿 경계와 가역성 게이트가 처음으로 무겁게 작동한다.</p>
+
+  <p>환경변수와 배포는 전환에서 신뢰 경계가 물리적으로 드러나는 축이다. 두 가지를 분명히 해야 한다 — <strong>무엇이 공개되고 무엇이 비밀인가</strong>, 그리고 <strong>어떤 배포가 되돌릴 수 있고 어떤 배포가 못 되돌리나.</strong></p>
+
+  <h3><span class="h3num">06.1</span>시크릿 경계 — 에이전트가 만지면 안 되는 것</h3>
+  <p>환경변수는 공개값(클라이언트에 노출되어도 되는 것)과 비밀값(서버에서만 읽혀야 하는 것)으로 갈린다. 비밀값 — API 키·DB 연결·스토리지 시크릿 — 은 <strong>에이전트의 컨텍스트에 직접 들어가면 안 된다.</strong> 노출되면 비용·데이터 유출로 이어진다.</p>
+  <div class="gap">
+    <div class="g-label">시크릿의 빈 구멍</div>
+    <h4>에이전트에게 직접 자격증명을 주는 것</h4>
+    <p>편의를 위해 에이전트에게 프로덕션 키를 쥐여주면, 그 에이전트가 읽는 코드·문서·외부 입력 안의 텍스트가 명령처럼 작동할 수 있다(프롬프트 인젝션). 자격증명을 가진 에이전트가 조작당하면 피해가 크다.</p>
+    <div class="fix"><b>해결 방향</b> — 시크릿을 에이전트에 직접 주지 않는다. 별도의 도구 프록시가 정책을 집행하고, 짧은 수명의 제한된 권한만 발급한다. 에이전트는 "이 작업을 해라"는 명령만 내리고, 실제 키는 격리된 실행기가 쓴다.</div>
+  </div>
+
+  <h3><span class="h3num">06.2</span>배포 채널의 가역성 차등</h3>
+  <p>배포는 채널마다 가역성이 다르다. 이 차이를 게이트로 만든다.</p>
+  <div class="axis-row"><div class="ax-name">즉시 가역<span>reversible</span></div><div class="ax-body">서버·데이터·정적 자산을 자동 빌드·반영하는 채널. 롤백이 빠르다. → 자동 + 로그.</div></div>
+  <div class="axis-row"><div class="ax-name">비용 가역<span>costly</span></div><div class="ax-body">외부 스토리지 업로드, DB 마이그레이션, 캐시 무효화. 흔적이 남고 시간이 든다. → 자동 + 비용 로그.</div></div>
+  <div class="axis-row"><div class="ax-name">준 비가역<span>hard</span></div><div class="ax-body">외부 심사·승인이 걸린 배포. 되돌리기 느리고 외부에 종속. → 사람 게이트.</div></div>
+
+  <p>전환의 영리한 설계는 <strong>가역적인 것과 비가역적인 것을 채널로 분리</strong>하는 것이다. 자주 바뀌는 것(콘텐츠·데이터)은 즉시 가역 채널에, 드물게 바뀌는 것(앱 빌드)은 준 비가역 채널에. 그러면 일상 작업이 위험한 게이트를 건드리지 않고 무한히 반복된다.</p>
+</section>
+
+<!-- 07 -->
+<section id="sec-07">
+  <div class="sec-marker">§ 07 — Release</div>
+  <h2 class="h">앱 출시 · 버전 관리</h2>
+  <p class="h-sub">스펙트럼의 가장 끝. 외부 게이트와 실기가 겹치는, 자동화 제외 영역.</p>
+
+  <p>앱 출시는 11축 중 자동화가 가장 어려운 — 사실상 제외해야 할 — 영역이다. 두 가지가 겹치기 때문이다. 첫째, <strong>외부 심사·계정 승인</strong>이라는 시스템 밖의 게이트에 종속된다. 시스템이 아무리 준비돼도 외부가 열어줘야 통과한다. 둘째, <strong>실기 검증</strong>이 필수다 — 출시 빌드의 동작은 실제 디바이스에서만 확인된다.</p>
+
+  <h3><span class="h3num">07.1</span>배치 발화와 짝 제약</h3>
+  <p>준 비가역 게이트는 통과 비용이 크므로, 변경을 <strong>모아서 한 번에</strong> 내보낸다. 그런데 여기서 까다로운 문제가 생긴다 — <strong>짝 제약</strong>이다. 서로 다른 채널에 걸친 두 작업이 동시에 발화돼야 하는 경우다.</p>
+  <div class="gap">
+    <div class="g-label">짝 제약의 위험</div>
+    <h4>가역성이 다른 두 작업이 짝일 때</h4>
+    <p>예: 어떤 기능 제거(즉시 가역 채널)와 그 대체물(앱 빌드, 준 비가역 채널)이 짝이라면 — 빠른 쪽을 먼저 내보내면 대체물이 없는 공백 상태가 사용자에게 노출된다. 서로 다른 채널은 원자적으로 묶을 수 없다(하나는 즉시, 하나는 며칠).</p>
+    <div class="fix"><b>해결 방향</b> — 헤더(중앙 지휘자)가 짝을 인식하고, 느린 쪽(앱 빌드) 시점에 빠른 쪽을 묶어 동시 발화한다. 이것이 중앙 오케스트레이션이 반드시 필요한 실전적 이유다 — 짝을 아는 누군가가 발화 시점을 쥐어야 한다.</div>
+  </div>
+
+  <h3><span class="h3num">07.2</span>버전 관리는 가역성의 안전망</h3>
+  <p>버전 관리는 단순한 기록이 아니라 <strong>가역성을 떠받치는 안전망</strong>이다. 자유 가역이 가능한 이유가 곧 버전 관리다 — 잘못되면 이전 버전으로 돌아갈 수 있기 때문에 자동화를 마음 놓고 켠다. 그래서 모든 변경이 소스의 단일 진실에서 출발해야 하고(중간 산출물 직접 수정 금지), 그 이력이 끊기지 않아야 한다. 이력이 끊기면 가역성도 끊긴다.</p>
+</section>
+
+<!-- 08 -->
+<section id="sec-08">
+  <div class="sec-marker">§ 08 — The Flow</div>
+  <h2 class="h">축을 관통하는 흐름</h2>
+  <p class="h-sub">11축은 따로 놀지 않는다. 하나의 변경이 여러 축을 순서대로 지난다.</p>
+
+  <p>지금까지 축을 하나씩 봤지만, 실제 작업은 한 축에 머물지 않는다. 하나의 변경이 여러 축을 <strong>순서대로 관통</strong>한다. 그래서 헤더의 진짜 일은 "이 작업이 어느 축인가"가 아니라 "이 작업이 어느 축들을 어떤 순서로 지나야 하나"의 라우팅이다.</p>
+
+  <figure>
+    <div class="fhead"><span>변경 하나의 관통 경로</span><span class="fnum">FIG.08.1</span></div>
+    <div class="fbody">
+      <svg class="dia" viewBox="0 0 680 200" role="img" aria-label="변경이 축을 관통하는 흐름">
+        <rect x="20" y="80" width="110" height="44" rx="2" fill="#faf6ec" stroke="#1a1f26"/>
+        <text x="75" y="100" class="d-sub" fill="#1a1f26" text-anchor="middle">소스 변경</text>
+        <text x="75" y="116" class="d-sub" fill="#7a8493" text-anchor="middle">단일 진실</text>
+        <line x1="130" y1="102" x2="160" y2="102" stroke="#7a8493" stroke-width="1" marker-end="url(#ar)"/>
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#7a8493"/></marker></defs>
+
+        <rect x="162" y="80" width="110" height="44" rx="2" fill="#faf6ec" stroke="#1e5f55"/>
+        <text x="217" y="100" class="d-sub" fill="#1e5f55" text-anchor="middle">기계 검증</text>
+        <text x="217" y="116" class="d-sub" fill="#7a8493" text-anchor="middle">스키마·정합성</text>
+        <line x1="272" y1="102" x2="302" y2="102" stroke="#7a8493" stroke-width="1" marker-end="url(#ar)"/>
+
+        <rect x="304" y="80" width="110" height="44" rx="2" fill="#f0d8d2" stroke="#94372d"/>
+        <text x="359" y="100" class="d-sub" fill="#94372d" text-anchor="middle">사람 판정</text>
+        <text x="359" y="116" class="d-sub" fill="#7a8493" text-anchor="middle">가치·실기</text>
+        <line x1="414" y1="102" x2="444" y2="102" stroke="#7a8493" stroke-width="1" marker-end="url(#ar)"/>
+
+        <rect x="446" y="80" width="110" height="44" rx="2" fill="#f3e6cf" stroke="#a26420"/>
+        <text x="501" y="100" class="d-sub" fill="#a26420" text-anchor="middle">비용 게이트</text>
+        <text x="501" y="116" class="d-sub" fill="#7a8493" text-anchor="middle">blast 예측</text>
+        <line x1="556" y1="102" x2="586" y2="102" stroke="#7a8493" stroke-width="1" marker-end="url(#ar)"/>
+
+        <rect x="588" y="80" width="72" height="44" rx="2" fill="#d9e8e3" stroke="#1e5f55"/>
+        <text x="624" y="100" class="d-sub" fill="#1e5f55" text-anchor="middle">배포</text>
+        <text x="624" y="116" class="d-sub" fill="#7a8493" text-anchor="middle">채널별</text>
+
+        <text x="340" y="170" class="d-sub" fill="#7a8493" text-anchor="middle" font-style="italic">헤더가 이 순서를 쥔다 — 어느 단계도 건너뛰지 않게</text>
+      </svg>
+    </div>
+    <figcaption>변경 하나가 기계 검증 → 사람 판정 → 비용 게이트 → 배포를 순서대로 지난다. 중앙 지휘 없이 자율 반응만으로는 게이트를 건너뛸 수 있다.</figcaption>
+  </figure>
+
+  <p>이 관통 구조가 두 가지를 함의한다. 첫째, 작업을 단일 축으로 보면 안 된다 — 그 작업이 지나는 모든 축의 게이트를 거쳐야 한다. 둘째, 누군가 중앙에서 순서를 쥐어야 한다 — 그래야 어느 게이트도 누락되지 않는다. 이것이 SPEC 02 §05의 "중앙 오케스트레이션"이 실제 개발에서 필요한 이유다.</p>
+</section>
+
+<!-- 09 -->
+<section id="sec-09">
+  <div class="sec-marker">§ 09 — Hole Map</div>
+  <h2 class="h">축별 빈 구멍 지도</h2>
+  <p class="h-sub">어느 축에 어떤 구멍이 있는지 한자리에 모은다. 안심의 지도이자 불안의 지도다.</p>
+
+  <p>마지막으로, 11축 각각의 빈 구멍을 한 표에 모은다. 이 표가 당신의 "안심 점검표"다 — 각 축에서 무엇을 조심해야 하는지, 그리고 그 위를 어떻게 건너는지.</p>
+
+  <table class="tbl">
+    <thead><tr><th>축</th><th>빈 구멍</th><th>건너는 법</th></tr></thead>
+    <tbody>
+      <tr><td>기획·UX</td><td>에이전트가 의도를 재정의</td><td>출력을 제안으로 표시, 채택은 사람 기록</td></tr>
+      <tr><td>UI·디자인</td><td>"좋아 보임"을 점수로 대체</td><td>규칙만 기계, 미적 승인은 사람 눈</td></tr>
+      <tr><td>API·스키마</td><td>거의 없음 (가장 안전)</td><td>정합성 게이트를 척추로</td></tr>
+      <tr><td>백엔드</td><td>유닛 통과 ≠ 작동</td><td>E2E 증거 함께 요구</td></tr>
+      <tr><td>프론트</td><td>환경 의존 동작 검증 불가</td><td>실기 검증을 사람에 남김</td></tr>
+      <tr><td>콘텐츠 생성</td><td>닻 자체를 LLM이 만듦</td><td>닻 검증은 사람·교차 경로</td></tr>
+      <tr><td>교차검증</td><td>만장일치 = 공유 맹점일 수도</td><td>독립 경로·경계사례 에스컬레이션</td></tr>
+      <tr><td>환경변수</td><td>에이전트에 직접 시크릿</td><td>도구 프록시·단명 권한</td></tr>
+      <tr><td>배포</td><td>상태 경합·가역성 오판</td><td>별도 상태 레이어·정적 등급 강제</td></tr>
+      <tr><td>앱 출시</td><td>외부 게이트·짝 제약</td><td>사람 게이트·짝 묶음 발화</td></tr>
+    </tbody>
+  </table>
+
+  <div class="decision">
+    <div class="d-label">The Honest Map</div>
+    <p>11축 중 셋(UI·UX·앱 출시)은 본질적으로 사람의 자리다. 이걸 자동화하려 애쓰는 대신, 정확히 사람에게 남기고 나머지를 견고하게 자동화하는 것 — 그것이 안심의 설계다.</p>
+  </div>
+
+  <p class="note">이 문서는 11축을 범용으로 다뤘다. 이것이 실제 프로젝트 한 곳(Voyage)에 어떻게 구체적으로 정착하는지는 SPEC 05에서 다룬다.</p>
+</section>
+
+<footer>
+  <div class="frow"><span><b>DEVELOPMENT PROCESS</b> · UNDER ORCHESTRATION · R1</span><span>SPEC 04 · 계열 01–02–03–04–05</span></div>
+  <div class="frow" style="margin-top:8px"><span>END OF DOCUMENT · 10 SECTIONS · 1 FIGURE</span><span>11 AXES · HOLE MAP</span></div>
+</footer>
+</main>
+</div>
+<script>
+  var tg=document.getElementById('toctoggle');var as=document.querySelector('aside');
+  if(tg){tg.addEventListener('click',function(){var o=as.classList.toggle('open');tg.classList.toggle('open',o);tg.setAttribute('aria-expanded',o);});}
+  document.querySelectorAll('nav a').forEach(function(a){a.addEventListener('click',function(){if(window.innerWidth<=980){as.classList.remove('open');tg.classList.remove('open');tg.setAttribute('aria-expanded',false);}});});
+  var secs=[].slice.call(document.querySelectorAll('section[id]'));var links=[].slice.call(document.querySelectorAll('nav a'));
+  function spy(){var y=window.scrollY+120,cur=secs[0];secs.forEach(function(s){if(s.offsetTop<=y)cur=s;});links.forEach(function(l){l.classList.toggle('on',l.getAttribute('href')==='#'+cur.id);});}
+  window.addEventListener('scroll',spy,{passive:true});spy();
+</script>
+</body>
+</html>

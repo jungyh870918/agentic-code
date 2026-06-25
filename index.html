@@ -2,933 +2,191 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>에이전트 오케스트레이션 환경 구축 — 기술 명세</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>에이전틱 오케스트레이션 명세 — 문서 계열</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Noto+Sans+KR:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#f4f0e6;
-    --paper-2:#faf6ec;
-    --surface:#ffffff;
-    --ink:#1a1f26;
-    --ink-2:#4a5260;
-    --ink-3:#7a8493;
-    --ink-4:#a6aebb;
-    --rule:#d8d0bf;
-    --rule-soft:#e6dfce;
-    --accent:#1e5f55;
-    --accent-2:#103d36;
-    --accent-soft:#d9e8e3;
-    --warn:#a26420;
-    --warn-soft:#f3e6cf;
-    --danger:#94372d;
-    --danger-soft:#f0d8d2;
+    --paper:#f4f0e6; --paper-2:#faf6ec; --surface:#ffffff;
+    --ink:#1a1f26; --ink-2:#4a5260; --ink-3:#7a8493; --ink-4:#a6aebb;
+    --rule:#d8d0bf; --rule-soft:#e6dfce;
+    --accent:#1e5f55; --accent-2:#103d36; --accent-soft:#d9e8e3;
+    --warn:#a26420; --warn-soft:#f3e6cf;
+    --danger:#94372d; --danger-soft:#f0d8d2;
     --serif:"Fraunces","Noto Sans KR",serif;
-    --sans:"Inter","Noto Sans KR",-apple-system,sans-serif;
     --kr:"Noto Sans KR",-apple-system,sans-serif;
     --mono:"JetBrains Mono",ui-monospace,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;scroll-padding-top:32px}
+  html{scroll-behavior:smooth}
   body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:var(--kr);
-    font-size:15px;
-    line-height:1.75;
-    -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
+    background:var(--paper);color:var(--ink);
+    font-family:var(--kr);font-size:15px;line-height:1.75;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    padding:max(48px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(64px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
   }
   ::selection{background:var(--accent);color:var(--paper)}
+  .wrap{max-width:920px;margin:0 auto}
 
-  .layout{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1220px;margin:0 auto}
-  @media(max-width:980px){.layout{grid-template-columns:1fr}}
-
-  /* ============ MOBILE TOPBAR ============ */
-  .mobilebar{
-    display:none;
-    position:sticky;top:0;z-index:30;
-    background:var(--paper);
-    border-bottom:1px solid var(--rule);
-    padding:14px 24px;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-  }
-  .mobilebar .mtitle{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
-  .mobilebar .mtitle b{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.14em;display:block;margin-bottom:3px;font-weight:500}
-  .toctoggle{
-    font-family:var(--mono);font-size:11px;letter-spacing:.08em;
-    background:var(--paper-2);color:var(--accent);
-    border:1px solid var(--rule);border-radius:3px;
-    padding:9px 14px;cursor:pointer;
-    display:flex;align-items:center;gap:10px;
-    text-transform:uppercase;font-weight:500;
-  }
-  .toctoggle .bars{display:inline-flex;flex-direction:column;gap:3px}
-  .toctoggle .bars span{display:block;width:14px;height:1.5px;background:var(--accent);transition:.2s}
-  .toctoggle.open .bars span:nth-child(1){transform:translateY(4.5px) rotate(45deg)}
-  .toctoggle.open .bars span:nth-child(2){opacity:0}
-  .toctoggle.open .bars span:nth-child(3){transform:translateY(-4.5px) rotate(-45deg)}
-  @media(max-width:980px){.mobilebar{display:flex}}
-
-  /* ============ SIDEBAR ============ */
-  aside{
-    border-right:1px solid var(--rule);
-    padding:48px 28px 80px 28px;
-    position:sticky;top:0;align-self:start;
-    height:100vh;overflow-y:auto;
-    background:var(--paper);
-  }
-  @media(max-width:980px){
-    aside{
-      position:fixed;top:0;left:0;right:0;bottom:0;
-      z-index:40;
-      border-right:none;
-      padding:84px 28px 60px;
-      height:100vh;
-      transform:translateY(-100%);
-      transition:transform .32s cubic-bezier(.4,0,.2,1);
-      overflow-y:auto;
-      visibility:hidden;
-    }
-    aside.open{transform:translateY(0);visibility:visible}
-    aside .docmeta{margin-bottom:20px}
-    aside .doctitle{font-size:18px;margin-bottom:6px}
-    aside .docsubtitle{margin-bottom:24px}
-  }
-  .docmeta{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:18px;line-height:1.6}
-  .docmeta .row{display:flex;justify-content:space-between;gap:8px}
-  .docmeta b{color:var(--ink-2);font-weight:500}
-  .doctitle{font-family:var(--serif);font-weight:500;font-size:21px;letter-spacing:-.01em;line-height:1.2;margin-bottom:6px;color:var(--ink)}
-  .docsubtitle{font-family:var(--kr);font-size:12px;color:var(--ink-3);line-height:1.55;margin-bottom:34px}
-  .toc-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase;border-top:1px solid var(--rule);padding-top:18px;margin-bottom:14px}
-  nav ol{list-style:none;counter-reset:toc}
-  nav li{counter-increment:toc;margin:1px 0}
-  nav a{
-    display:grid;
-    grid-template-columns:24px 1fr;
-    gap:10px;
-    text-decoration:none;
-    color:var(--ink-2);
-    font-size:13px;
-    padding:8px 8px 8px 4px;
-    border-left:2px solid transparent;
-    transition:.15s;
-    line-height:1.5;
-    word-break:keep-all;
-    overflow-wrap:break-word;
-  }
-  nav a::before{
-    content:counter(toc,decimal-leading-zero);
-    font-family:var(--mono);
-    font-size:10.5px;
-    color:var(--ink-4);
-    letter-spacing:.04em;
-    padding-top:1px;
-  }
-  nav a:hover{color:var(--ink);background:var(--paper-2)}
-  nav a.on{color:var(--accent);border-left-color:var(--accent);font-weight:500}
-  nav a.on::before{color:var(--accent)}
-
-  .signoff{margin-top:30px;padding-top:18px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10.5px;color:var(--ink-3);line-height:1.7}
-  .signoff b{color:var(--ink-2);font-weight:500;letter-spacing:.04em}
-
-  /* ============ MAIN ============ */
-  main{padding:48px 56px 120px 56px;min-width:0}
-  @media(max-width:980px){main{padding:24px 22px 60px}}
-  @media(max-width:560px){main{padding:18px 18px 50px}}
-
-  /* document header */
-  header.doc{margin-bottom:60px}
+  /* ===== 헤더 ===== */
   .deptline{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
   .deptline::after{content:"";flex:1;height:1px;background:var(--rule)}
-  h1.bigtitle{font-family:var(--serif);font-weight:500;font-size:clamp(30px,5.5vw,52px);line-height:1.1;letter-spacing:-.025em;color:var(--ink);max-width:18ch;word-break:keep-all}
-  h1.bigtitle em{font-style:italic;color:var(--accent);font-weight:500}
-  .ledesum{margin-top:28px;font-size:16.5px;color:var(--ink-2);max-width:58ch;line-height:1.8;word-break:keep-all}
-  @media(max-width:560px){.ledesum{font-size:15px;line-height:1.75}}
-  .leadout{margin-top:38px;display:flex;gap:30px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-3);text-transform:uppercase}
-  .leadout div b{display:block;font-family:var(--kr);font-size:14px;color:var(--ink);text-transform:none;letter-spacing:0;margin-top:4px;font-weight:500;word-break:keep-all}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(28px,6vw,48px);line-height:1.12;letter-spacing:-.025em;color:var(--ink);max-width:20ch;word-break:keep-all}
+  h1 em{font-style:italic;color:var(--accent);font-weight:500}
+  .lede{margin-top:24px;font-size:15.5px;color:var(--ink-2);max-width:62ch;line-height:1.85;word-break:keep-all}
+  .meta-row{margin-top:28px;display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-3);text-transform:uppercase}
+  .meta-row b{display:block;font-family:var(--kr);font-size:13.5px;color:var(--ink);text-transform:none;letter-spacing:0;margin-top:4px;font-weight:500}
 
-  /* sections */
-  section{margin:88px 0 0 0;padding-top:36px;border-top:1px solid var(--rule)}
-  @media(max-width:560px){section{margin-top:64px;padding-top:28px}}
-  section:first-of-type{border-top:none;padding-top:0;margin-top:0}
-  .sec-marker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;font-weight:500}
-  h2.h{font-family:var(--serif);font-weight:500;font-size:clamp(24px,4vw,36px);letter-spacing:-.015em;line-height:1.2;color:var(--ink);max-width:22ch;margin-bottom:14px;word-break:keep-all}
-  .h-sub{font-size:14.5px;color:var(--ink-3);margin-bottom:38px;max-width:60ch;line-height:1.75;word-break:keep-all}
+  /* ===== 흐름 다이어그램 ===== */
+  .flow{margin:44px 0 8px;padding:22px;border:1px solid var(--rule);border-radius:2px;background:var(--surface)}
+  .flow .fh{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:16px}
+  .flow svg{display:block;width:100%;height:auto;max-width:100%}
+  .flow .ft{font:500 12px var(--kr)} .flow .fs{font:400 10px var(--mono);letter-spacing:.04em}
 
-  h3{font-family:var(--kr);font-weight:700;font-size:17px;letter-spacing:-.005em;margin:36px 0 12px;color:var(--ink);display:flex;align-items:baseline;gap:10px;word-break:keep-all;flex-wrap:wrap}
-  h3 .h3num{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.04em;flex:none}
-
-  p{color:var(--ink-2);font-size:14.5px;max-width:72ch;margin:0 0 14px;line-height:1.85;word-break:keep-all}
-  p strong{color:var(--ink);font-weight:500}
-  p code, li code{font-family:var(--mono);font-size:12.5px;background:var(--paper-2);border:1px solid var(--rule-soft);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
-
-  ul.cln{list-style:none;margin:14px 0 18px;max-width:72ch}
-  ul.cln li{position:relative;padding:6px 0 6px 22px;color:var(--ink-2);font-size:14.5px;line-height:1.75}
-  ul.cln li::before{content:"";position:absolute;left:6px;top:16px;width:6px;height:1px;background:var(--accent)}
-  ul.cln li strong{color:var(--ink);font-weight:500}
-
-  /* pull quote / decision callout */
-  .decision{
-    border-left:2px solid var(--accent);
-    padding:18px 22px;
-    margin:24px 0 28px;
-    background:var(--paper-2);
-    max-width:72ch;
+  /* ===== 문서 카드 ===== */
+  .speclist{margin:36px 0;display:flex;flex-direction:column;gap:0}
+  .toc-head{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase;border-top:1px solid var(--ink);padding-top:18px;margin-bottom:4px}
+  .card{
+    display:grid;grid-template-columns:auto 1fr auto;gap:0 22px;align-items:center;
+    text-decoration:none;color:inherit;
+    padding:22px 4px;border-bottom:1px solid var(--rule-soft);
+    transition:background .15s,padding-left .15s;
   }
-  .decision .d-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;font-weight:500}
-  .decision p{margin:0;color:var(--ink);font-family:var(--serif);font-size:18px;font-style:italic;font-weight:400;line-height:1.55;max-width:none}
+  .card:hover{background:var(--paper-2);padding-left:14px}
+  .card .num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.04em;align-self:start;padding-top:4px}
+  .card .body{min-width:0}
+  .card .ctitle{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--ink);letter-spacing:-.01em;line-height:1.25;margin-bottom:5px;word-break:keep-all}
+  .card .ctitle .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;padding:2px 7px;border-radius:3px;vertical-align:middle;margin-left:8px;text-transform:uppercase;font-weight:500}
+  .b-ext{background:var(--warn-soft);color:var(--warn)}
+  .b-core{background:var(--accent-soft);color:var(--accent-2)}
+  .card .cdesc{font-size:13.5px;color:var(--ink-2);line-height:1.7;max-width:54ch;word-break:keep-all}
+  .card .ctag{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-3);margin-top:7px;text-transform:uppercase}
+  .card .arrow{font-family:var(--mono);font-size:18px;color:var(--ink-4);align-self:center;transition:color .15s,transform .15s}
+  .card:hover .arrow{color:var(--accent);transform:translateX(3px)}
 
-  .note{font-size:13px;color:var(--ink-3);font-style:italic;margin:14px 0;max-width:64ch}
+  /* 읽는 순서 안내 */
+  .reading{margin:40px 0;padding:20px 22px;border-left:2px solid var(--accent);background:var(--paper-2);border-radius:2px}
+  .reading .rh{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;font-weight:500}
+  .reading p{font-size:13.5px;color:var(--ink-2);line-height:1.8;max-width:64ch;word-break:keep-all}
+  .reading p strong{color:var(--ink);font-weight:500}
 
-  /* table */
-  .tbl{width:100%;border-collapse:collapse;margin:18px 0 28px;font-size:13.5px;max-width:100%}
-  .tbl th,.tbl td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;word-break:keep-all}
-  .tbl thead th{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);font-family:var(--mono);font-size:11px;letter-spacing:.04em;font-weight:500;color:var(--ink);text-transform:uppercase}
-  .tbl td{color:var(--ink-2);line-height:1.65}
-  .tbl td strong{color:var(--ink);font-weight:500}
-  .tbl tbody tr:last-child td{border-bottom:1px solid var(--ink)}
-  @media(max-width:560px){
-    .tbl{font-size:12.5px}
-    .tbl th,.tbl td{padding:9px 8px}
-  }
-  .badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;padding:2px 7px;border-radius:3px;display:inline-block;font-weight:500}
-  .b-ok{background:var(--accent-soft);color:var(--accent-2)}
-  .b-warn{background:var(--warn-soft);color:var(--warn)}
-  .b-danger{background:var(--danger-soft);color:var(--danger)}
-  .b-neutral{background:var(--paper-2);color:var(--ink-2);border:1px solid var(--rule)}
-
-  /* figures */
-  figure{margin:30px 0 38px;border:1px solid var(--rule);border-radius:2px;background:var(--surface);overflow:hidden}
-  figure .fhead{padding:9px 18px;border-bottom:1px solid var(--rule-soft);background:var(--paper-2);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink-3);text-transform:uppercase}
-  figure .fhead .fnum{color:var(--accent);font-weight:500}
-  figure .fbody{padding:24px 22px 8px}
-  figure figcaption{padding:0 22px 18px;font-size:12.5px;color:var(--ink-3);line-height:1.65;font-style:italic}
-
-  svg.dia{display:block;width:100%;height:auto;max-width:100%}
-  .d-title{font:500 13.5px var(--kr)}
-  .d-sub{font:400 11.5px var(--kr)}
-  .d-mono{font:500 11px var(--mono);letter-spacing:.04em}
-
-  /* code block */
-  pre{
-    background:var(--paper-2);
-    border:1px solid var(--rule);
-    border-left:2px solid var(--accent);
-    border-radius:2px;
-    padding:18px 20px;
-    overflow-x:auto;
-    margin:18px 0 26px;
-    font-family:var(--mono);
-    font-size:12.5px;
-    line-height:1.75;
-    color:var(--ink);
-    max-width:100%;
-  }
-  @media(max-width:560px){
-    pre{padding:14px 14px;font-size:11.5px;line-height:1.7}
-  }
-  pre .c{color:var(--ink-3);font-style:italic}
-  pre .k{color:var(--accent-2);font-weight:500}
-  pre .s{color:var(--warn)}
-  pre .v{color:var(--danger)}
-  .codecap{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;margin:24px 0 -10px;display:flex;gap:10px;align-items:baseline}
-  .codecap b{color:var(--accent);font-weight:500;letter-spacing:.06em}
-
-  /* checklist */
-  .checklist{list-style:none;margin:18px 0;max-width:64ch}
-  .checklist li{position:relative;padding:8px 0 8px 30px;color:var(--ink-2);font-size:14px;border-bottom:1px solid var(--rule-soft)}
-  .checklist li:last-child{border-bottom:none}
-  .checklist li::before{content:"□";position:absolute;left:8px;top:9px;font-family:var(--mono);color:var(--accent);font-size:14px}
-
-  /* tab-like phase blocks */
-  .phasebox{border:1px solid var(--rule);border-radius:2px;margin:14px 0;background:var(--surface)}
-  .phasebox + .phasebox{margin-top:14px}
-  .phasebox .ph-head{display:flex;gap:18px;align-items:baseline;padding:16px 20px;border-bottom:1px solid var(--rule-soft);background:var(--paper-2);flex-wrap:wrap}
-  .ph-no{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--accent);font-weight:500}
-  .ph-name{font-size:15.5px;font-weight:700;color:var(--ink)}
-  .ph-when{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
-  .phasebox .ph-body{padding:18px 20px 22px}
-  .phasebox .ph-body p{margin-bottom:10px;font-size:13.5px}
-  .phasebox .ph-body ul.cln li{font-size:13.5px;padding:4px 0 4px 22px}
-
-  /* judgment cards */
-  .judge{display:grid;grid-template-columns:auto 1fr;gap:18px 22px;border-top:1px solid var(--rule-soft);padding:18px 0;align-items:start}
-  .judge:first-of-type{border-top:1px solid var(--ink)}
-  .judge:last-of-type{border-bottom:1px solid var(--ink)}
-  .judge .v{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;padding-top:3px;white-space:nowrap}
-  .judge h4{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
-  .judge p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.75}
-
-  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--ink);font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em;line-height:1.7}
-  footer .frow{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--ink);font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.04em;line-height:1.7;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
   footer b{color:var(--ink-2);font-weight:500}
+
+  /* ===== 모바일 반응형 ===== */
+  @media(max-width:640px){
+    body{padding:max(32px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(48px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+    .lede{font-size:14.5px}
+    .card{grid-template-columns:auto 1fr;gap:4px 16px;padding:18px 2px}
+    .card .num{padding-top:2px}
+    .card .arrow{display:none}
+    .card:hover{padding-left:6px}
+    .card .ctitle{font-size:18px}
+    .card .ctitle .badge{display:inline-block;margin-left:0;margin-top:4px}
+    .flow{padding:16px;overflow-x:auto}
+  }
+  @media(max-width:380px){
+    .card .ctitle .badge{display:block;margin-top:6px;width:fit-content}
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="mobilebar">
-  <div class="mtitle"><b>SPEC 01</b>Agent Orchestration</div>
-  <button class="toctoggle" id="toctoggle" aria-label="목차 열기" aria-expanded="false">
-    <span class="bars"><span></span><span></span><span></span></span>
-    <span class="ttxt">목차</span>
-  </button>
+  <div class="deptline">Specification Series · Index</div>
+  <h1>에이전트에게 맡기되, <em>안심하는 법</em></h1>
+  <p class="lede">개발 과정을 에이전틱 오케스트레이션으로 전환하기 위한 다섯 편의 명세다. 거버넌스 원형에서 시작해, 보편 개념을 거쳐, 실제 프로젝트 <strong>Voyage</strong>에 정착하기까지 — 추상에서 구체로 한 방향으로 흐른다. 어느 편을 먼저 펴도 자체 완결적이지만, 순서대로 읽으면 전환의 전 경로가 닫힌다.</p>
+  <div class="meta-row">
+    <div>편수<b>5부작 · 01–05</b></div>
+    <div>예시 프로젝트<b>Voyage</b></div>
+    <div>핵심 명제<b>안심 = 런타임 보장</b></div>
+  </div>
+
+  <div class="flow">
+    <div class="fh">계열 흐름 — 추상에서 구체로</div>
+    <svg viewBox="0 0 760 90" role="img" aria-label="다섯 문서의 흐름">
+      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#a6aebb"/></marker></defs>
+      <g>
+        <circle cx="60" cy="34" r="5" fill="#94372d"/><text x="60" y="58" class="ft" fill="#1a1f26" text-anchor="middle">01</text><text x="60" y="74" class="fs" fill="#7a8493" text-anchor="middle">원형</text>
+        <line x1="78" y1="34" x2="132" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
+        <circle cx="200" cy="34" r="5" fill="#1e5f55"/><text x="200" y="58" class="ft" fill="#1a1f26" text-anchor="middle">02</text><text x="200" y="74" class="fs" fill="#7a8493" text-anchor="middle">개념</text>
+        <line x1="218" y1="34" x2="272" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
+        <circle cx="340" cy="34" r="5" fill="#2e7d6f"/><text x="340" y="58" class="ft" fill="#1a1f26" text-anchor="middle">03</text><text x="340" y="74" class="fs" fill="#7a8493" text-anchor="middle">분해</text>
+        <line x1="358" y1="34" x2="412" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
+        <circle cx="480" cy="34" r="5" fill="#a26420"/><text x="480" y="58" class="ft" fill="#1a1f26" text-anchor="middle">04</text><text x="480" y="74" class="fs" fill="#7a8493" text-anchor="middle">범용 적용</text>
+        <line x1="498" y1="34" x2="552" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
+        <circle cx="620" cy="34" r="5" fill="#a85a3a"/><text x="620" y="58" class="ft" fill="#1a1f26" text-anchor="middle">05</text><text x="620" y="74" class="fs" fill="#7a8493" text-anchor="middle">정착</text>
+        <text x="700" y="38" class="fs" fill="#a6aebb">구체</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="speclist">
+    <div class="toc-head">문서 목록</div>
+
+    <a class="card" href="https://jungyh870918.github.io/agentic-code/" target="_blank" rel="noopener">
+      <div class="num">01</div>
+      <div class="body">
+        <div class="ctitle">거버넌스 원형 · Phase 1 구현 <span class="badge b-ext">외부 링크</span></div>
+        <div class="cdesc">에이전트 오케스트레이션 환경 구축의 원형 명세. 6개 거버넌스 축과 PR 자동 리뷰 구현 골격(워크플로·스크립트·행동 규약)까지.</div>
+        <div class="ctag">GitHub Pages · 새 탭에서 열림</div>
+      </div>
+      <div class="arrow">↗</div>
+    </a>
+
+    <a class="card" href="spec-02-concepts.html">
+      <div class="num">02</div>
+      <div class="body">
+        <div class="ctitle">개념서 — 보편 원리 + Voyage 예시 <span class="badge b-core">개념</span></div>
+        <div class="cdesc">전환의 보편 원리를 Voyage 실제 예시로 설명하는 학습서. 두 칼날·다섯 조각·네 축·세 빈 구멍까지. 숙지하면 남에게 가르칠 수 있는 수준.</div>
+        <div class="ctag">10 섹션 · 가르칠 수 있는 수준</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="card" href="spec-03-decomposition.html">
+      <div class="num">03</div>
+      <div class="body">
+        <div class="ctitle">Voyage 완전 분해 <span class="badge b-core">분해</span></div>
+        <div class="cdesc">Voyage를 시스템 정착 단위로 해체한 명세. 5조각(A–E)·4개 직교 축·정합성 그래프·짝 제약·헤더 중앙 오케스트레이션 확정.</div>
+        <div class="ctag">8 섹션 · 4 다이어그램</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="card" href="spec-04-process.html">
+      <div class="num">04</div>
+      <div class="body">
+        <div class="ctitle">11축 범용 적용 <span class="badge b-core">적용</span></div>
+        <div class="cdesc">기획·UI·UX·API·스키마·프론트·백엔드·콘텐츠·배포·출시 — 11개 개발 축을 검증 가능성으로 가른 범용 적용서. 축별 빈 구멍 지도 포함.</div>
+        <div class="ctag">10 섹션 · 빈 구멍 점검표</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="card" href="spec-05-voyage.html">
+      <div class="num">05</div>
+      <div class="body">
+        <div class="ctitle">Voyage 11축 정착 <span class="badge b-core">정착</span></div>
+        <div class="cdesc">11축을 Voyage 실물에 구체 매핑한 정착판. 장면 판별·채점 삼중 구조·age_group 비용·짝 제약·Phase 0 정착 순서·일곱 빈 구멍 점검표.</div>
+        <div class="ctag">10 섹션 · 7 빈 구멍</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+  </div>
+
+  <div class="reading">
+    <div class="rh">읽는 순서 제안</div>
+    <p><strong>처음이라면</strong> 02(개념)부터. 보편 원리를 Voyage 예시로 익힌 뒤, 03에서 그 분해를 깊이 보고, 04에서 다른 프로젝트에도 적용하는 법을 익히고, 05에서 Voyage 정착의 구체를 본다. <strong>구현이 급하다면</strong> 01(원형)의 Phase 1 골격과 05(정착)의 Phase 0를 먼저 펴도 된다. <strong>가르치려면</strong> 02 한 편으로 충분하다 — 끝의 "다섯 문장"이 그대로 설명 대본이 된다.</p>
+  </div>
+
+  <footer>
+    <span><b>AGENTIC ORCHESTRATION</b> · SPECIFICATION SERIES · R1</span>
+    <span>INDEX · 5 DOCUMENTS · 2026.06</span>
+  </footer>
+
 </div>
-
-<div class="layout">
-
-<aside>
-  <div class="docmeta">
-    <div class="row"><span>문서</span><b>SPEC&nbsp;01</b></div>
-    <div class="row"><span>개정</span><b>R1 · 2026.05</b></div>
-    <div class="row"><span>상태</span><b>설계 확정</b></div>
-  </div>
-  <div class="doctitle">Agent Orchestration<br>Build Specification</div>
-  <div class="docsubtitle">에이전트 오케스트레이션 환경 구축<br>거버넌스 · 아키텍처 · Phase 1 구현</div>
-
-  <div class="toc-label">목차</div>
-  <nav><ol>
-    <li><a href="#sec-00">개요와 범위</a></li>
-    <li><a href="#sec-01">거버넌스 — 자동화의 경계</a></li>
-    <li><a href="#sec-02">오케스트레이션 아키텍처</a></li>
-    <li><a href="#sec-03">조율 모델 — 상태 기반 간접 통신</a></li>
-    <li><a href="#sec-04">도구 스택 — Git·Actions·Terraform·Claude·MCP</a></li>
-    <li><a href="#sec-05">에이전트 외주 분배</a></li>
-    <li><a href="#sec-06">Phase 1 구현 — PR 자동 리뷰</a></li>
-    <li><a href="#sec-07">로드맵 — Phase 1 / 2 / 3</a></li>
-    <li><a href="#sec-08">업계 표준 대비 판단</a></li>
-  </ol></nav>
-
-  <div class="signoff">
-    <b>지휘자</b><br>사람 (오너)<br><br>
-    <b>헤더 에이전트</b><br>Claude · API<br><br>
-    <b>진실의 원천</b><br>GitHub
-  </div>
-</aside>
-
-<main>
-
-<header class="doc">
-  <div class="deptline">Engineering Specification</div>
-  <h1 class="bigtitle">사람은 의도를 쥐고, <em>에이전트는 실행을 짊어진다</em></h1>
-  <p class="ledesum">이 문서는 에이전트 오케스트레이션 환경을 처음부터 구축하기 위한 단일 참조 명세다. 거버넌스 원칙부터 Phase 1의 실행 가능한 코드 골격까지, 결정의 근거와 함께 정리한다. 만드는 것은 앱이 아니라 — 사람의 관여를 최소화한 개발 파이프라인이고, 그 능력의 증명이다.</p>
-  <div class="leadout">
-    <div>증명 포인트<b>프로세스 추적 가능성</b></div>
-    <div>설계 축<b>거버넌스 6개</b></div>
-    <div>구현 단계<b>Phase 1 / 2 / 3</b></div>
-    <div>최종 승인<b>사람 — 1초 게이트</b></div>
-  </div>
-</header>
-
-<!-- ========== 00 ========== -->
-<section id="sec-00">
-  <div class="sec-marker">§ 00 — Overview</div>
-  <h2 class="h">개요와 범위</h2>
-  <p class="h-sub">무엇을 만들고, 무엇을 의도적으로 만들지 않는지를 먼저 정한다.</p>
-
-  <h3><span class="h3num">00.1</span>프로젝트 목표</h3>
-  <p>이 프로젝트의 산출물은 <strong>앱이 아니라 오케스트레이션 시스템과 그 능력의 증명</strong>이다. 그래서 만드는 서비스는 화려할 필요가 없고, 오케스트레이션이 잘 돌아간다는 걸 보여주기 좋으면 된다. 증명의 핵심은 코드 품질이 아니라 <strong>프로세스 추적 가능성</strong> — "이 결과물은 누가, 어떤 판단으로, 왜 만들었는가"가 GitHub 안에 기록으로 남아야 한다.</p>
-
-  <h3><span class="h3num">00.2</span>역할 분포</h3>
-  <p>사람과 에이전트가 책임을 어떻게 나누는지의 최상위 그림이다.</p>
-
-  <figure>
-    <div class="fhead"><span>역할 분포</span><span class="fnum">FIG.00.1</span></div>
-    <div class="fbody">
-      <svg class="dia" viewBox="0 0 680 290" role="img" aria-label="오케스트레이션 4계층 역할 분포">
-        <defs><marker id="a0" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#7a8493" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
-        <rect x="240" y="20" width="200" height="48" fill="none" stroke="#1a1f26" stroke-width="0.8"/>
-        <text class="d-title" x="340" y="42" text-anchor="middle" fill="#1a1f26">사람 — 지휘자</text>
-        <text class="d-sub" x="340" y="58" text-anchor="middle" fill="#4a5260">의도 · 승인 · 최종 배포</text>
-
-        <rect x="240" y="98" width="200" height="48" fill="#d9e8e3" stroke="#1e5f55" stroke-width="0.8"/>
-        <text class="d-title" x="340" y="120" text-anchor="middle" fill="#103d36">Claude — 헤더</text>
-        <text class="d-sub" x="340" y="136" text-anchor="middle" fill="#1e5f55">분해 · 라우팅 · 검증 · 트리거</text>
-
-        <rect x="20" y="180" width="200" height="48" fill="#faf6ec" stroke="#7a8493" stroke-width="0.5"/>
-        <text class="d-title" x="120" y="202" text-anchor="middle" fill="#1a1f26">전문 에이전트</text>
-        <text class="d-sub" x="120" y="218" text-anchor="middle" fill="#4a5260">코드 · 리뷰 · 테스트 · IaC</text>
-
-        <rect x="240" y="180" width="200" height="48" fill="#faf6ec" stroke="#7a8493" stroke-width="0.5"/>
-        <text class="d-title" x="340" y="202" text-anchor="middle" fill="#1a1f26">GitHub</text>
-        <text class="d-sub" x="340" y="218" text-anchor="middle" fill="#4a5260">공용 진실 · 조율 매개</text>
-
-        <rect x="460" y="180" width="200" height="48" fill="#faf6ec" stroke="#7a8493" stroke-width="0.5"/>
-        <text class="d-title" x="560" y="202" text-anchor="middle" fill="#1a1f26">Actions</text>
-        <text class="d-sub" x="560" y="218" text-anchor="middle" fill="#4a5260">트리거 · CI/CD</text>
-
-        <line x1="340" y1="68" x2="340" y2="96" stroke="#7a8493" stroke-width="0.8" marker-end="url(#a0)"/>
-        <path d="M280 146 L120 146 L120 178" fill="none" stroke="#7a8493" stroke-width="0.8" marker-end="url(#a0)"/>
-        <line x1="340" y1="146" x2="340" y2="178" stroke="#7a8493" stroke-width="0.8" marker-end="url(#a0)"/>
-        <path d="M400 146 L560 146 L560 178" fill="none" stroke="#7a8493" stroke-width="0.8" marker-end="url(#a0)"/>
-
-        <text class="d-sub" x="340" y="266" text-anchor="middle" fill="#7a8493" font-style="italic">에이전트는 서로 대화하지 않는다 — GitHub 상태를 읽고 쓰며 조율된다</text>
-      </svg>
-    </div>
-    <figcaption>헤더는 코드를 직접 많이 짜지 않고 지휘만 한다. 상태를 메모리에 들지 않으며 매번 GitHub에서 읽어 다음 행동을 정한다.</figcaption>
-  </figure>
-
-  <h3><span class="h3num">00.3</span>의도적으로 제외한 것</h3>
-  <p>블로그·외부 일지 작성은 이 시스템의 흐름에 포함하지 않는다. 사람이 읽는 기록은 오직 <strong>타 팀 교류용 이력</strong>의 목적으로만 남기며, 그 기록은 GitHub 안의 PR 설명·이슈 코멘트·CHANGELOG·ADR로 인라인화한다. 별도 사이트나 외부 채널은 컨텍스트에 포함하지 않는다 — 곁다리가 본류를 막을 위험을 차단한다.</p>
-
-  <div class="decision">
-    <div class="d-label">Principle</div>
-    <p>"이 PR은 사람이 한 줄도 안 썼습니다"를 증명 가능한 주장으로 만든다.<br>기록이 없으면 마법상자고, 회사는 마법상자를 도입하지 않는다.</p>
-  </div>
-</section>
-
-<!-- ========== 01 ========== -->
-<section id="sec-01">
-  <div class="sec-marker">§ 01 — Governance</div>
-  <h2 class="h">자동화의 경계를 긋다</h2>
-  <p class="h-sub">코드보다 경계가 먼저다. 기술적으로 가능한 것과 거버넌스적으로 해도 되는 것은 다르다.</p>
-
-  <h3><span class="h3num">01.1</span>여섯 개의 설계 축</h3>
-  <p>오케스트레이션을 한 방향에서만 보면 놓치는 게 많아 여섯 각도로 쪼갠다. 앞 셋은 구조축, 뒤 셋은 횡단 원칙이다.</p>
-
-  <table class="tbl">
-    <thead><tr><th>축</th><th>질문</th><th>역할</th></tr></thead>
-    <tbody>
-      <tr><td><strong>권한</strong></td><td>누가 결정하는가</td><td>레이어를 4단으로 분리</td></tr>
-      <tr><td><strong>신뢰 경계</strong></td><td>어디까지 내 영역인가</td><td>같은 작업도 위치로 허용 수준이 다름</td></tr>
-      <tr><td><strong>가역성</strong></td><td>되돌릴 수 있는가</td><td>실무 라우팅의 실제 알고리즘</td></tr>
-      <tr><td><strong>관찰 가능성</strong></td><td>전부 기록했는가</td><td>증명의 원천 · 게이트를 1초로 압축</td></tr>
-      <tr><td><strong>에스컬레이션</strong></td><td>막혔을 때 어디로</td><td>윗 레이어로 — 멋대로 진행 금지</td></tr>
-      <tr><td><strong>상태·행동 분리</strong></td><td>진실은 어디 있는가</td><td>외부(GitHub) · 메모리 의존 금지</td></tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3num">01.2</span>권한 레이어 — 누가 결정하는가</h3>
-  <p>결정권의 소재로 시스템을 네 층으로 가른다. 위로 갈수록 자동화는 가능해도 해서는 안 되는 영역, 아래로 갈수록 사람의 손이 떠난다.</p>
-
-  <figure>
-    <div class="fhead"><span>권한 레이어 스택</span><span class="fnum">FIG.01.1</span></div>
-    <div class="fbody">
-      <svg class="dia" viewBox="0 0 680 280" role="img" aria-label="권한 레이어 스택">
-        <rect x="20" y="20" width="640" height="54" fill="#f0d8d2" stroke="#94372d" stroke-width="0.6"/>
-        <rect x="20" y="20" width="3" height="54" fill="#94372d"/>
-        <text class="d-title" x="38" y="42" fill="#94372d">의도 레이어 — 사람 전용</text>
-        <text class="d-sub" x="38" y="60" fill="#4a5260">무엇을 왜 만드는가 · 비즈니스 목표 · 타협 불가 제약</text>
-        <text class="d-mono" x="640" y="50" text-anchor="end" fill="#94372d">비가역</text>
-
-        <rect x="20" y="84" width="640" height="54" fill="#f3e6cf" stroke="#a26420" stroke-width="0.6"/>
-        <rect x="20" y="84" width="3" height="54" fill="#a26420"/>
-        <text class="d-title" x="38" y="106" fill="#a26420">판단 레이어 — 사람 게이트</text>
-        <text class="d-sub" x="38" y="124" fill="#4a5260">머지 · 배포 · 아키텍처 승인 — 에이전트 근거, 사람 결정</text>
-        <text class="d-mono" x="640" y="114" text-anchor="end" fill="#a26420">준 비가역</text>
-
-        <rect x="20" y="148" width="640" height="54" fill="#d9e8e3" stroke="#1e5f55" stroke-width="0.6"/>
-        <rect x="20" y="148" width="3" height="54" fill="#1e5f55"/>
-        <text class="d-title" x="38" y="170" fill="#103d36">실행 레이어 — 에이전트 자율</text>
-        <text class="d-sub" x="38" y="188" fill="#4a5260">코드 · 리뷰 · 테스트 · 문서 · IaC · 영향 분석</text>
-        <text class="d-mono" x="640" y="178" text-anchor="end" fill="#1e5f55">자유 가역</text>
-
-        <rect x="20" y="212" width="640" height="50" fill="#faf6ec" stroke="#7a8493" stroke-width="0.6"/>
-        <rect x="20" y="212" width="3" height="50" fill="#7a8493"/>
-        <text class="d-title" x="38" y="234" fill="#1a1f26">기계 레이어 — 완전 자동</text>
-        <text class="d-sub" x="38" y="252" fill="#4a5260">빌드 · 린트 · 포맷 · 배포 스크립트 — 판단 없음</text>
-      </svg>
-    </div>
-    <figcaption>핵심 결론 — 최종 승인 클릭은 사람이 하되, 그 클릭을 1초짜리 형식으로 만든다. 에이전트가 근거(리뷰·테스트·요약·리스크)를 모두 쌓아두면 사람은 납득만 하면 된다.</figcaption>
-  </figure>
-
-  <h3><span class="h3num">01.3</span>신뢰 경계 — 어디까지가 내 영역인가</h3>
-  <p>권한 축이 수직이라면 신뢰 경계는 수평이다. 같은 작업이라도 어디서 일어나느냐에 따라 자동화 허용 수준이 달라진다.</p>
-  <ul class="cln">
-    <li><strong>내부 구역</strong> — 내가 오너인 코드. 실행 레이어를 마음껏 자동화하는 운동장.</li>
-    <li><strong>경계 구역</strong> — 공유 라이브러리·API 계약. 출력이 경계를 넘기 전 사람 게이트가 한 번 들어간다.</li>
-    <li><strong>외부 구역</strong> — 타 팀·프로덕션. 에이전트는 읽기만, 쓰기와 소통은 사람을 통해서만.</li>
-  </ul>
-  <p>이 분할이 회사 도입 가능성을 결정짓는다. 타 팀이 봤을 때 "사람을 대체하는 위험한 자동화"가 아니라 "팀 생산성을 N배 올리는 도구"로 포지셔닝되기 때문이다.</p>
-
-  <h3><span class="h3num">01.4</span>가역성 — 게이트를 정하는 실제 기준</h3>
-  <p>새 작업이 들어오면 단 하나만 묻는다 — <strong>"이게 잘못되면 되돌리는 데 얼마 드는가?"</strong> 이 질문 하나로 어느 게이트로 보낼지 즉시 결정된다.</p>
-
-  <table class="tbl">
-    <thead><tr><th>등급</th><th>예시</th><th>되돌림 비용</th><th>처리</th></tr></thead>
-    <tbody>
-      <tr><td><strong>자유 가역</strong></td><td>코드 변경, 문서, 브랜치</td><td>git revert · 1분</td><td><span class="badge b-ok">완전 자동</span></td></tr>
-      <tr><td><strong>비용 있는 가역</strong></td><td>스테이징 배포, 테스트 데이터</td><td>흔적·시간 소요</td><td><span class="badge b-neutral">자동 + 로그</span></td></tr>
-      <tr><td><strong>준 비가역</strong></td><td>프로덕션 배포, 운영 DB</td><td>매우 어려움</td><td><span class="badge b-warn">사람 게이트</span></td></tr>
-      <tr><td><strong>비가역</strong></td><td>데이터 삭제, 시크릿, 결제</td><td>불가</td><td><span class="badge b-danger">게이트 + 확인</span></td></tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3num">01.5</span>횡단 원칙 셋</h3>
-  <ul class="cln">
-    <li><strong>관찰 가능성</strong> — 모든 에이전트 행동은 누가·무엇을·왜를 GitHub에 남긴다. 이 기록이 있어야 게이트가 1초가 된다.</li>
-    <li><strong>에스컬레이션</strong> — 막히면 멈추고 윗 레이어로 올린다. "어떻게든 통과시키려" 테스트를 약화시키지 않는다.</li>
-    <li><strong>상태·행동 분리</strong> — 진실의 원천은 외부(GitHub)에 둔다. 한 에이전트가 죽어도 다른 에이전트가 상태만 보고 이어받는다.</li>
-  </ul>
-</section>
-
-<!-- ========== 02 ========== -->
-<section id="sec-02">
-  <div class="sec-marker">§ 02 — Architecture</div>
-  <h2 class="h">오케스트레이션 아키텍처</h2>
-  <p class="h-sub">사람-헤더-전문 에이전트-자동화의 네 계층과, 각각의 책임 경계.</p>
-
-  <h3><span class="h3num">02.1</span>헤더의 네 가지 역할</h3>
-  <p>메인 오케스트레이터(Claude)는 직접 코드를 많이 짜는 주체가 아니라 <strong>지휘자</strong>다. 역할은 명확히 네 가지로 한정한다.</p>
-  <ul class="cln">
-    <li><strong>작업 분해</strong> — GitHub 상태(이슈·라벨)를 읽고 큰 요청을 실행 단위로 나눈다.</li>
-    <li><strong>라우팅</strong> — 각 단위를 가역성과 성격에 따라 적절한 전문 에이전트(또는 사람)에게 보낸다.</li>
-    <li><strong>검증</strong> — 돌아온 결과물이 행동 규약과 스펙에 부합하는지 확인한다.</li>
-    <li><strong>트리거</strong> — 다음 단계를 GitHub 상태에 기록해 자동 발화시킨다.</li>
-  </ul>
-
-  <h3><span class="h3num">02.2</span>채팅방은 실행 무대가 아니다</h3>
-  <p>채팅방은 휘발성 컨텍스트라 진실의 원천이 될 수 없다. 길어지면 잘리고, 닫히면 사라지고, 두 방이 서로를 못 본다. 그래서 에이전트의 실행 무대는 채팅이 아니라 <strong>GitHub Actions 안에서 호출되는 무상태 Claude API</strong>다. 맥락은 매번 GitHub에서 읽어 프롬프트에 주입한다.</p>
-
-  <div class="decision">
-    <div class="d-label">Decision</div>
-    <p>채팅방은 사람 쪽 도구일 뿐이다. 실행 단위로 늘리지 않는다. 권장 구성: 설계·상의 방 1개 + 작업 지시 방 1개. 다리는 채팅 기억이 아니라 GitHub.</p>
-  </div>
-</section>
-
-<!-- ========== 03 ========== -->
-<section id="sec-03">
-  <div class="sec-marker">§ 03 — Coordination</div>
-  <h2 class="h">조율 모델</h2>
-  <p class="h-sub">에이전트는 서로 대화하지 않는다. 상태를 통해 간접적으로 조율된다.</p>
-
-  <h3><span class="h3num">03.1</span>상태 기반 간접 통신</h3>
-  <p>여러 에이전트가 직접 메시지를 주고받으면 동기화 지옥에 빠진다. 그래서 통신을 <strong>상태(GitHub 이슈 라벨·PR 체크·코멘트)를 매개로 한 간접 통신</strong>으로 단순화한다. 각 에이전트는 상태를 읽어 자기 차례인지 판단하고, 일을 마치면 상태를 갱신한다.</p>
-
-  <figure>
-    <div class="fhead"><span>상태 기반 조율 루프</span><span class="fnum">FIG.03.1</span></div>
-    <div class="fbody">
-      <svg class="dia" viewBox="0 0 680 250" role="img" aria-label="상태 기반 조율 루프">
-        <defs><marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#1e5f55" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
-        <rect x="240" y="20" width="200" height="56" fill="#d9e8e3" stroke="#1e5f55" stroke-width="0.6"/>
-        <text class="d-title" x="340" y="44" text-anchor="middle" fill="#103d36">GitHub 상태</text>
-        <text class="d-sub" x="340" y="62" text-anchor="middle" fill="#1e5f55">이슈 라벨 · PR 체크 · 코멘트</text>
-
-        <rect x="20" y="142" width="180" height="56" fill="#faf6ec" stroke="#7a8493" stroke-width="0.5"/>
-        <text class="d-title" x="110" y="166" text-anchor="middle" fill="#1a1f26">에이전트 A</text>
-        <text class="d-sub" x="110" y="184" text-anchor="middle" fill="#4a5260">상태 읽고 → 일 → 갱신</text>
-
-        <rect x="250" y="142" width="180" height="56" fill="#faf6ec" stroke="#7a8493" stroke-width="0.5"/>
-        <text class="d-title" x="340" y="166" text-anchor="middle" fill="#1a1f26">에이전트 B</text>
-        <text class="d-sub" x="340" y="184" text-anchor="middle" fill="#4a5260">상태 읽고 → 일 → 갱신</text>
-
-        <rect x="480" y="142" width="180" height="56" fill="#faf6ec" stroke="#7a8493" stroke-width="0.5"/>
-        <text class="d-title" x="570" y="166" text-anchor="middle" fill="#1a1f26">에이전트 C</text>
-        <text class="d-sub" x="570" y="184" text-anchor="middle" fill="#4a5260">상태 읽고 → 일 → 갱신</text>
-
-        <path d="M270 76 L130 138" fill="none" stroke="#1e5f55" stroke-width="0.8" marker-end="url(#a3)"/>
-        <path d="M340 76 L340 138" fill="none" stroke="#1e5f55" stroke-width="0.8" marker-end="url(#a3)"/>
-        <path d="M410 76 L555 138" fill="none" stroke="#1e5f55" stroke-width="0.8" marker-end="url(#a3)"/>
-
-        <path d="M130 142 L270 80" fill="none" stroke="#a26420" stroke-width="0.8" stroke-dasharray="3 3" marker-end="url(#a3)"/>
-        <path d="M340 142 L340 80" fill="none" stroke="#a26420" stroke-width="0.8" stroke-dasharray="3 3" marker-end="url(#a3)"/>
-        <path d="M555 142 L410 80" fill="none" stroke="#a26420" stroke-width="0.8" stroke-dasharray="3 3" marker-end="url(#a3)"/>
-
-        <text class="d-sub" x="340" y="232" text-anchor="middle" fill="#7a8493" font-style="italic">실선 = 읽기 · 점선 = 쓰기 · 에이전트끼리는 서로를 모름</text>
-      </svg>
-    </div>
-    <figcaption>이 모델 덕분에 한 에이전트가 죽어도 다른 에이전트가 GitHub 상태만 보고 이어받을 수 있다. MCP는 이 읽기·쓰기의 표준 통로다.</figcaption>
-  </figure>
-</section>
-
-<!-- ========== 04 ========== -->
-<section id="sec-04">
-  <div class="sec-marker">§ 04 — Tool Stack</div>
-  <h2 class="h">도구 스택과 각 도구의 책임</h2>
-  <p class="h-sub">Git · GitHub Actions · Terraform · Claude API · MCP — 다섯 도구가 어떻게 맞물리는가.</p>
-
-  <table class="tbl">
-    <thead><tr><th>도구</th><th>레이어</th><th>책임</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><strong>Git</strong></td>
-        <td>버전 · 협업</td>
-        <td>모든 변경의 1차 진실. 브랜치·커밋·이력이 곧 시스템의 기억.</td>
-      </tr>
-      <tr>
-        <td><strong>GitHub Actions</strong></td>
-        <td>트리거 · 자동화</td>
-        <td>PR·이슈·테스트 이벤트를 받아 파이프라인을 발화. 에이전트 실행 무대 호스트.</td>
-      </tr>
-      <tr>
-        <td><strong>Terraform</strong></td>
-        <td>인프라 코드화 (Phase 3)</td>
-        <td>AWS 리소스를 코드로 선언·관리. 에이전트가 인프라까지 다루게 하는 핵심.</td>
-      </tr>
-      <tr>
-        <td><strong>Claude API</strong></td>
-        <td>판단 · 생성</td>
-        <td>헤더와 전문 에이전트의 두뇌. 무상태 호출, 맥락은 매번 주입.</td>
-      </tr>
-      <tr>
-        <td><strong>MCP</strong></td>
-        <td>상태 접근</td>
-        <td>에이전트가 GitHub 상태를 직접 읽고 쓰는 표준 통로. 상태 기반 조율의 실제 구현.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3num">04.1</span>Terraform이 들어가는 자리</h3>
-  <p>Phase 1·2에서는 Terraform이 필요 없다. AWS도 마찬가지다. <strong>인프라가 들어오는 시점은 Phase 3</strong> — 그때 VPC·EKS·ECR·IAM·ALB·RDS·Secrets Manager·모니터링 스택을 모두 코드로 선언한다. 사전 학습은 이미 다음 수준까지 정리되어 있다.</p>
-  <ul class="cln">
-    <li><strong>개념</strong> — provider, resource, module, backend(S3), variables, outputs, 의존관계.</li>
-    <li><strong>리소스</strong> — VPC, EKS(IRSA), ECR(lifecycle), IAM, ALB(Ingress Controller).</li>
-    <li><strong>연동</strong> — Terraform output → GitHub Actions Secrets, ECR login → kubectl set image.</li>
-    <li><strong>미학습</strong> — workspace, data source, RDS, ECS, Secrets Manager 연동, Prometheus + Grafana.</li>
-  </ul>
-  <p class="note">미학습 영역은 Phase 3에서 에이전트가 작성한 코드 → 사람이 검토 → 학습이 동시에 일어나는 구조로 채운다. 이 자체가 또 하나의 증명 포인트다.</p>
-</section>
-
-<!-- ========== 05 ========== -->
-<section id="sec-05">
-  <div class="sec-marker">§ 05 — Agent Distribution</div>
-  <h2 class="h">에이전트 외주 분배</h2>
-  <p class="h-sub">비용 × 신뢰 × 가역성의 곱으로 모델을 작업에 매핑한다.</p>
-
-  <p>비싼 프런티어 모델을 아무 데나 쓰면 비용이 새고, 싼 로컬 모델을 판단에 쓰면 품질이 무너진다. 작업의 성격에 맞춰 모델을 배정한다.</p>
-
-  <table class="tbl">
-    <thead><tr><th>작업 성격</th><th>담당</th><th>이유</th></tr></thead>
-    <tbody>
-      <tr><td><strong>판단 무거움</strong><br>아키텍처·코드 리뷰·스펙 분해·영향 분석</td><td>Claude (헤더)</td><td>잘못된 판단의 복구 비용이 호출 비용보다 훨씬 크다. 아끼지 않는다.</td></tr>
-      <tr><td><strong>생성 + 검증 가능</strong><br>컴포넌트·보일러플레이트·UI</td><td>Cursor/v0 또는 Claude</td><td>테스트로 즉시 검증 가능 → 모델 선택 위험 낮음.</td></tr>
-      <tr><td><strong>초안·발산</strong><br>기획 초안·카피·브레인스토밍</td><td>ChatGPT / Gemini</td><td>어차피 헤더가 다듬음. 다양성이 장점.</td></tr>
-      <tr><td><strong>값싸고 반복</strong><br>제목 정리·커밋 요약·라벨·마스킹</td><td>M4 맥미니 로컬 LLM (Ollama)</td><td>정확도 영향 미미 + 호출 잦아 비용 절감 효과 큼.</td></tr>
-    </tbody>
-  </table>
-
-  <div class="decision">
-    <div class="d-label">Phase 1 — Hold the Line</div>
-    <p>Phase 1에서는 멀티 모델을 붙이지 않는다. Claude 하나로 PR 리뷰만 돌린다. 처음부터 네 모델을 엮으면 디버깅이 지옥이 된다. 멀티 라우팅은 Phase 2.</p>
-  </div>
-</section>
-
-<!-- ========== 06 ========== -->
-<section id="sec-06">
-  <div class="sec-marker">§ 06 — Phase 1 Implementation</div>
-  <h2 class="h">Phase 1 구현 — PR 자동 리뷰</h2>
-  <p class="h-sub">첫 자동화는 가역성이 가장 높고 가치가 즉시 보이는 PR 자동 리뷰부터.</p>
-
-  <h3><span class="h3num">06.1</span>사전 준비물</h3>
-  <ul class="cln">
-    <li>GitHub 계정과 <strong>프라이빗 샌드박스 레포</strong> 한 개.</li>
-    <li>Anthropic API 키 — <code>console.anthropic.com</code>에서 발급.</li>
-    <li>Node.js 환경 (맥미니 또는 로컬).</li>
-  </ul>
-  <p class="note">AWS는 이 단계에서 필요 없다. 인프라는 Phase 3까지 미룬다.</p>
-
-  <h3><span class="h3num">06.2</span>레포 구조 (최소)</h3>
-<pre><span class="c">// 모노레포 — Phase 1 시점의 최소 골격</span>
-repo-root/
-├─ .github/workflows/pr-review.yml    <span class="c">// PR 트리거되는 단 하나의 워크플로</span>
-├─ orchestrator/
-│   ├─ review.mjs                     <span class="c">// diff 읽고 Claude 호출, 코멘트 게시</span>
-│   └─ package.json                   <span class="c">// @anthropic-ai/sdk 의존성</span>
-├─ CLAUDE.md                          <span class="c">// 에이전트 행동 규약</span>
-└─ src/                               <span class="c">// 리뷰 대상이 될 데모 앱 코드</span></pre>
-
-  <p><code>apps/</code> <code>packages/</code> 등은 Phase 2에서 추가한다.</p>
-
-  <h3><span class="h3num">06.3</span>세팅 순서</h3>
-  <ol class="cln" style="counter-reset:none">
-    <li><strong>레포 생성</strong> — 위 골격을 빈 채로 올린다.</li>
-    <li><strong>Secret 등록</strong> — <code>Settings → Secrets and variables → Actions</code>에 <code>ANTHROPIC_API_KEY</code>로 등록. 코드에 절대 적지 않는다.</li>
-    <li><strong>워크플로 활성화</strong> — <code>pr-review.yml</code>이 <code>pull_request</code> 이벤트에 반응하도록 설정.</li>
-    <li><strong>스크립트 동작</strong> — PR diff를 GitHub API로 가져와 <code>CLAUDE.md</code>와 함께 Claude에 보내고, 응답을 PR 코멘트로 게시.</li>
-  </ol>
-
-  <div class="codecap"><b>06.4</b> .github/workflows/pr-review.yml</div>
-<pre><span class="k">name</span>: PR Auto Review
-<span class="k">on</span>:
-  <span class="k">pull_request</span>:
-    <span class="k">types</span>: [opened, synchronize]
-
-<span class="k">permissions</span>:
-  <span class="k">contents</span>: read
-  <span class="k">pull-requests</span>: write   <span class="c"># 코멘트 게시에 필요</span>
-
-<span class="k">jobs</span>:
-  <span class="k">review</span>:
-    <span class="k">runs-on</span>: ubuntu-latest   <span class="c"># 나중에 self-hosted(맥미니)로 교체 가능</span>
-    <span class="k">steps</span>:
-      - <span class="k">uses</span>: actions/checkout@v4
-        <span class="k">with</span>:
-          <span class="k">fetch-depth</span>: 0      <span class="c"># diff 비교 위해 전체 히스토리</span>
-
-      - <span class="k">uses</span>: actions/setup-node@v4
-        <span class="k">with</span>:
-          <span class="k">node-version</span>: 20
-
-      - <span class="k">name</span>: Install deps
-        <span class="k">working-directory</span>: orchestrator
-        <span class="k">run</span>: npm install
-
-      - <span class="k">name</span>: Run review
-        <span class="k">working-directory</span>: orchestrator
-        <span class="k">env</span>:
-          <span class="k">ANTHROPIC_API_KEY</span>: <span class="s">${{ secrets.ANTHROPIC_API_KEY }}</span>
-          <span class="k">GITHUB_TOKEN</span>: <span class="s">${{ secrets.GITHUB_TOKEN }}</span>
-          <span class="k">PR_NUMBER</span>: <span class="s">${{ github.event.pull_request.number }}</span>
-          <span class="k">REPO</span>: <span class="s">${{ github.repository }}</span>
-          <span class="k">BASE_SHA</span>: <span class="s">${{ github.event.pull_request.base.sha }}</span>
-          <span class="k">HEAD_SHA</span>: <span class="s">${{ github.event.pull_request.head.sha }}</span>
-        <span class="k">run</span>: node review.mjs</pre>
-
-  <div class="codecap"><b>06.5</b> orchestrator/review.mjs</div>
-<pre><span class="k">import</span> Anthropic <span class="k">from</span> <span class="s">"@anthropic-ai/sdk"</span>;
-<span class="k">import</span> { execSync } <span class="k">from</span> <span class="s">"node:child_process"</span>;
-<span class="k">import</span> { readFileSync } <span class="k">from</span> <span class="s">"node:fs"</span>;
-
-<span class="k">const</span> { ANTHROPIC_API_KEY, GITHUB_TOKEN, PR_NUMBER,
-        REPO, BASE_SHA, HEAD_SHA } = process.env;
-
-<span class="c">// 1) diff 추출 — 자유 가역(읽기)</span>
-<span class="k">const</span> diff = execSync(<span class="s">`git diff ${BASE_SHA} ${HEAD_SHA}`</span>,
-  { maxBuffer: 10 * 1024 * 1024 }).toString();
-
-<span class="c">// 2) 행동 규약 로드</span>
-<span class="k">let</span> rules = <span class="s">""</span>;
-<span class="k">try</span> { rules = readFileSync(<span class="s">"../CLAUDE.md"</span>, <span class="s">"utf8"</span>); }
-<span class="k">catch</span> { rules = <span class="s">"(규약 파일 없음)"</span>; }
-
-<span class="c">// 3) Claude 호출 — 헤더의 판단</span>
-<span class="k">const</span> client = <span class="k">new</span> Anthropic({ apiKey: ANTHROPIC_API_KEY });
-<span class="k">const</span> msg = <span class="k">await</span> client.messages.create({
-  model: <span class="s">"claude-opus-4-7"</span>,   <span class="c">// 작업 시점 최신으로 갱신</span>
-  max_tokens: <span class="v">2000</span>,
-  system: <span class="s">`너는 코드 리뷰 에이전트다. 행동 규약을 따른다.\n\n${rules}\n\n`</span> +
-          <span class="s">`리뷰는 한국어로, (1) 변경 요약 (2) 발견 문제와 근거 `</span> +
-          <span class="s">`(3) 리스크 평가 (4) 머지 가능 여부. 추측 금지, 근거만.`</span>,
-  messages: [{ role: <span class="s">"user"</span>,
-               content: <span class="s">`다음 PR diff를 리뷰하라:\n\n\`\`\`diff\n${diff}\n\`\`\``</span> }],
-});
-<span class="k">const</span> review = msg.content.filter(b =&gt; b.type === <span class="s">"text"</span>)
-                          .map(b =&gt; b.text).join(<span class="s">"\n"</span>);
-
-<span class="c">// 4) PR 코멘트 게시 — 관찰 가능성(누가·무엇을·왜)</span>
-<span class="k">const</span> body = <span class="s">`## 자동 코드 리뷰 (Claude)\n\n${review}\n\n`</span> +
-             <span class="s">`---\n_모델: claude-opus-4-7 · 트리거: pull_request · `</span> +
-             <span class="s">`이 리뷰는 에이전트가 생성했습니다._`</span>;
-
-<span class="k">const</span> res = <span class="k">await</span> fetch(
-  <span class="s">`https://api.github.com/repos/${REPO}/issues/${PR_NUMBER}/comments`</span>,
-  {
-    method: <span class="s">"POST"</span>,
-    headers: {
-      <span class="s">"Authorization"</span>: <span class="s">`Bearer ${GITHUB_TOKEN}`</span>,
-      <span class="s">"Accept"</span>: <span class="s">"application/vnd.github+json"</span>,
-      <span class="s">"Content-Type"</span>: <span class="s">"application/json"</span>,
-    },
-    body: JSON.stringify({ body }),
-  }
-);
-
-<span class="k">if</span> (!res.ok) {
-  console.error(<span class="s">"코멘트 게시 실패:"</span>, res.status, <span class="k">await</span> res.text());
-  process.exit(<span class="v">1</span>);
-}
-console.log(<span class="s">"리뷰 코멘트 게시 완료."</span>);</pre>
-
-  <div class="codecap"><b>06.6</b> CLAUDE.md — 행동 규약</div>
-<pre><span class="c"># 에이전트 행동 규약</span>
-
-<span class="c">## 권한 레이어</span>
-- 의도: 사람 전용 (에이전트 입력 불가)
-- 판단: 에이전트는 근거 제출까지, 결정은 사람
-- 실행: 에이전트 자율
-- 기계: 완전 자동
-
-<span class="c">## 신뢰 경계</span>
-- 내부 구역: 실행 자동 자유
-- 경계 구역: 출력 전 사람 게이트
-- 외부 구역: 읽기만, 쓰기·소통은 사람
-
-<span class="c">## 가역성 라우팅</span>
-- 자유 가역: 완전 자동
-- 비용 있는 가역: 자동 + 로그
-- 준 비가역: 사람 게이트
-- 비가역: 게이트 + 추가 확인
-
-<span class="c">## 횡단 원칙</span>
-- 관찰 가능성: 누가·무엇을·왜를 GitHub에 남긴다
-- 에스컬레이션: 막히면 멋대로 진행 말고 윗 레이어로
-- 상태/행동 분리: 진실의 원천은 GitHub 상태
-
-<span class="c">## 타 팀 교류 이력</span>
-- PR 설명에 변경 목적·영향 범위·근거를 사람이 읽도록 작성
-- 경계/외부 구역 변경은 사람이 소통, 에이전트는 초안만</pre>
-
-  <h3><span class="h3num">06.7</span>검증 기준 — Phase 1 완료 조건</h3>
-  <ul class="checklist">
-    <li>PR을 열면 1~2분 내 자동 리뷰 코멘트가 달린다.</li>
-    <li>코멘트에 모델·트리거·"에이전트 생성" 표기가 남는다 (관찰 가능성).</li>
-    <li>API 키가 코드 어디에도 없고 Secret으로만 주입된다.</li>
-    <li>데모로 "이 리뷰는 사람이 쓰지 않았다"를 보여줄 수 있다.</li>
-  </ul>
-  <p>이게 통과되면 같은 패턴으로 이슈→스펙 초안, 테스트 실패 분석, Swagger 자동 생성을 차례로 붙인다.</p>
-</section>
-
-<!-- ========== 07 ========== -->
-<section id="sec-07">
-  <div class="sec-marker">§ 07 — Roadmap</div>
-  <h2 class="h">로드맵 — 능력을 단계적으로 쌓는다</h2>
-  <p class="h-sub">각 단계는 앞 단계의 신뢰 위에 쌓인다. 자동화 범위가 넓어질수록 사람 게이트의 위치도 정교해진다.</p>
-
-  <div class="phasebox">
-    <div class="ph-head">
-      <span class="ph-no">PHASE 01</span>
-      <span class="ph-name">파이프라인 증명</span>
-      <span class="ph-when">2~3주 · 진행</span>
-    </div>
-    <div class="ph-body">
-      <p>"에이전트가 개발 프로세스에 참여한다"의 최소 증명. GitHub Actions + Claude API 조합만 사용.</p>
-      <ul class="cln">
-        <li>PR 자동 리뷰 (가장 먼저 — 가역성 최고)</li>
-        <li>이슈 → 스펙 문서 초안 자동 생성</li>
-        <li>테스트 실패 → 원인 분석 + 수정 제안</li>
-        <li>새 API 엔드포인트 → Swagger 문서 갱신</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="phasebox">
-    <div class="ph-head">
-      <span class="ph-no">PHASE 02</span>
-      <span class="ph-name">멀티 에이전트 파이프라인</span>
-      <span class="ph-when">3~4주 · 예정</span>
-    </div>
-    <div class="ph-body">
-      <p>한 기능이 사람 터치 최소화로 흐르는 파이프라인. 멀티 모델 라우팅 도입.</p>
-      <ul class="cln">
-        <li>이슈 등록 → Claude가 스펙 분해 → 서브태스크 생성</li>
-        <li>Cursor/v0가 코드 작성 → Claude 리뷰 + 테스트 생성</li>
-        <li>GitHub Actions 자동 테스트 → 머지 가능 상태까지</li>
-        <li>사람은 마지막 승인 버튼만 누른다 (1초 게이트)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="phasebox">
-    <div class="ph-head">
-      <span class="ph-no">PHASE 03</span>
-      <span class="ph-name">엔터프라이즈 스택 완성</span>
-      <span class="ph-when">4~6주 · 예정</span>
-    </div>
-    <div class="ph-body">
-      <p>인프라까지 에이전트가 관리하는 완전한 구조. Terraform이 이 단계에서 본격 등장.</p>
-      <ul class="cln">
-        <li>Terraform IaC로 AWS 인프라 코드화 (VPC·EKS·RDS·ECR)</li>
-        <li>Secrets Manager 연동 · IAM·IRSA 자동 바인딩</li>
-        <li>Prometheus + Grafana 모니터링 스택</li>
-        <li>ECR 이미지 취약점 스캔 + SAST 보안 자동화</li>
-        <li>로드 테스트 자동화 · 필요 시 LangGraph 검토</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- ========== 08 ========== -->
-<section id="sec-08">
-  <div class="sec-marker">§ 08 — Standards Alignment</div>
-  <h2 class="h">업계 표준 대비 판단</h2>
-  <p class="h-sub">이 명세의 제약과 선택이 업계 관행과 어떻게 맞물리는지 정직하게 점검한다.</p>
-
-  <div class="judge">
-    <div class="v">부합</div>
-    <div>
-      <h4>최종 승인은 사람</h4>
-      <p>오히려 이걸 안 지키면 비표준이다. GitHub의 브랜치 보호 규칙, 필수 리뷰어, 자가승인 금지는 거의 모든 기업의 기본 거버넌스. "AI가 코드를 짜는 시대에도 머지 승인은 사람" — 이 라인은 흔들리지 않는다.</p>
-    </div>
-  </div>
-
-  <div class="judge">
-    <div class="v">모범</div>
-    <div>
-      <h4>사람이 읽는 기록을 PR·이슈·ADR로 한정</h4>
-      <p>외부 블로그를 흐름에서 빼고 GitHub 안의 표준 산출물(PR 설명·코멘트·CHANGELOG·ADR)로 좁힌 결정은 성숙한 팀일수록 챙기는 관행이다. 복잡도를 줄이면서 표준에 더 가까워졌다.</p>
-    </div>
-  </div>
-
-  <div class="judge">
-    <div class="v">합의선</div>
-    <div>
-      <h4>코드·리뷰·테스트는 자동, 머지·배포·타팀 소통은 사람</h4>
-      <p>GitHub Copilot 류 AI 코드 리뷰 도구들이 정확히 이 선에서 작동한다. 시장의 검증된 합의선과 일치한다.</p>
-    </div>
-  </div>
-
-  <div class="judge">
-    <div class="v">보수적</div>
-    <div>
-      <h4>멀티 모델 라우팅을 Phase 2로 미룸 — 전략적 보강 필요</h4>
-      <p>능력 증명이 목표인 만큼 "멀티 모델 오케스트레이션"은 강력한 차별점이다. Phase 1이 너무 길어지면 증명이 밋밋해진다. 절충안 — Phase 1 끝에 값싼 보조 작업(커밋 요약) 하나만 로컬 LLM으로 붙여 "라우팅이 존재함"의 최소 증명을 보여준다. 전체 멀티 모델은 Phase 2.</p>
-    </div>
-  </div>
-
-  <div class="judge">
-    <div class="v">보강</div>
-    <div>
-      <h4>관찰 가능성의 깊이</h4>
-      <p>지금은 "코멘트에 모델·트리거 표기"까지다. 성숙한 시스템은 구조화된 메타데이터(프롬프트 버전·토큰 사용량·비용·소요 시간)를 함께 남긴다. Phase 1에선 지금 수준으로 충분하지만, "추적 가능성이 증명 포인트"라면 Phase 2에서 JSON으로 PR에 첨부하거나 별도 로그로 남기는 보강을 권한다.</p>
-    </div>
-  </div>
-
-  <div class="decision" style="margin-top:34px">
-    <div class="d-label">Verdict</div>
-    <p>이 설계는 "데모로 멋진" 쪽보다 "회사에 도입되는" 쪽으로 잘 기울어 있다. 그게 맞는 방향이다.</p>
-  </div>
-</section>
-
-<footer>
-  <div class="frow">
-    <div><b>AGENT ORCHESTRATION</b> · BUILD SPECIFICATION · R1</div>
-    <div>END OF DOCUMENT · 8 SECTIONS · 4 FIGURES</div>
-  </div>
-</footer>
-
-</main>
-</div>
-
-<script>
-  const links = document.querySelectorAll('nav a');
-  const sections = [...document.querySelectorAll('section[id]')];
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const id = e.target.id;
-        links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
-  sections.forEach(s => obs.observe(s));
-
-  // 모바일 TOC 토글
-  const aside = document.querySelector('aside');
-  const toggle = document.getElementById('toctoggle');
-  const ttxt = toggle.querySelector('.ttxt');
-  const setOpen = (open) => {
-    aside.classList.toggle('open', open);
-    toggle.classList.toggle('open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-    ttxt.textContent = open ? '닫기' : '목차';
-    document.body.style.overflow = open ? 'hidden' : '';
-  };
-  toggle.addEventListener('click', () => setOpen(!aside.classList.contains('open')));
-  // 링크 클릭하면 닫힘
-  links.forEach(a => a.addEventListener('click', () => {
-    if (window.matchMedia('(max-width: 980px)').matches) setOpen(false);
-  }));
-  // 화면 넓어지면 자동 닫기
-  window.addEventListener('resize', () => {
-    if (!window.matchMedia('(max-width: 980px)').matches && aside.classList.contains('open')) {
-      setOpen(false);
-    }
-  });
-</script>
-
 </body>
 </html>
