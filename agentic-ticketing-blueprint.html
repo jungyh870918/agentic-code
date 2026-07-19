@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실행 청사진 — agentic-ticketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f8fafc;
+    --paper-2:#f1f5f9;
+    --surface:#ffffff;
+    --ink:#0f172a;
+    --ink-2:#334155;
+    --ink-3:#64748b;
+    --ink-4:#94a3b8;
+    --rule:#cbd5e1;
+    --rule-soft:#e2e8f0;
+    --grid:#e8eef4;
+    --blueprint:#1e40af;
+    --blueprint-2:#1e3a8a;
+    --blueprint-soft:#dbeafe;
+    --p1:#059669;
+    --p1-soft:#d1fae5;
+    --p2:#b45309;
+    --p2-soft:#fef3c7;
+    --p3:#be185d;
+    --p3-soft:#fce7f3;
+    --danger:#dc2626;
+    --sans:"IBM Plex Sans","Noto Sans KR",-apple-system,sans-serif;
+    --kr:"Noto Sans KR","IBM Plex Sans",-apple-system,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:24px}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--kr);
+    font-size:14.5px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    word-break:keep-all;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:32px 32px;
+    background-position:-1px -1px;
+  }
+  ::selection{background:var(--blueprint);color:var(--paper)}
+
+  /* ===== LAYOUT ===== */
+  .layout{
+    display:grid;
+    grid-template-columns:260px minmax(0,1fr);
+    max-width:1280px;
+    margin:0 auto;
+  }
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+  /* Mobile bar */
+  .mbar{
+    display:none;
+    position:sticky;top:0;z-index:30;
+    background:var(--paper);
+    border-bottom:1px solid var(--rule);
+    padding:14px 22px;
+    align-items:center;justify-content:space-between;gap:14px;
+  }
+  .mbar .mt{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--blueprint);text-transform:uppercase;font-weight:600}
+  .mbar .mt b{display:block;font-family:var(--sans);color:var(--ink);font-size:15px;text-transform:none;letter-spacing:0;margin-top:2px;font-weight:600}
+  .toctog{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    background:var(--blueprint-soft);color:var(--blueprint);
+    border:1px solid var(--rule);border-radius:2px;
+    padding:8px 12px;cursor:pointer;
+    font-weight:600;text-transform:uppercase;
+  }
+  @media(max-width:900px){.mbar{display:flex}}
+
+  /* ===== SIDEBAR ===== */
+  aside{
+    border-right:1px solid var(--rule);
+    padding:36px 24px 60px;
+    position:sticky;top:0;align-self:start;
+    height:100vh;overflow-y:auto;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+  @media(max-width:900px){
+    aside{
+      position:fixed;top:0;left:0;right:0;bottom:0;
+      z-index:40;height:100vh;
+      transform:translateY(-100%);
+      transition:transform .3s;
+      visibility:hidden;
+      padding:70px 24px 40px;
+    }
+    aside.open{transform:translateY(0);visibility:visible}
+  }
+
+  .docmark{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--blueprint);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+  .doctitle{font-family:var(--sans);font-size:19px;font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.015em;margin-bottom:6px}
+  .docsub{font-family:var(--kr);font-size:12px;color:var(--ink-3);margin-bottom:26px;line-height:1.55}
+  
+  .toclabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase;margin:22px 0 10px;padding-top:14px;border-top:1px solid var(--rule-soft);font-weight:600}
+  .toclabel:first-of-type{padding-top:0;border-top:none;margin-top:0}
+  
+  nav ol{list-style:none;counter-reset:sec}
+  nav li{counter-increment:sec}
+  nav a{
+    display:grid;
+    grid-template-columns:22px 1fr;
+    gap:8px;
+    text-decoration:none;
+    color:var(--ink-2);
+    font-size:12.5px;
+    padding:6px 6px 6px 4px;
+    border-left:2px solid transparent;
+    line-height:1.4;
+    word-break:keep-all;
+    transition:.15s;
+  }
+  nav a::before{
+    content:"§ " counter(sec);
+    font-family:var(--mono);
+    font-size:9.5px;
+    color:var(--ink-4);
+    letter-spacing:.02em;
+    padding-top:1px;
+    font-weight:500;
+  }
+  nav a:hover{color:var(--ink);background:var(--paper-2)}
+  nav a.on{color:var(--blueprint);border-left-color:var(--blueprint);font-weight:600}
+  nav a.on::before{color:var(--blueprint)}
+
+  /* ===== MAIN ===== */
+  main{padding:40px 48px 100px;min-width:0}
+  @media(max-width:900px){main{padding:24px 22px 60px}}
+  @media(max-width:560px){main{padding:18px 16px 50px}}
+
+  /* Header */
+  header.title{border-bottom:2px solid var(--ink);padding-bottom:32px;margin-bottom:52px}
+  .badge-row{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    color:var(--blueprint);text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;margin-bottom:24px;font-weight:600;
+  }
+  .badge-row::after{content:"";flex:1;height:1px;background:var(--rule)}
+  .badge-row .stamp{
+    padding:4px 10px;
+    background:var(--blueprint-soft);
+    border:1px solid var(--blueprint);
+    border-radius:2px;
+  }
+  h1.doc-h1{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:clamp(30px,4.5vw,44px);
+    line-height:1.1;
+    letter-spacing:-.025em;
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+  h1.doc-h1 em{font-style:normal;color:var(--blueprint)}
+  .lead{
+    font-size:15.5px;
+    color:var(--ink-2);
+    line-height:1.85;
+    max-width:64ch;
+    margin-bottom:36px;
+  }
+  .lead strong{color:var(--ink);font-weight:600}
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+    padding:20px 0;
+    border-top:1px solid var(--rule);
+  }
+  .meta-grid > div{
+    font-family:var(--mono);
+    font-size:10px;letter-spacing:.16em;
+    color:var(--ink-3);text-transform:uppercase;
+    font-weight:600;
+  }
+  .meta-grid b{
+    display:block;
+    font-family:var(--sans);
+    font-size:14px;color:var(--ink);
+    text-transform:none;letter-spacing:0;
+    margin-top:4px;font-weight:600;
+  }
+
+  /* Sections */
+  section{margin-top:80px}
+  section:first-of-type{margin-top:0}
+  @media(max-width:560px){section{margin-top:56px}}
+
+  .sec-hd{margin-bottom:32px}
+  .sec-num{
+    font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+    color:var(--blueprint);text-transform:uppercase;font-weight:600;
+    display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  }
+  .sec-num::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h2.sec{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:clamp(22px,3vw,28px);
+    letter-spacing:-.02em;
+    color:var(--ink);
+    line-height:1.2;
+    margin-bottom:10px;
+  }
+  .sec-sub{
+    font-size:14.5px;
+    color:var(--ink-3);
+    line-height:1.7;
+    max-width:60ch;
+  }
+
+  h3{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:17px;
+    color:var(--ink);
+    letter-spacing:-.005em;
+    margin:36px 0 12px;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  h3 .h3n{
+    font-family:var(--mono);font-size:11.5px;
+    color:var(--blueprint);font-weight:600;
+    letter-spacing:.04em;flex:none;
+  }
+
+  h4{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:14.5px;
+    color:var(--ink);
+    margin:24px 0 8px;
+    letter-spacing:-.005em;
+  }
+
+  p{
+    color:var(--ink-2);
+    font-size:14.5px;
+    line-height:1.85;
+    margin-bottom:14px;
+    max-width:64ch;
+  }
+  p strong{color:var(--ink);font-weight:600}
+  p code, li code, td code{
+    font-family:var(--mono);
+    font-size:12.5px;
+    background:var(--paper-2);
+    border:1px solid var(--rule-soft);
+    border-radius:2px;
+    padding:1px 6px;
+    color:var(--blueprint-2);
+  }
+
+  /* File tree — the centerpiece */
+  .tree{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    padding:24px 28px;
+    margin:24px 0 32px;
+    overflow-x:auto;
+    max-width:100%;
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:2;
+    color:var(--ink-2);
+    white-space:pre;
+    tab-size:2;
+  }
+  .tree .fn{color:var(--ink)}
+  .tree .fd{color:var(--blueprint-2);font-weight:500}
+  .tree .cm{color:var(--ink-3)}
+  .tree .ph{
+    display:inline-block;
+    font-size:9.5px;letter-spacing:.08em;
+    padding:1px 6px;
+    border-radius:2px;
+    margin-left:8px;
+    font-weight:600;text-transform:uppercase;
+    vertical-align:1px;
+  }
+  .tree .ph-1{background:var(--p1-soft);color:var(--p1)}
+  .tree .ph-2{background:var(--p2-soft);color:var(--p2)}
+  .tree .ph-3{background:var(--p3-soft);color:var(--p3)}
+  .tree .ph-b{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--rule-soft)}
+
+  .tree-legend{
+    display:flex;flex-wrap:wrap;gap:12px 20px;
+    margin-bottom:20px;
+    font-family:var(--mono);font-size:10.5px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.08em;
+  }
+  .tree-legend .lg{display:flex;align-items:center;gap:6px;font-weight:600}
+  .tree-legend .sw{
+    display:inline-block;width:14px;height:14px;
+    border:1px solid var(--rule);border-radius:2px;
+  }
+  .tree-legend .sw-b{background:var(--paper-2)}
+  .tree-legend .sw-1{background:var(--p1-soft);border-color:var(--p1)}
+  .tree-legend .sw-2{background:var(--p2-soft);border-color:var(--p2)}
+  .tree-legend .sw-3{background:var(--p3-soft);border-color:var(--p3)}
+
+  /* File spec cards */
+  .fspec{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    margin:16px 0 24px;
+    padding:20px 24px;
+    max-width:100%;
+  }
+  .fspec .fs-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;flex-wrap:wrap;
+    padding-bottom:12px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .fspec .fs-path{
+    font-family:var(--mono);
+    font-size:13.5px;font-weight:600;
+    color:var(--ink);
+  }
+  .fspec .fs-tag{
+    font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.1em;
+    padding:2px 8px;border-radius:2px;
+    font-weight:600;text-transform:uppercase;
+  }
+  .tag-p1{background:var(--p1-soft);color:var(--p1)}
+  .tag-p2{background:var(--p2-soft);color:var(--p2)}
+  .tag-p3{background:var(--p3-soft);color:var(--p3)}
+  .tag-b{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--rule)}
+
+  .fspec dl{
+    display:grid;
+    grid-template-columns:96px 1fr;
+    gap:8px 20px;
+    font-size:13.5px;
+    line-height:1.7;
+  }
+  .fspec dt{
+    font-family:var(--mono);font-size:10.5px;
+    color:var(--blueprint);text-transform:uppercase;
+    letter-spacing:.08em;padding-top:2px;font-weight:600;
+  }
+  .fspec dd{color:var(--ink-2)}
+  .fspec dd strong{color:var(--ink);font-weight:600}
+  @media(max-width:560px){
+    .fspec dl{grid-template-columns:1fr;gap:4px 0}
+    .fspec dd{margin-bottom:12px;padding-left:12px;border-left:1px solid var(--rule-soft)}
+  }
+
+  /* Code blocks */
+  pre{
+    background:var(--paper-2);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--blueprint);
+    padding:16px 18px;
+    margin:14px 0 22px;
+    overflow-x:auto;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.7;
+    color:var(--ink);
+    max-width:100%;
+  }
+  pre .c{color:var(--ink-3);font-style:italic}
+  pre .k{color:var(--blueprint);font-weight:600}
+  pre .s{color:var(--p2)}
+  pre .v{color:var(--p3)}
+  @media(max-width:560px){pre{padding:12px;font-size:11px}}
+
+  .code-cap{
+    font-family:var(--mono);font-size:10px;
+    color:var(--ink-3);letter-spacing:.14em;
+    text-transform:uppercase;font-weight:600;
+    margin:22px 0 -8px;display:flex;gap:10px;align-items:baseline;
+  }
+  .code-cap b{color:var(--blueprint);font-weight:700;letter-spacing:.08em}
+
+  /* Tables */
+  table.tbl{
+    width:100%;border-collapse:collapse;
+    margin:16px 0 28px;font-size:13.5px;
+    max-width:100%;
+  }
+  table.tbl th, table.tbl td{
+    text-align:left;padding:11px 14px;
+    border-bottom:1px solid var(--rule-soft);
+    vertical-align:top;
+    word-break:keep-all;
+  }
+  table.tbl thead th{
+    border-top:1px solid var(--ink);
+    border-bottom:1px solid var(--ink);
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.06em;font-weight:600;
+    color:var(--ink);text-transform:uppercase;
+  }
+  table.tbl td{color:var(--ink-2);line-height:1.6}
+  table.tbl td strong{color:var(--ink);font-weight:600}
+  table.tbl tbody tr:last-child td{border-bottom:1px solid var(--ink)}
+  @media(max-width:560px){table.tbl{font-size:12.5px}table.tbl th,table.tbl td{padding:9px 8px}}
+
+  /* Bullet lists */
+  ul.mk{list-style:none;margin:12px 0 20px;max-width:64ch}
+  ul.mk li{
+    position:relative;padding:6px 0 6px 22px;
+    color:var(--ink-2);font-size:14.5px;line-height:1.75;
+  }
+  ul.mk li::before{
+    content:"→";position:absolute;left:0;top:6px;
+    color:var(--blueprint);font-weight:700;
+  }
+  ul.mk li strong{color:var(--ink);font-weight:600}
+
+  ol.step{list-style:none;margin:16px 0 24px;counter-reset:step;max-width:64ch}
+  ol.step > li{
+    counter-increment:step;
+    position:relative;
+    padding:12px 0 12px 44px;
+    border-bottom:1px solid var(--rule-soft);
+    color:var(--ink-2);font-size:14.5px;line-height:1.7;
+  }
+  ol.step > li::before{
+    content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:12px;
+    font-family:var(--mono);font-size:11px;
+    font-weight:700;color:var(--blueprint);
+    background:var(--blueprint-soft);
+    padding:2px 6px;border-radius:2px;
+    letter-spacing:.04em;
+  }
+  ol.step > li strong{color:var(--ink);font-weight:600}
+  ol.step > li:last-child{border-bottom:none}
+
+  /* Callout */
+  .call{
+    padding:16px 20px;
+    margin:20px 0 24px;
+    border-left:3px solid var(--blueprint);
+    background:var(--blueprint-soft);
+    max-width:64ch;
+  }
+  .call .clb{
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.16em;color:var(--blueprint);
+    text-transform:uppercase;font-weight:600;
+    margin-bottom:6px;
+  }
+  .call p{margin:0;font-size:14px;color:var(--ink);max-width:none}
+  .call.warn{border-left-color:var(--p2);background:var(--p2-soft)}
+  .call.warn .clb{color:var(--p2)}
+  .call.danger{border-left-color:var(--danger);background:#fee2e2}
+  .call.danger .clb{color:var(--danger)}
+
+  /* Phase blocks */
+  .phase{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    margin:18px 0;padding:0;
+  }
+  .phase-head{
+    padding:16px 22px;
+    background:var(--paper-2);
+    border-bottom:1px solid var(--rule);
+    display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
+  }
+  .phase-1 .phase-head{background:var(--p1-soft);border-bottom-color:var(--p1)}
+  .phase-2 .phase-head{background:var(--p2-soft);border-bottom-color:var(--p2)}
+  .phase-3 .phase-head{background:var(--p3-soft);border-bottom-color:var(--p3)}
+  .phase-tag{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+    padding:3px 10px;border-radius:2px;
+    color:#fff;font-weight:600;text-transform:uppercase;
+  }
+  .phase-1 .phase-tag{background:var(--p1)}
+  .phase-2 .phase-tag{background:var(--p2)}
+  .phase-3 .phase-tag{background:var(--p3)}
+  .phase-name{font-size:16.5px;font-weight:700;color:var(--ink)}
+  .phase-when{
+    margin-left:auto;
+    font-family:var(--mono);font-size:11px;
+    color:var(--ink-3);font-weight:500;letter-spacing:.04em;
+  }
+  .phase-body{padding:20px 22px 22px}
+  .phase-body p{font-size:13.5px;margin-bottom:12px}
+
+  /* Timeline */
+  .timeline{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    padding:24px;margin:20px 0 32px;
+  }
+  .tl-row{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:16px 20px;
+    padding:14px 0;
+    border-bottom:1px solid var(--rule-soft);
+    align-items:baseline;
+  }
+  .tl-row:last-child{border-bottom:none}
+  .tl-when{
+    font-family:var(--mono);font-size:11px;
+    color:var(--blueprint);font-weight:600;
+    letter-spacing:.04em;white-space:nowrap;
+  }
+  .tl-what{font-size:13.5px;color:var(--ink);font-weight:500;line-height:1.5}
+  .tl-what small{display:block;color:var(--ink-3);font-weight:400;font-size:12.5px;margin-top:2px}
+  .tl-who{
+    font-family:var(--mono);font-size:10px;
+    letter-spacing:.08em;padding:2px 8px;
+    border-radius:2px;font-weight:600;text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .who-h{background:var(--paper-2);color:var(--ink-2);border:1px solid var(--rule)}
+  .who-r{background:var(--blueprint-soft);color:var(--blueprint)}
+  .who-a{background:var(--p2-soft);color:var(--p2)}
+
+  /* Footer */
+  footer{
+    margin-top:80px;
+    padding-top:22px;
+    border-top:1px solid var(--ink);
+    display:flex;justify-content:space-between;gap:20px;
+    flex-wrap:wrap;
+    font-family:var(--mono);font-size:10.5px;
+    color:var(--ink-3);letter-spacing:.06em;
+    text-transform:uppercase;font-weight:500;
+  }
+  footer b{color:var(--ink-2);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="mbar">
+  <div class="mt">BLUEPRINT · R1<b>실행 청사진</b></div>
+  <button class="toctog" id="toctog">TOC</button>
+</div>
+
+<div class="layout">
+
+<aside>
+  <div class="docmark">BLUEPRINT · R1</div>
+  <div class="doctitle">실행 청사진</div>
+  <div class="docsub">agentic-ticketing<br>파일 · 시나리오 · 확장</div>
+
+  <div class="toclabel">Overview</div>
+  <nav><ol>
+    <li><a href="#s1">B 플랜의 실체</a></li>
+    <li><a href="#s2">최종 파일 구조</a></li>
+  </ol></nav>
+
+  <div class="toclabel">Specification</div>
+  <nav start="3"><ol style="counter-reset:sec 2">
+    <li><a href="#s3">파일별 명세 — 지침 층</a></li>
+    <li><a href="#s4">파일별 명세 — 강제 층</a></li>
+    <li><a href="#s5">파일별 명세 — 워크플로</a></li>
+    <li><a href="#s6">파일별 명세 — 문서와 스크립트</a></li>
+    <li><a href="#s7">환경과 스택 스펙</a></li>
+  </ol></nav>
+
+  <div class="toclabel">Execution</div>
+  <nav><ol style="counter-reset:sec 7">
+    <li><a href="#s8">Phase 1 실행 시나리오</a></li>
+    <li><a href="#s9">Phase 2 진입과 확장</a></li>
+    <li><a href="#s10">Phase 3 진입과 완결</a></li>
+  </ol></nav>
+
+  <div class="toclabel">Governance</div>
+  <nav><ol style="counter-reset:sec 10">
+    <li><a href="#s11">진입 조건과 관찰 지표</a></li>
+    <li><a href="#s12">실패 플레이북</a></li>
+  </ol></nav>
+</aside>
+
+<main>
+
+<header class="title">
+  <div class="badge-row">
+    <span class="stamp">Rev. R1</span>
+    <span>Execution Blueprint</span>
+    <span>agentic-ticketing</span>
+  </div>
+  <h1 class="doc-h1">B 플랜의 <em>실행 청사진</em></h1>
+  <p class="lead">이 문서는 <strong>B 플랜을 어떻게 실행할 것인가</strong>를 담는다. 개념서가 왜인지, 명세서가 무엇인지 다뤘다면 이 청사진은 <strong>어떻게, 언제, 어디에</strong>를 다룬다. 파일 구조·명세·시나리오·확장 순서·관찰 지표를 하나의 참조 문서로 통합했다. 이 문서를 열어 두면 어느 시점에 어느 파일을 만들고 어느 자동화를 추가할지 즉시 확인할 수 있다.</p>
+
+  <div class="meta-grid">
+    <div>Base<b>agentic-ticketing repo</b></div>
+    <div>Phase 진행<b>Phase 1 진입 직전</b></div>
+    <div>확장 방식<b>단계적 · 관찰 기반</b></div>
+    <div>추상 문서<b>개념서 · 명세서 R2</b></div>
+  </div>
+</header>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <div class="sec-hd">
+    <div class="sec-num">§ 01 — Plan B</div>
+    <h2 class="sec">B 플랜의 실체</h2>
+    <p class="sec-sub">우리 명세서(R2)와 저쪽 튜터 답변에서 채택한 네 가지 흡수 지점, 그리고 그것이 파일과 시나리오로 어떻게 실체화되는지.</p>
+  </div>
+
+  <p>B 플랜의 목표는 하나다. <strong>우리 명세서 R2의 야심(재귀 자기 검증, Phase 로드맵, 신뢰 축적 이론)을 유지하되, 저쪽 튜터가 제시한 실무 강도(권한 강제, 위험 등급 정량화, 정량적 중단 조건, PR 템플릿)를 흡수해 실행 가능한 청사진으로 완성한다</strong>.</p>
+
+  <h3><span class="h3n">1.1</span>흡수한 네 지점</h3>
+  <ul class="mk">
+    <li><strong>권한 강제의 이중 구조</strong> — <code>CLAUDE.md</code>는 지침, <code>.claude/settings.json</code>과 hooks가 실제 강제. 명세서에 원칙만 있고 강제 층이 없으면 실효성이 없다.</li>
+    <li><strong>위험 등급 R0~R3</strong> — 우리 가역성 4단(자유/비용/준비/비가역)을 R0~R3로 이름 붙여 실무 언어와 정합. PR 템플릿·라벨·자동 리뷰에 이 등급이 표면화된다.</li>
+    <li><strong>정량적 중단 조건</strong> — "막히면 올려보낸다" 원칙에 임계치를 부여. 테스트 2회 실패, 수정 루프 2회 초과, 변경 파일 15개 이상 등. 이 수치가 있어야 원칙이 실행 가능해진다.</li>
+    <li><strong>PR 템플릿의 강제 필드</strong> — "변경하지 않은 범위", "미검증 사항", "롤백 방법", "위험 등급"이 모든 PR의 필수 필드. 관찰 가능성의 실체화.</li>
+  </ul>
+
+  <h3><span class="h3n">1.2</span>유지한 우리 관점</h3>
+  <ul class="mk">
+    <li><strong>증명 프로젝트의 정체성</strong> — Phase 3까지 가는 여정 자체가 산출물이다. 저쪽은 회사 도입 청사진이지만 우리는 능력 증명이라는 야심을 유지.</li>
+    <li><strong>재귀 자기 검증</strong> — 저쪽에는 없는 개념. 시스템이 자기 자신의 다음 버전을 자기 원칙으로 검증한다는 특성을 살린다.</li>
+    <li><strong>신뢰 축적 이론</strong> — Phase 이동의 시점을 "관찰된 PR 수"로만 정하지 않고 신뢰 축적이라는 개념적 근거로 뒷받침.</li>
+  </ul>
+
+  <div class="call">
+    <div class="clb">Plan B — 요약</div>
+    <p>명세서 R2 → <strong>R2.5로 개정</strong>하고, kit에 <strong>4개 파일을 즉시 추가</strong>한다. Phase 1은 얇게 시작하되 강제 층은 확보한 상태. 나머지 파일들은 신뢰 축적에 따라 Phase 2·3에서 점진 추가.</p>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <div class="sec-hd">
+    <div class="sec-num">§ 02 — File Structure</div>
+    <h2 class="sec">최종 파일 구조</h2>
+    <p class="sec-sub">Phase 1/2/3에 걸쳐 완성될 프로젝트 트리. 각 파일 옆의 뱃지가 언제 등장할지를 표시한다.</p>
+  </div>
+
+  <div class="tree-legend">
+    <div class="lg"><span class="sw sw-b"></span>베이스라인</div>
+    <div class="lg"><span class="sw sw-1"></span>Phase 1</div>
+    <div class="lg"><span class="sw sw-2"></span>Phase 2</div>
+    <div class="lg"><span class="sw sw-3"></span>Phase 3</div>
+  </div>
+
+  <div class="tree"><span class="fd">agentic-ticketing/</span>
+├─ <span class="fd">auth/</span> · <span class="fd">tickets/</span> · <span class="fd">orders/</span> · <span class="fd">payments/</span> · <span class="fd">expiration/</span> · <span class="fd">client/</span> · <span class="fd">common/</span>  <span class="ph ph-b">Baseline</span>
+├─ <span class="fd">infra/k8s/</span>  <span class="cm"># 17개 매뉴얼 YAML, Phase 3에서 Terraform 변환</span> <span class="ph ph-b">Baseline</span>
+│
+├─ <span class="fd">.claude/</span>
+│  ├─ <span class="fn">settings.json</span>  <span class="cm"># 권한 강제 (allow/ask/deny)</span> <span class="ph ph-1">P1</span>
+│  ├─ <span class="fn">settings.local.json.example</span>  <span class="cm"># 개인별 예시</span> <span class="ph ph-1">P1</span>
+│  ├─ <span class="fd">hooks/</span>
+│  │  ├─ <span class="fn">guard-command.sh</span>  <span class="cm"># 위험 명령 차단</span> <span class="ph ph-1">P1</span>
+│  │  ├─ <span class="fn">validate-write-scope.sh</span>  <span class="cm"># 편집 범위 검사</span> <span class="ph ph-1">P1</span>
+│  │  ├─ <span class="fn">format-changed-file.sh</span>  <span class="cm"># 변경 파일 포맷</span> <span class="ph ph-2">P2</span>
+│  │  └─ <span class="fn">record-run-event.sh</span>  <span class="cm"># 이벤트 로그</span> <span class="ph ph-2">P2</span>
+│  ├─ <span class="fd">skills/</span>
+│  │  ├─ <span class="fd">plan-change/</span><span class="fn">SKILL.md</span>  <span class="ph ph-2">P2</span>
+│  │  ├─ <span class="fd">verify-change/</span><span class="fn">SKILL.md</span>  <span class="ph ph-2">P2</span>
+│  │  └─ <span class="fd">prepare-pr/</span><span class="fn">SKILL.md</span>  <span class="ph ph-2">P2</span>
+│  └─ <span class="fd">agents/</span>
+│     └─ <span class="fn">reviewer.md</span>  <span class="cm"># 격리된 읽기 전용 리뷰</span> <span class="ph ph-3">P3</span>
+│
+├─ <span class="fd">.github/</span>
+│  ├─ <span class="fd">workflows/</span>
+│  │  ├─ <span class="fn">pr-review.yml</span>  <span class="cm"># PR 자동 리뷰</span> <span class="ph ph-b">Baseline</span>
+│  │  ├─ <span class="fn">baseline-diagnose.yml</span>  <span class="cm"># 진단 · 수동 트리거</span> <span class="ph ph-b">Baseline</span>
+│  │  ├─ <span class="fn">ci.yml</span>  <span class="cm"># 결정적 검증 통합</span> <span class="ph ph-1">P1</span>
+│  │  ├─ <span class="fn">security.yml</span>  <span class="cm"># 의존성·SAST·시크릿 스캔</span> <span class="ph ph-2">P2</span>
+│  │  ├─ <span class="fn">code-draft.yml</span>  <span class="cm"># 라벨 트리거 · 코드 초안 자동 생성</span> <span class="ph ph-2">P2</span>
+│  │  ├─ <span class="fn">terraform-plan.yml</span>  <span class="cm"># .tf 변경 시 plan 자동</span> <span class="ph ph-3">P3</span>
+│  │  ├─ <span class="fn">terraform-apply.yml</span>  <span class="cm"># workflow_dispatch만, 사람 트리거</span> <span class="ph ph-3">P3</span>
+│  │  └─ <span class="fd">_archive/</span><span class="fn">deploy-*.yaml</span>  <span class="cm"># DigitalOcean 격리</span> <span class="ph ph-b">Baseline</span>
+│  ├─ <span class="fn">CODEOWNERS</span>  <span class="cm"># 민감 파일 소유자</span> <span class="ph ph-1">P1</span>
+│  ├─ <span class="fn">pull_request_template.md</span>  <span class="cm"># 위험 등급·롤백 필수</span> <span class="ph ph-1">P1</span>
+│  ├─ <span class="fd">ISSUE_TEMPLATE/</span>
+│  │  ├─ <span class="fn">feature.yml</span>  <span class="ph ph-1">P1</span>
+│  │  ├─ <span class="fn">bug.yml</span>  <span class="ph ph-1">P1</span>
+│  │  └─ <span class="fn">chore.yml</span>  <span class="ph ph-1">P1</span>
+│  └─ <span class="fn">dependabot.yml</span>  <span class="cm"># 의존성 업데이트</span> <span class="ph ph-2">P2</span>
+│
+├─ <span class="fd">orchestrator/</span>
+│  ├─ <span class="fn">package.json</span>  <span class="ph ph-b">Baseline</span>
+│  ├─ <span class="fn">review.mjs</span>  <span class="cm"># PR diff → Claude → 코멘트</span> <span class="ph ph-b">Baseline</span>
+│  └─ <span class="fn">diagnose.mjs</span>  <span class="cm"># 코드 스캔 → 변환 후보 이슈</span> <span class="ph ph-b">Baseline</span>
+│
+├─ <span class="fd">scripts/</span>
+│  ├─ <span class="fn">verify-change.ts</span>  <span class="cm"># 결정적 검증 파이프라인</span> <span class="ph ph-2">P2</span>
+│  ├─ <span class="fn">classify-change.ts</span>  <span class="cm"># 변경 성격 자동 분류</span> <span class="ph ph-2">P2</span>
+│  ├─ <span class="fn">baseline-diff.ts</span>  <span class="cm"># 베이스라인 대비 변경 감지</span> <span class="ph ph-2">P2</span>
+│  └─ <span class="fn">emit-audit-event.ts</span>  <span class="cm"># 구조화 이벤트 발행</span> <span class="ph ph-2">P2</span>
+│
+├─ <span class="fd">docs/</span>
+│  └─ <span class="fd">agentic-development/</span>
+│     ├─ <span class="fn">architecture.md</span>  <span class="ph ph-1">P1</span>
+│     ├─ <span class="fn">authority-model.md</span>  <span class="ph ph-1">P1</span>
+│     ├─ <span class="fn">risk-model.md</span>  <span class="cm"># R0~R3 판정 기준</span> <span class="ph ph-1">P1</span>
+│     ├─ <span class="fn">workflow.md</span>  <span class="ph ph-1">P1</span>
+│     ├─ <span class="fn">verification-policy.md</span>  <span class="ph ph-2">P2</span>
+│     ├─ <span class="fn">context-policy.md</span>  <span class="ph ph-2">P2</span>
+│     ├─ <span class="fn">security-boundaries.md</span>  <span class="ph ph-2">P2</span>
+│     ├─ <span class="fn">failure-playbook.md</span>  <span class="ph ph-1">P1</span>
+│     └─ <span class="fn">adr/</span>  <span class="cm"># Architecture Decision Records</span> <span class="ph ph-1">P1</span>
+│
+├─ <span class="fd">artifacts/</span>  <span class="cm"># 실행 산출물 · gitignore</span> <span class="ph ph-2">P2</span>
+│
+├─ <span class="fn">CLAUDE.md</span>  <span class="cm"># 지침 층 (150~300줄)</span> <span class="ph ph-b">Baseline</span>
+├─ <span class="fn">.mcp.json</span>  <span class="cm"># GitHub read-only부터</span> <span class="ph ph-2">P2</span>
+└─ <span class="fn">.gitignore</span>  <span class="ph ph-b">Baseline</span>
+</div>
+
+  <p><strong>즉시 추가할 파일(Phase 1 진입 전):</strong> <code>.claude/settings.json</code>, <code>.claude/hooks/guard-command.sh</code>, <code>.claude/hooks/validate-write-scope.sh</code>, <code>.github/CODEOWNERS</code>, <code>.github/pull_request_template.md</code>. 이 다섯 파일이 R2.5 개정의 실체다.</p>
+
+  <p><strong>Phase 1 진행 중 추가:</strong> <code>ci.yml</code> 표준화, ISSUE_TEMPLATE 세 개, <code>docs/agentic-development/</code>의 초기 문서(<code>architecture.md</code>, <code>authority-model.md</code>, <code>risk-model.md</code>, <code>workflow.md</code>, <code>failure-playbook.md</code>).</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <div class="sec-hd">
+    <div class="sec-num">§ 03 — Guidance Layer</div>
+    <h2 class="sec">파일별 명세 · 지침 층</h2>
+    <p class="sec-sub">에이전트가 읽어서 행동을 유도받는 문서들. Claude가 매 세션에서 참조하는 자리.</p>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">CLAUDE.md</span>
+      <span class="fs-tag tag-b">Baseline · Refined P1</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>에이전트의 매 API 호출에서 시스템 프롬프트로 주입되는 <strong>행동 규약의 실행용 압축본</strong>. 명세서의 원칙을 Claude가 흡수 가능한 형태로 정리한 것.</dd>
+      <dt>크기</dt>
+      <dd>150~300줄 이하. 백과사전이 아니라 라우팅 규칙. 각 도메인 상세는 하위 문서로 링크.</dd>
+      <dt>담을 것</dt>
+      <dd>프로젝트 목적 · 저장소 구조 · 기본 개발 명령 · 변경 절차 · 권한·가역성 원칙 · 테스트 기준 · 금지 행동 · PR 완료 조건 · 하위 문서 위치 · 중단 조건 참조</dd>
+      <dt>담지 말 것</dt>
+      <dd>모든 서비스 상세 설명 · API 명세 전체 · 과거 의사결정 대화 · 긴 코딩 스타일 · 수십 개의 예외 규칙</dd>
+      <dt>중요 참조</dt>
+      <dd>이 문서는 지침 층이며 <strong>실제 권한 강제는 <code>.claude/settings.json</code>과 hooks가 담당</strong>한다. "말로 하지 말라"와 "실제로 못 하게 한다"를 구분한다.</dd>
+    </dl>
+  </div>
+
+<div class="code-cap"><b>SPEC 03.1</b> CLAUDE.md 구성 예시</div>
+<pre><span class="c"># 에이전트 행동 규약</span>
+
+<span class="c">## 프로젝트</span>
+- 목적, 산출물 정의
+- 베이스라인 (ticketing) 참조
+
+<span class="c">## 권한 층 (4단)</span>
+- 의도 / 판단 / 실행 / 기계
+
+<span class="c">## 신뢰 경계 (3구역)</span>
+- 내부 / 경계 / 외부
+
+<span class="c">## 위험 등급 (R0~R3)</span>
+- R0/R1: 자동 후보
+- R2: plan 승인 + 독립 리뷰
+- R3: 분석만, 명시적 승인
+
+<span class="c">## 횡단 원칙</span>
+- 관찰 가능성 · 에스컬레이션 · 상태/행동 분리
+
+<span class="c">## 베이스라인 변환 규칙</span>
+- 손대지 말 영역 (비즈니스 로직)
+- 변환 가능 영역 (인프라·의존성·타입·테스트·미들웨어)
+
+<span class="c">## 브랜치·커밋 컨벤션</span>
+- Conventional Commits
+- 한 이슈 = 한 브랜치 = 한 PR
+
+<span class="c">## 중단 조건</span>
+- 같은 테스트 2회 실패 → 사람에게
+- 수정 루프 2회 초과 → 사람에게
+- 변경 파일 15개 이상 → 분할
+- 보안·권한 영역 진입 → 즉시 중단
+
+<span class="c">## 참조 문서</span>
+- docs/agentic-development/authority-model.md
+- docs/agentic-development/risk-model.md
+- docs/agentic-development/workflow.md</pre>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">docs/agentic-development/</span>
+      <span class="fs-tag tag-p1">Phase 1 中</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>CLAUDE.md의 하위 문서. 각 도메인의 상세를 여기에 두어 CLAUDE.md는 짧게 유지.</dd>
+      <dt>P1 시점</dt>
+      <dd><strong>architecture.md</strong> · <strong>authority-model.md</strong> · <strong>risk-model.md</strong> (R0~R3 판정 기준) · <strong>workflow.md</strong> · <strong>failure-playbook.md</strong> · <strong>adr/</strong> (아키텍처 결정 기록)</dd>
+      <dt>P2 시점</dt>
+      <dd>verification-policy.md · context-policy.md · security-boundaries.md</dd>
+      <dt>ADR</dt>
+      <dd>큰 결정은 별도 ADR로. 예: <code>adr/0001-nats-to-kafka.md</code>, <code>adr/0002-terraform-adoption.md</code>. 결정 시점의 맥락과 대안을 남긴다.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/skills/*/SKILL.md</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>반복되는 절차의 패키지. <strong>역할극이 아니라 실행 가능한 명령 시퀀스</strong>.</dd>
+      <dt>초기 셋</dt>
+      <dd><strong>plan-change</strong> — 작업 목적·수용 조건·변경 영역을 받아 변경 대상·영향·위험 등급·검증 계획을 출력. <strong>verify-change</strong> — 포맷 → 린트 → 타입체크 → affected 유닛/통합 테스트 → 빌드 → diff scope validation 순으로 실행. <strong>prepare-pr</strong> — 변경 이유·구현 요약·위험·검증 결과·미검증 사항·롤백 방법을 담은 PR body 생성.</dd>
+      <dt>확장 원칙</dt>
+      <dd>새 스킬은 <strong>실제로 3회 이상 반복 관찰된 패턴</strong>만 추가. 상상으로 만들지 않는다.</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <div class="sec-hd">
+    <div class="sec-num">§ 04 — Enforcement Layer</div>
+    <h2 class="sec">파일별 명세 · 강제 층</h2>
+    <p class="sec-sub">지침이 무시되거나 잘못 해석돼도 실행 자체를 차단하는 층. CLAUDE.md의 원칙이 실효성을 갖게 되는 자리.</p>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/settings.json</span>
+      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>Claude Code의 <strong>실행 계층에서 강제되는 권한 규칙</strong>. <code>defaultMode</code> + <code>allow</code>/<code>ask</code>/<code>deny</code> 배열로 구성.</dd>
+      <dt>평가 순서</dt>
+      <dd>deny → ask → allow. deny가 최우선.</dd>
+      <dt>버전</dt>
+      <dd>팀 공용은 <code>.claude/settings.json</code>, 개인 기계별은 <code>.claude/settings.local.json</code>, 개인 전역은 <code>~/.claude/settings.json</code>.</dd>
+      <dt>실효성</dt>
+      <dd>모델의 지시가 아니라 <strong>Claude Code 실행 계층에서 강제</strong>된다. 모델이 어떻게 해석하든 여기서 걸리면 실행이 차단된다.</dd>
+    </dl>
+  </div>
+
+<div class="code-cap"><b>SPEC 04.1</b> settings.json 방향 예시</div>
+<pre>{
+  <span class="k">"$schema"</span>: <span class="s">"https://json.schemastore.org/claude-code-settings.json"</span>,
+  <span class="k">"permissions"</span>: {
+    <span class="k">"defaultMode"</span>: <span class="s">"default"</span>,
+    <span class="k">"allow"</span>: [
+      <span class="s">"Bash(git status)"</span>,
+      <span class="s">"Bash(git diff *)"</span>,
+      <span class="s">"Bash(git log *)"</span>,
+      <span class="s">"Bash(npm test *)"</span>,
+      <span class="s">"Bash(npm run lint *)"</span>,
+      <span class="s">"Bash(npm run typecheck *)"</span>
+    ],
+    <span class="k">"ask"</span>: [
+      <span class="s">"Bash(git commit *)"</span>,
+      <span class="s">"Bash(git push *)"</span>,
+      <span class="s">"Bash(npm install *)"</span>,
+      <span class="s">"Bash(npm add *)"</span>,
+      <span class="s">"Bash(kubectl *)"</span>,
+      <span class="s">"Bash(helm *)"</span>,
+      <span class="s">"Bash(terraform apply *)"</span>
+    ],
+    <span class="k">"deny"</span>: [
+      <span class="s">"Bash(git push --force *)"</span>,
+      <span class="s">"Bash(git reset --hard *)"</span>,
+      <span class="s">"Bash(git clean -fd *)"</span>,
+      <span class="s">"Bash(rm -rf /*)"</span>,
+      <span class="s">"Bash(kubectl delete *)"</span>,
+      <span class="s">"Bash(terraform destroy *)"</span>
+    ]
+  }
+}</pre>
+
+  <div class="call warn">
+    <div class="clb">권한 강제의 원칙</div>
+    <p>규약을 만들 때 스스로에게 묻는다 — <strong>"이 원칙이 지켜지지 않아도 아무 일이 일어나지 않는가?"</strong> 답이 그렇다면 그 원칙은 지침 층에만 있는 상태. 반드시 강제 층에 대응하는 규칙을 추가해야 한다.</p>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/hooks/guard-command.sh</span>
+      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd><strong>PreToolUse 훅</strong>. 명령이 실행되기 전 shell 스크립트가 검사. force push, hard reset, 광범위 삭제, 운영 namespace, 운영 DB URL, <code>.github/workflows/</code> 수정, secrets 접근 등을 판정.</dd>
+      <dt>결과</dt>
+      <dd>allow / ask / deny 중 하나를 반환.</dd>
+      <dt>구현</dt>
+      <dd>LLM 훅이 아니라 <strong>결정적 shell/TypeScript 규칙</strong>. 판정에 언어 모델을 개입시키지 않는다.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/hooks/validate-write-scope.sh</span>
+      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>파일 편집 전 편집 범위 검사. 현재 task에 허용된 디렉토리인지, 생성 파일인지, protected file인지, 변경 파일 상한(15개)을 넘었는지 검사.</dd>
+      <dt>보호 대상</dt>
+      <dd><code>.github/workflows/**</code> · <code>CODEOWNERS</code> · <code>.claude/settings.json</code> · <code>infra/**</code> · <code>migrations/**</code> · 비즈니스 로직 도메인 폴더</dd>
+      <dt>기본 편집 영역</dt>
+      <dd>대상 서비스 디렉토리 + <code>common/</code> (경계 구역은 사람 승인 필요)</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/hooks/format-changed-file.sh</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>PostToolUse 훅. <strong>변경된 파일 하나에만</strong> 포맷 적용. 저장소 전체 포맷은 diff를 부풀리므로 절대 금지.</dd>
+      <dt>예시</dt>
+      <dd>잘못된 형태: <code>npm run prettier -- --write .</code> / 올바른 형태: <code>prettier --write &lt;changed-file&gt;</code></dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/hooks/record-run-event.sh</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>구조화된 실행 이벤트 로그. 관찰 가능성의 실체.</dd>
+      <dt>기록 이벤트</dt>
+      <dd><code>session_started</code> · <code>plan_approved</code> · <code>file_modified</code> · <code>verification_started</code> · <code>verification_completed</code> · <code>permission_denied</code> · <code>task_completed</code> · <code>task_failed</code></dd>
+      <dt>저장 위치</dt>
+      <dd>로컬은 <code>.agent-runs/</code>(gitignore). CI에서는 GitHub Actions artifact.</dd>
+      <dt>스키마</dt>
+      <dd>runId, taskId, event, baseSha, headSha, command, result, durationMs, timestamp</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/CODEOWNERS</span>
+      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>민감 파일 변경 시 자동 리뷰어 지정. GitHub이 강제한다.</dd>
+      <dt>소유자</dt>
+      <dd>개인 프로젝트라도 본인 계정으로 지정. 목적은 사람 수가 아니라 <strong>민감 파일을 일반 변경과 구분</strong>하는 것.</dd>
+    </dl>
+  </div>
+
+<div class="code-cap"><b>SPEC 04.2</b> CODEOWNERS 예시</div>
+<pre><span class="c"># .github/CODEOWNERS</span>
+
+<span class="c"># 인프라 · 워크플로 · 규약 = 소유자 승인 필수</span>
+/.github/                @daniel
+/infra/                  @daniel
+/.claude/                @daniel
+/CLAUDE.md               @daniel
+/docs/agentic-development/  @daniel
+
+<span class="c"># 비즈니스 로직 = 손대지 말 영역</span>
+/auth/src/               @daniel
+/tickets/src/            @daniel
+/orders/src/             @daniel
+/payments/src/           @daniel
+/expiration/src/         @daniel
+
+<span class="c"># 공유 패키지 = 경계 구역, 조심</span>
+/common/                 @daniel</pre>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/pull_request_template.md</span>
+      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>모든 PR이 반드시 채워야 하는 필드. 관찰 가능성의 최전선.</dd>
+      <dt>강제 필드</dt>
+      <dd><strong>목적</strong> · <strong>변경 내용</strong> · <strong>변경하지 않은 범위</strong> · <strong>위험 등급 R0~R3</strong> · <strong>검증 체크리스트</strong> · <strong>미검증 사항</strong> · <strong>롤백 방법</strong> · <strong>에이전트 사용 정도</strong> · <strong>증거(Task/BaseSHA/Agent run/Test artifact)</strong></dd>
+      <dt>사람의 검토 지점</dt>
+      <dd>사람은 요약만 훑는 게 아니라 특히 <strong>변경하지 않은 범위 · 미검증 사항 · 롤백 방법 · 위험 등급</strong>을 본다.</dd>
+    </dl>
+  </div>
+
+<div class="code-cap"><b>SPEC 04.3</b> PR 템플릿 실체</div>
+<pre><span class="c">## 목적</span>
+
+<span class="c">## 변경 내용</span>
+
+<span class="c">## 변경하지 않은 범위</span>
+
+<span class="c">## 위험 등급</span>
+- [ ] R0: 문서·포맷
+- [ ] R1: 쉽게 되돌릴 수 있는 내부 코드
+- [ ] R2: 서비스 계약·데이터 흐름 영향
+- [ ] R3: 인프라·보안·DB·운영 영향
+
+<span class="c">## 검증</span>
+- [ ] format
+- [ ] lint
+- [ ] typecheck
+- [ ] unit
+- [ ] integration
+- [ ] build
+
+<span class="c">## 미검증 사항</span>
+
+<span class="c">## 롤백 방법</span>
+
+<span class="c">## 에이전트 사용</span>
+- [ ] 사용하지 않음
+- [ ] 구현 보조
+- [ ] 구현 대부분
+- [ ] 리뷰 보조
+
+<span class="c">## 증거</span>
+- Task:
+- Base SHA:
+- Agent run:
+- Test artifact:</pre>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <div class="sec-hd">
+    <div class="sec-num">§ 05 — Workflows</div>
+    <h2 class="sec">파일별 명세 · 워크플로</h2>
+    <p class="sec-sub">GitHub Actions 워크플로들. 각 파일이 언제 발화하고 무엇을 하는지.</p>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/pr-review.yml</span>
+      <span class="fs-tag tag-b">P1 · Baseline</span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>pull_request: [opened, synchronize]</code></dd>
+      <dt>동작</dt>
+      <dd>PR diff 추출 → <code>orchestrator/review.mjs</code> 실행 → Claude API 호출 → 리뷰 결과를 PR 코멘트로 게시.</dd>
+      <dt>필터</dt>
+      <dd>draft 제외, bot PR 제외, generated-only 제외, diff 상한 검사, fork PR에서는 secret 미사용.</dd>
+      <dt>권한</dt>
+      <dd><code>contents: read</code>, <code>pull-requests: write</code></dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/baseline-diagnose.yml</span>
+      <span class="fs-tag tag-b">P1 · Baseline</span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>workflow_dispatch</code>만 (사람 수동 실행)</dd>
+      <dt>동작</dt>
+      <dd>레포 전체를 스캔 → <code>orchestrator/diagnose.mjs</code> 실행 → 변환 후보 5~10개를 GitHub Issue로 발행. 각 후보에 영역·가치·난이도·<strong>R0~R3 등급</strong>·제안 시점·근거 포함.</dd>
+      <dt>권한</dt>
+      <dd><code>contents: read</code>, <code>issues: write</code></dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/ci.yml</span>
+      <span class="fs-tag tag-p1">Phase 1 · 표준화</span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>pull_request</code> + <code>push: [main]</code></dd>
+      <dt>동작 (모든 PR)</dt>
+      <dd>checkout → Node/npm setup → frozen install → format check → lint → typecheck → unit test → affected integration test → build → manifest validation.</dd>
+      <dt>경로 최적화</dt>
+      <dd>docs-only PR은 markdown 검사만. 특정 서비스 변경은 해당 서비스 + 공유 패키지 검사만. 인프라 변경은 render + policy + validation.</dd>
+      <dt>중요 원칙</dt>
+      <dd>AI 리뷰 전에 <strong>결정적 CI가 먼저 통과</strong>해야 한다. 기계가 찾을 수 있는 오류는 기계가 먼저 제거해야 함.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/security.yml</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>포함</dt>
+      <dd>dependency scanning · secret scanning · code scanning · container scan · workflow dependency pinning 검토 · IaC 정책 스캔</dd>
+      <dt>연동</dt>
+      <dd>PR 리뷰와 <strong>병렬 실행</strong>. 결과가 심각도 High 이상이면 PR에 별도 코멘트로 게시하고 배포 워크플로 자동 실패.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/code-draft.yml</span>
+      <span class="fs-tag tag-p2">Phase 2 · 자동화 확장</span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>issues: labeled</code> + label == <code>ready-for-draft</code></dd>
+      <dt>동작</dt>
+      <dd>이슈 본문 읽기 → Claude API로 스펙 분해 → 브랜치 자동 생성 (<code>agent/{issue}-{slug}</code>) → Claude Code 헤드리스로 코드 초안 작성 → 자동 커밋 & 푸시 → PR 자동 오픈.</dd>
+      <dt>제한</dt>
+      <dd>변경 파일 15개 이하, diff 800줄 이하, 위험 등급 R0/R1만. R2 이상은 이 워크플로에서 만들지 않고 <code>needs-plan</code> 라벨로 승격.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/terraform-plan.yml</span>
+      <span class="fs-tag tag-p3">Phase 3</span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>pull_request: paths: ['infra/terraform/**']</code></dd>
+      <dt>동작</dt>
+      <dd><code>terraform plan</code> 실행 → 결과를 PR 코멘트로 게시 → Claude가 plan 결과를 해석하고 <strong>리스크 평가·월 예상 비용 요약</strong>을 별도 코멘트로 추가.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/workflows/terraform-apply.yml</span>
+      <span class="fs-tag tag-p3">Phase 3 · 사람 게이트</span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>workflow_dispatch</code>만. 자동 트리거 절대 금지.</dd>
+      <dt>입력</dt>
+      <dd>environment 선택 필수 (<code>dev</code> / <code>staging</code> / <code>prod</code>). 드롭다운으로 실수 방지.</dd>
+      <dt>동작</dt>
+      <dd>선택 환경에 <code>terraform apply</code>. <strong>사람이 명시적으로 실행</strong>한 경우에만 발화.</dd>
+      <dt>보호</dt>
+      <dd>GitHub Environment 보호 규칙으로 <code>staging</code>·<code>prod</code>는 별도 승인 필요. 실패 시 자동 롤백 워크플로 트리거.</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="s6">
+  <div class="sec-hd">
+    <div class="sec-num">§ 06 — Documents & Scripts</div>
+    <h2 class="sec">파일별 명세 · 문서와 스크립트</h2>
+    <p class="sec-sub">사람이 참조하는 상세 문서, 그리고 결정적 검증을 담는 스크립트들.</p>
+  </div>
+
+  <h3><span class="h3n">6.1</span>docs/agentic-development/ 하위 문서</h3>
+
+  <table class="tbl">
+    <thead><tr><th>파일</th><th>담는 것</th><th>Phase</th></tr></thead>
+    <tbody>
+      <tr><td><code>architecture.md</code></td><td>시스템 전체 아키텍처, 서비스 간 관계, 데이터 흐름</td><td>P1</td></tr>
+      <tr><td><code>authority-model.md</code></td><td>4단 권한 층의 상세 정의, 각 층의 결정 예시</td><td>P1</td></tr>
+      <tr><td><code>risk-model.md</code></td><td><strong>R0~R3 판정 기준, 등급별 처리 방식, 예외 처리</strong></td><td>P1</td></tr>
+      <tr><td><code>workflow.md</code></td><td>일상 사용 루틴 (새 기능/버그 수정/인프라 변경 각각)</td><td>P1</td></tr>
+      <tr><td><code>failure-playbook.md</code></td><td><strong>중단 조건 도달 시 대응, 롤백 절차, 에스컬레이션 경로</strong></td><td>P1</td></tr>
+      <tr><td><code>verification-policy.md</code></td><td>검증 명령 표준, affected 스코프 결정, CI 통과 기준</td><td>P2</td></tr>
+      <tr><td><code>context-policy.md</code></td><td>세션당 컨텍스트 관리, 로딩 규칙, 세션 분리 기준</td><td>P2</td></tr>
+      <tr><td><code>security-boundaries.md</code></td><td>MCP write 권한 경계, 시크릿 관리, 네트워크 정책</td><td>P2</td></tr>
+      <tr><td><code>adr/*.md</code></td><td>큰 아키텍처 결정 기록. 결정 시점 맥락 · 대안 · 결과</td><td>P1 이후 지속</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">6.2</span>scripts/ · 결정적 검증 도구</h3>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">scripts/verify-change.ts</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>에이전트의 기본 검증 파이프라인. <strong>하나의 명령으로 통일</strong>: <code>npm run verify:affected</code></dd>
+      <dt>순서</dt>
+      <dd>format check → lint → typecheck → affected unit tests → affected integration tests → build → diff scope validation</dd>
+      <dt>CI vs 로컬</dt>
+      <dd>로컬 에이전트는 affected만, PR CI는 <code>npm run verify</code>로 전체 서비스 단위 독립 검증, main은 전체 build 및 필요한 통합 검사.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">scripts/classify-change.ts</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>변경된 파일 경로와 diff를 분석해 <strong>R0~R3 등급을 자동 판정</strong>. PR 템플릿의 등급 필드에 자동 반영.</dd>
+      <dt>판정 규칙</dt>
+      <dd><code>docs/**</code>, 포맷 변경 → R0. <code>src/**</code> 내부 코드 → R1. <code>common/**</code>, 이벤트 스키마 → R2. <code>infra/**</code>, <code>.github/workflows/**</code>, <code>migrations/**</code> → R3.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">scripts/baseline-diff.ts</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>베이스라인(Stephen Grider 원본) 대비 변경 감지. 비즈니스 로직 침범 시 자동 경고.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">scripts/emit-audit-event.ts</span>
+      <span class="fs-tag tag-p2">Phase 2</span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>구조화된 이벤트 발행. record-run-event.sh와 함께 관찰 가능성의 실체.</dd>
+    </dl>
+  </div>
+
+  <h3><span class="h3n">6.3</span>orchestrator/ · Claude API 호출 진입점</h3>
+
+  <p>기존 세 파일이 여기 자리. <code>package.json</code>은 <code>@anthropic-ai/sdk</code> 의존. <code>review.mjs</code>는 PR diff → Claude → 코멘트, <code>diagnose.mjs</code>는 코드 스캔 → 변환 후보 이슈. Phase 2에서 <code>router.mjs</code>(모델 라우팅)와 <code>decompose.mjs</code>(이슈 스펙 분해) 추가.</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="s7">
+  <div class="sec-hd">
+    <div class="sec-num">§ 07 — Environment & Stack</div>
+    <h2 class="sec">환경과 스택 스펙</h2>
+    <p class="sec-sub">Phase 1 시작에 필요한 로컬 환경, API 키, 시크릿, MCP 도입 조건.</p>
+  </div>
+
+  <h3><span class="h3n">7.1</span>로컬 개발 환경</h3>
+
+  <table class="tbl">
+    <thead><tr><th>도구</th><th>버전 · 정책</th><th>고정 방식</th></tr></thead>
+    <tbody>
+      <tr><td>Node.js</td><td>20 LTS 고정</td><td><code>.nvmrc</code> 또는 <code>mise</code></td></tr>
+      <tr><td>패키지 매니저</td><td>npm (베이스라인 유지)</td><td><code>packageManager</code> 필드 <code>package.json</code></td></tr>
+      <tr><td>Git</td><td>최신 안정 버전</td><td>—</td></tr>
+      <tr><td>VS Code</td><td>최신 안정 + Claude Code Extension</td><td>Workspace 설정 <code>.vscode/</code></td></tr>
+      <tr><td>Claude Code CLI</td><td>Verified baseline &gt;= 2.x</td><td>월 1회 검증 후 갱신</td></tr>
+      <tr><td>Docker</td><td>Desktop 또는 호환 런타임</td><td>—</td></tr>
+      <tr><td>GitHub CLI (gh)</td><td>최신 안정</td><td>—</td></tr>
+      <tr><td>kubectl / Helm</td><td>Phase 3 진입 시</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">7.2</span>API 키와 시크릿</h3>
+
+  <table class="tbl">
+    <thead><tr><th>시크릿</th><th>어디에</th><th>목적</th><th>Phase</th></tr></thead>
+    <tbody>
+      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>GitHub Secrets (repo)</td><td>워크플로에서 Claude API 호출</td><td>P1</td></tr>
+      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>로컬 <code>~/.claude/</code></td><td>로컬 Claude Code</td><td>P1</td></tr>
+      <tr><td><code>GITHUB_TOKEN</code></td><td>자동 (workflow 기본 제공)</td><td>PR 코멘트, 이슈 발행</td><td>P1</td></tr>
+      <tr><td><code>AWS_ACCESS_KEY_ID</code></td><td>GitHub Environment secret</td><td>Terraform apply</td><td>P3</td></tr>
+      <tr><td><code>AWS_SECRET_ACCESS_KEY</code></td><td>GitHub Environment secret</td><td>Terraform apply</td><td>P3</td></tr>
+    </tbody>
+  </table>
+
+  <div class="call warn">
+    <div class="clb">시크릿 원칙</div>
+    <p>로컬 개인 사용과 CI 인증은 <strong>완전히 분리</strong>한다. CI가 개인 구독 세션에 종속되면 안 된다. 초기 소규모 프로젝트에서 API 키를 쓴다면 최소 사용 범위 · 정기 회전 · 비용 한도 · fork PR 미제공 · 로그 출력 금지 · production secret과 분리를 지킨다.</p>
+  </div>
+
+  <h3><span class="h3n">7.3</span>API 사용 스펙 · Claude</h3>
+
+  <table class="tbl">
+    <thead><tr><th>항목</th><th>값</th></tr></thead>
+    <tbody>
+      <tr><td>SDK</td><td><code>@anthropic-ai/sdk</code> npm</td></tr>
+      <tr><td>모델 (Phase 1)</td><td><code>claude-opus-4-8</code> (Console에서 확인된 최신 안정)</td></tr>
+      <tr><td>모델 (Phase 2 라우팅)</td><td>판단 무거움 → Opus / 코드 생성 → Claude Code 헤드리스 / 반복 요약 → 로컬 LLM</td></tr>
+      <tr><td>Context window</td><td>200k 토큰까지 사용 가능</td></tr>
+      <tr><td>Max tokens 응답</td><td>2500 (리뷰), 4000 (진단)</td></tr>
+      <tr><td>Diff 상한</td><td>200,000 chars (~50k tokens) 초과 시 자르기</td></tr>
+      <tr><td>System prompt</td><td><code>CLAUDE.md</code> 파일 내용 주입</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">7.4</span>MCP 도입 순서</h3>
+
+  <div class="call">
+    <div class="clb">MCP 원칙</div>
+    <p>초기 MCP는 <strong>하나 이하</strong>. 로컬에서 이미 사용 가능한 것(<code>git</code>, <code>gh</code> CLI, GitHub Actions)이 있으면 MCP 안 붙인다. 복사·붙여넣기가 반복되기 시작하면 그때 GitHub read-only MCP부터.</p>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>MCP</th><th>도입 시점</th><th>범위</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GitHub</strong></td><td>Phase 2 초반</td><td>read 중심 (issue/PR/review 조회). write는 매번 승인.</td></tr>
+      <tr><td><strong>Sentry</strong></td><td>Phase 3</td><td>read-only. 관련 오류 조회, 배포 후 회귀 확인. write 권한 절대 금지.</td></tr>
+      <tr><td><strong>Playwright</strong></td><td>Phase 3</td><td>Playwright 테스트 스위트가 먼저 있어야. 실패 화면 탐색, 재현 보조.</td></tr>
+      <tr><td><strong>Kubernetes</strong></td><td>Phase 3 후반 (조건부)</td><td>local kind/minikube read → staging read → staging 제한 write → production read. Production write는 원칙적으로 사람 전용.</td></tr>
+      <tr><td><strong>Database</strong></td><td>제한적</td><td>로컬 DB · fixture DB · read replica · schema metadata · 익명화 샘플까지만. 운영 write는 절대 금지.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">7.5</span>GitHub Actions 권한 기본</h3>
+
+<div class="code-cap"><b>SPEC 07.1</b> workflow 기본 권한</div>
+<pre><span class="k">permissions</span>:
+  <span class="k">contents</span>: read
+  <span class="k">pull-requests</span>: write   <span class="c"># 리뷰 코멘트 게시 시만</span>
+  <span class="k">issues</span>: write          <span class="c"># 진단 이슈 발행 시만</span></pre>
+
+  <p>모든 워크플로는 기본을 <code>contents: read</code>로 두고 필요한 권한만 명시 추가한다. 코드 수정 워크플로는 별도 파일·별도 트리거로 분리한다.</p>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="s8">
+  <div class="sec-hd">
+    <div class="sec-num">§ 08 — Phase 1 Scenario</div>
+    <h2 class="sec">Phase 1 실행 시나리오</h2>
+    <p class="sec-sub">2~3주간의 실제 진행. 셋업부터 첫 자동 흐름 관찰, 그리고 관찰된 것을 문서화까지.</p>
+  </div>
+
+  <div class="phase phase-1">
+    <div class="phase-head">
+      <span class="phase-tag">Phase 01</span>
+      <span class="phase-name">파이프라인 증명 + 베이스라인 인수</span>
+      <span class="phase-when">Week 1~3</span>
+    </div>
+    <div class="phase-body">
+      <p><strong>목표:</strong> "에이전트가 개발 프로세스에 참여한다"의 최소 증명. 관찰이 이 단계의 산출물.</p>
+      <p><strong>완료 조건:</strong> 3~5건의 실제 변환 머지, 자동 리뷰가 안정적으로 발화, 진단 이슈가 유용한 후보 발굴, 이 과정이 GitHub 안에 기록으로 남음.</p>
+    </div>
+  </div>
+
+  <h3><span class="h3n">8.1</span>Week 1 · 셋업과 첫 발화</h3>
+
+  <div class="timeline">
+    <div class="tl-row">
+      <span class="tl-when">Day 1</span>
+      <span class="tl-what">R2.5 파일 5개 추가<small>settings.json · hooks 2개 · CODEOWNERS · PR 템플릿을 <code>feat/orchestration-bootstrap</code> 브랜치에 커밋</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1</span>
+      <span class="tl-what">GitHub Secret 등록<small><code>ANTHROPIC_API_KEY</code>를 <code>Settings → Secrets → Actions</code>에</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1</span>
+      <span class="tl-what">Branch protection 설정<small>main에 직접 push 금지, PR 필수, required checks, CODEOWNERS 승인</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1</span>
+      <span class="tl-what">첫 PR 열기<small>bootstrap 브랜치 → main. 이 PR 자체가 첫 자동 리뷰의 시험대</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1</span>
+      <span class="tl-what">자동 리뷰 발화 관찰<small>1~2분 내 Claude 리뷰 코멘트 확인. 안 뜨면 head 브랜치 워크플로 트리거 이슈 확인</small></span>
+      <span class="tl-who who-r">러너</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1</span>
+      <span class="tl-what">첫 머지<small>사람이 리뷰 확인 후 Merge 클릭. 1초 게이트의 첫 실행</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 2</span>
+      <span class="tl-what">Baseline Diagnose 실행<small>Actions 탭 → workflow_dispatch. 진단 이슈 자동 생성 확인</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 2</span>
+      <span class="tl-what">진단 리포트 발행<small>변환 후보 5~10개가 R0~R3 등급과 함께 이슈로 발행</small></span>
+      <span class="tl-who who-r">러너</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 2~3</span>
+      <span class="tl-what">진단 검토와 첫 작업 이슈 등록<small>후보 중 R0/R1 두 개 선정. <code>gh issue create</code>로 작업 이슈 등록</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+  </div>
+
+  <h3><span class="h3n">8.2</span>Week 1~2 · 첫 변환 사이클</h3>
+
+  <ol class="step">
+    <li><strong>이슈 확인</strong> — <code>gh issue view 5</code>로 오늘 처리할 이슈 상세 확인.</li>
+    <li><strong>브랜치 생성</strong> — <code>git checkout -b chore/auth-dockerfile-multistage</code></li>
+    <li><strong>Claude Code로 편집</strong> — <code>claude</code>. "이슈 #5 참조해서 auth/Dockerfile을 멀티스테이지로 재구성. CLAUDE.md 규약 따라 최소 변경. 비즈니스 로직은 손대지 마."</li>
+    <li><strong>settings.json이 실제로 작동</strong> — Claude Code가 <code>git push --force</code> 같은 것을 시도하면 강제 층에서 차단. 지침이 실효를 갖는 순간.</li>
+    <li><strong>검토 · 커밋 · 푸시</strong> — <code>git status</code> · <code>git diff</code> · <code>git add</code> · <code>git commit -m "chore(auth): multi-stage build"</code> · <code>git push</code></li>
+    <li><strong>PR 생성</strong> — <code>gh pr create</code>. PR 템플릿의 강제 필드 채우기 (변경하지 않은 범위, 위험 등급 R0, 롤백 방법).</li>
+    <li><strong>자동 리뷰 발화</strong> — 1~2분 내 Claude 리뷰 코멘트. 요약·발견 문제·리스크 평가·머지 의견 포함.</li>
+    <li><strong>리뷰 반영 (필요 시)</strong> — Claude Code로 재편집 → 커밋 → 푸시 → 자동 재리뷰.</li>
+    <li><strong>머지</strong> — 웹에서 Merge 클릭. 이슈는 <code>Closes #5</code>로 자동 닫힘.</li>
+    <li><strong>정리</strong> — <code>git checkout main && git pull</code>.</li>
+  </ol>
+
+  <h3><span class="h3n">8.3</span>Week 2~3 · 반복과 관찰</h3>
+
+  <p>같은 사이클로 3~5건의 변환 처리. 각 사이클마다 다음을 관찰한다.</p>
+
+  <ul class="mk">
+    <li><strong>지침이 실제로 지켜지는가</strong> — Claude가 CLAUDE.md 규약을 얼마나 정확히 따르는지</li>
+    <li><strong>강제 층이 작동하는가</strong> — settings.json/hooks가 위험 명령을 실제로 차단하는지</li>
+    <li><strong>자동 리뷰가 유용한가</strong> — 발견한 문제 채택률, 허위 양성률, 놓치는 것</li>
+    <li><strong>PR 템플릿이 실효 있는가</strong> — 강제 필드가 실제로 사람 검토 시간을 줄이는지</li>
+    <li><strong>중단 조건이 트리거되는가</strong> — 정량 조건이 실제 상황과 정합인지</li>
+  </ul>
+
+  <h3><span class="h3n">8.4</span>Week 3 · 관찰의 문서화</h3>
+
+  <p>Phase 1 종료 시점에 관찰된 것을 문서로 승격. 명세서 R2.5 → R3 개정 여부 판단.</p>
+
+  <div class="timeline">
+    <div class="tl-row">
+      <span class="tl-when">Week 3</span>
+      <span class="tl-what">docs/agentic-development/ 초안 작성<small>architecture · authority-model · risk-model · workflow · failure-playbook</small></span>
+      <span class="tl-who who-h">사람 + Claude Code</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Week 3</span>
+      <span class="tl-what">첫 ADR 작성<small>Phase 1에서 내린 결정들. 예: <code>adr/0001-baseline-adoption.md</code></small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Week 3</span>
+      <span class="tl-what">지표 수집<small>PR당 검토 시간 · 리뷰 채택률 · revert 비율 · 자동 수정 루프 횟수</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Week 3</span>
+      <span class="tl-what">Phase 2 진입 판단<small>지표 기준 충족 확인. 명세서 개정 여부 결정</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="s9">
+  <div class="sec-hd">
+    <div class="sec-num">§ 09 — Phase 2 Scenario</div>
+    <h2 class="sec">Phase 2 진입과 확장</h2>
+    <p class="sec-sub">사람 개입을 얇게 만드는 시기. 라벨 하나로 자동 흐름 시작.</p>
+  </div>
+
+  <div class="phase phase-2">
+    <div class="phase-head">
+      <span class="phase-tag">Phase 02</span>
+      <span class="phase-name">멀티 에이전트 + 코드 변환 본격화</span>
+      <span class="phase-when">Week 4~7 (3~4주)</span>
+    </div>
+    <div class="phase-body">
+      <p><strong>목표:</strong> Phase 1에서 관찰된 반복 패턴을 자동화로 승격. 사람 개입은 실행 감독에서 판단 승인으로 성격 이동.</p>
+      <p><strong>완료 조건:</strong> 라벨 하나로 코드 초안 PR이 자동 생성, 모델 라우팅 로그 확인, 한 마이그레이션이 여러 PR로 자동 분해, 사람은 마지막 승인만.</p>
+    </div>
+  </div>
+
+  <h3><span class="h3n">9.1</span>진입 조건</h3>
+
+  <p>Phase 2로 넘어가는 것은 시점(Phase 1이 끝났나)이 아니라 <strong>신뢰(관찰된 게 충분한가)</strong>가 결정한다. 최소 기준:</p>
+
+  <ul class="mk">
+    <li><strong>10~20개 PR 처리 완료</strong> — 자동 리뷰의 실제 품질을 판단할 수 있는 표본 확보</li>
+    <li><strong>AI finding 채택률 40% 이상</strong> — 자동 리뷰가 노이즈 이상의 가치를 제공</li>
+    <li><strong>revert 비율 5% 이하</strong> — 머지 판단이 정확</li>
+    <li><strong>중단 조건 트리거 이력</strong> — 최소 1~2회 자동 중단이 실제로 작동한 사례</li>
+    <li><strong>docs/agentic-development/ 5개 문서 존재</strong> — Phase 2 자동화가 참조할 근거 완비</li>
+  </ul>
+
+  <h3><span class="h3n">9.2</span>추가되는 것들</h3>
+
+  <table class="tbl">
+    <thead><tr><th>대상</th><th>파일</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td>새 워크플로</td><td><code>code-draft.yml</code></td><td>라벨 트리거로 코드 초안 → PR 자동</td></tr>
+      <tr><td>새 워크플로</td><td><code>security.yml</code></td><td>의존성·SAST·시크릿 스캔</td></tr>
+      <tr><td>새 hooks</td><td><code>format-changed-file.sh</code> · <code>record-run-event.sh</code></td><td>포맷 자동 · 이벤트 로그</td></tr>
+      <tr><td>Skills</td><td><code>plan-change</code> · <code>verify-change</code> · <code>prepare-pr</code></td><td>반복 절차 패키지화</td></tr>
+      <tr><td>MCP</td><td><code>.mcp.json</code></td><td>GitHub read-only</td></tr>
+      <tr><td>scripts</td><td><code>verify-change.ts</code> · <code>classify-change.ts</code> · <code>baseline-diff.ts</code> · <code>emit-audit-event.ts</code></td><td>결정적 검증 도구</td></tr>
+      <tr><td>Dependabot</td><td><code>dependabot.yml</code></td><td>자동 의존성 업데이트</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">9.3</span>바뀌는 사이클 · 라벨로 시작하는 흐름</h3>
+
+  <ol class="step">
+    <li><strong>이슈 등록</strong> — <code>gh issue create --label "phase-2,ready-for-draft"</code>. 이제 라벨이 트리거다.</li>
+    <li><strong>자동 흐름 시작</strong> — code-draft.yml이 발화. 러너가 이슈 본문 읽고, Claude API로 스펙 분해, 브랜치 자동 생성, Claude Code 헤드리스로 코드 초안, 커밋 & 푸시, PR 오픈.</li>
+    <li><strong>자동 리뷰 발화</strong> — 방금 만든 PR을 pr-review.yml이 자동 리뷰. classify-change.ts로 R0~R3 등급 자동 판정. security.yml 병렬 실행.</li>
+    <li><strong>사람 검토</strong> — <code>gh pr view --comments</code>. 자동 리뷰와 보안 스캔 결과 확인.</li>
+    <li><strong>필요 시 지시</strong> — <code>gh pr comment --body "..."</code>. 러너가 코멘트에 반응해 재작업.</li>
+    <li><strong>머지</strong> — 만족 시 웹에서 Merge 클릭. 사이클당 명령 수가 Phase 1의 절반 이하.</li>
+  </ol>
+
+  <div class="call">
+    <div class="clb">모델 라우팅</div>
+    <p>Phase 2에서 멀티 모델 시작. 판단 무거움(리뷰·스펙 분해) → Claude Opus. 코드 생성 → Claude Code 헤드리스. 값싼 반복(제목 정리·요약) → 로컬 LLM (Ollama). 각 호출이 어떤 모델로 라우팅됐는지 이벤트 로그에 기록.</p>
+  </div>
+
+  <h3><span class="h3n">9.4</span>실제 변환 작업</h3>
+
+  <p>Phase 2에서 처리할 큰 변환들. 각 변환은 계획 이슈 → ADR → 서브 이슈들 → 여러 PR로 흐른다.</p>
+
+  <ul class="mk">
+    <li><strong>client JavaScript → TypeScript 마이그레이션</strong> — 7~10개 서브 PR</li>
+    <li><strong>공통 미들웨어 추출</strong> — 서비스별 흩어진 미들웨어를 <code>common/</code>으로. 경계 구역 변경이라 사람 게이트 강화</li>
+    <li><strong>결제 흐름 멱등성 강화</strong> — Stripe 처리에 중복 방지 로직. 비즈니스 로직 근처를 만지는 미묘한 작업</li>
+    <li><strong>NATS Streaming → Kafka 이관</strong> — Phase 2의 최대 변환. 5~7개 서브 PR로 분할 (서비스별 이관)</li>
+  </ul>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="s10">
+  <div class="sec-hd">
+    <div class="sec-num">§ 10 — Phase 3 Scenario</div>
+    <h2 class="sec">Phase 3 진입과 완결</h2>
+    <p class="sec-sub">인프라 자동화. 넓어지면서 조여지는 시기.</p>
+  </div>
+
+  <div class="phase phase-3">
+    <div class="phase-head">
+      <span class="phase-tag">Phase 03</span>
+      <span class="phase-name">인프라 자동화 — IaC와 사람 게이트 재배치</span>
+      <span class="phase-when">Week 8~13 (4~6주)</span>
+    </div>
+    <div class="phase-body">
+      <p><strong>목표:</strong> 17개 매뉴얼 k8s YAML을 에이전트가 Terraform 모듈로 변환. DigitalOcean → AWS EKS 이전. 자동화가 넓어지면서 사람 게이트는 새로 강화.</p>
+      <p><strong>완료 조건:</strong> 인프라 변경이 .tf PR로 흐름, Plan 자동 리뷰, Apply 사람 명시 실행, AWS EKS 안정 운영, 사람이 kubectl을 매뉴얼로 치지 않는 상태 4주 이상.</p>
+    </div>
+  </div>
+
+  <h3><span class="h3n">10.1</span>진입 조건</h3>
+
+  <ul class="mk">
+    <li>Phase 2의 코드 변환이 최소 2회 성공적으로 완결 (예: JS→TS 마이그레이션, Kafka 이관)</li>
+    <li>자동 코드 생성의 revert 비율 5% 이하 유지</li>
+    <li>보안 스캔 통합이 안정적으로 작동</li>
+    <li>ADR 최소 3개 (Kafka, TS 마이그레이션, Terraform 채택)</li>
+  </ul>
+
+  <h3><span class="h3n">10.2</span>추가되는 것들</h3>
+
+  <table class="tbl">
+    <thead><tr><th>대상</th><th>파일 · 도구</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td>Terraform 코드</td><td><code>infra/terraform/</code></td><td>17개 YAML의 IaC 변환 결과물</td></tr>
+      <tr><td>모듈</td><td><code>modules/vpc</code> · <code>modules/eks</code> · <code>modules/ecr</code> · <code>modules/rds</code> · <code>modules/alb</code></td><td>재사용 가능한 인프라 단위</td></tr>
+      <tr><td>새 워크플로</td><td><code>terraform-plan.yml</code></td><td>.tf 변경 시 자동 plan + Claude 해석</td></tr>
+      <tr><td>새 워크플로</td><td><code>terraform-apply.yml</code></td><td>workflow_dispatch만, 사람 트리거</td></tr>
+      <tr><td>Subagent</td><td><code>.claude/agents/reviewer.md</code></td><td>격리된 읽기 전용 리뷰. 계약 명확</td></tr>
+      <tr><td>MCP</td><td>Sentry · Playwright · k8s (read)</td><td>Phase 3의 관측·검증 통로</td></tr>
+      <tr><td>State backend</td><td>S3 + DynamoDB</td><td>Terraform state 원격 관리</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">10.3</span>인프라 사이클 · Merge와 Apply의 분리</h3>
+
+  <p>Phase 3의 결정적 차이. Merge = plan 승인, Apply = 실제 인프라 변경. 두 개의 사람 게이트.</p>
+
+  <ol class="step">
+    <li><strong>이슈</strong> — <code>gh issue create --label "phase-3,infra,ready-for-draft"</code></li>
+    <li><strong>자동 코드 생성</strong> — code-draft.yml이 Terraform 모듈 초안 작성, PR 오픈</li>
+    <li><strong>병렬 리뷰</strong> — pr-review.yml (코드 관점) + terraform-plan.yml (인프라 관점). 각각 별도 코멘트로 게시</li>
+    <li><strong>Plan 결과 검토</strong> — 추가 리소스 · 변경 · 삭제 목록, 월 예상 비용, 리스크 평가 확인</li>
+    <li><strong>Merge (게이트 1)</strong> — 코드가 옳다는 승인. 하지만 실제 인프라는 아직 변경 안 됨</li>
+    <li><strong>Apply 트리거 (게이트 2)</strong> — <code>gh workflow run terraform-apply.yml --field environment=dev</code>. 사람이 명시적으로 실행</li>
+    <li><strong>Apply 실행 관찰</strong> — 러너가 apply 실행. 5~30분 소요. 실시간 로그.</li>
+    <li><strong>Dev 검증</strong> — Grafana 대시보드 · 통합 테스트. 문제 없으면 staging 반복</li>
+    <li><strong>Staging apply</strong> — 24시간 관측 창 후 prod로</li>
+    <li><strong>Prod apply</strong> — 배포 창 조율, 트래픽 낮은 시간. 실시간 관측 강화. 문제 감지 시 즉시 롤백 판단</li>
+  </ol>
+
+  <div class="call danger">
+    <div class="clb">Apply 게이트의 원칙</div>
+    <p>Apply는 <strong>어떤 상황에서도 자동 트리거 금지</strong>. 이유는 명세서 § 01.4 가역성 원칙 — 인프라 변경은 준 비가역이며, 프로덕션은 사용자 영향이 즉시 발생. Claude가 plan을 해석해서 리스크 요약을 미리 제공하지만, apply 결정은 조직 맥락(배포 창 · 트래픽 · 다른 진행 작업)을 아는 사람만 할 수 있음.</p>
+  </div>
+
+  <h3><span class="h3n">10.4</span>Phase 3의 최대 변환들</h3>
+
+  <ul class="mk">
+    <li><strong>k8s YAML 17개 → Terraform 모듈</strong> — 서비스별 · DB · Ingress · NATS·Kafka. 각 모듈이 별도 PR로.</li>
+    <li><strong>DigitalOcean → AWS EKS 이전</strong> — Phase 3의 정수. Stage 1~7로 분할된 마이그레이션 계획서. Blue-Green 방식.</li>
+    <li><strong>Prometheus + Grafana 자동 셋업</strong> — Helm 차트를 Terraform 모듈로 감싸서 원클릭 설치</li>
+    <li><strong>ECR 취약점 스캔 + SAST 통합</strong> — 이미지 푸시 시 자동 스캔, 심각도 High 이상이면 배포 자동 실패</li>
+    <li><strong>Secrets Manager 연동 · IAM/IRSA 자동 바인딩</strong> — 파드별 세밀 권한</li>
+    <li><strong>Blue-Green cutover 절차</strong> — DNS 스위치 순간이 결정적</li>
+    <li><strong>Drift Detection 워크플로</strong> — IaC와 실제 상태 정기 대조</li>
+  </ul>
+
+  <h3><span class="h3n">10.5</span>완결 시점의 상태</h3>
+
+  <p>Phase 3이 완결되면 시스템이 다음 상태에 도달한다.</p>
+
+  <ul class="mk">
+    <li>코드 작성부터 프로덕션 배포까지 <strong>전 과정이 관찰 가능하고 추적 가능</strong></li>
+    <li>각 단계에서 어떤 모델이 어떤 근거로 어떤 판단을 했는지 GitHub 영구 기록</li>
+    <li>사람 역할은 <strong>실행에서 판단으로 완전히 이동</strong> — 그 판단마저 Claude가 근거 정리</li>
+    <li>회사 관점에서 <strong>감사 가능성 · 개발 속도 · 인프라 안전성 동시 확보</strong></li>
+    <li>명세서 R5 개정 완료. 회고 섹션에 여정 정리. ADR 10개 이상 축적.</li>
+  </ul>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="s11">
+  <div class="sec-hd">
+    <div class="sec-num">§ 11 — Metrics & Gates</div>
+    <h2 class="sec">진입 조건과 관찰 지표</h2>
+    <p class="sec-sub">Phase 이동의 근거가 되는 지표들. 처음 3개월간은 이것만 본다.</p>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>지표</th><th>의미</th><th>P1 → P2</th><th>P2 → P3</th></tr></thead>
+    <tbody>
+      <tr><td>PR당 에이전트 비용</td><td>자동화의 경제성</td><td>&lt; $1</td><td>&lt; $2</td></tr>
+      <tr><td>PR당 사람 검토 시간</td><td>1초 게이트가 실제 작동하는지</td><td>&lt; 10분 (평균)</td><td>&lt; 5분 (평균)</td></tr>
+      <tr><td>AI finding 채택률</td><td>자동 리뷰의 실질 가치</td><td>≥ 40%</td><td>≥ 50%</td></tr>
+      <tr><td>허위 양성률</td><td>노이즈 대비 신호</td><td>&lt; 30%</td><td>&lt; 20%</td></tr>
+      <tr><td>agent PR 수정률</td><td>자동 생성 코드의 완성도</td><td>—</td><td>&lt; 40%</td></tr>
+      <tr><td>CI 실패 재발률</td><td>수정이 근본 원인을 다루는가</td><td>&lt; 20%</td><td>&lt; 10%</td></tr>
+      <tr><td>revert 비율</td><td>머지 판단의 정확성</td><td>≤ 5%</td><td>≤ 3%</td></tr>
+      <tr><td>자동 수정 루프 횟수</td><td>중단 조건이 작동하는가</td><td>중단이 관찰됨</td><td>평균 &lt; 1회</td></tr>
+      <tr><td>평균 변경 파일 수</td><td>작업 분할이 이루어지는가</td><td>&lt; 15</td><td>&lt; 10</td></tr>
+    </tbody>
+  </table>
+
+  <div class="call">
+    <div class="clb">지표의 의미</div>
+    <p><strong>에이전트가 몇 줄 작성했는가는 주요 지표가 아니다.</strong> 자동화의 총량이 아니라 사람의 판단이 얼마나 정확한 근거 위에서 이루어지는가로 성숙도를 측정한다.</p>
+  </div>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="s12">
+  <div class="sec-hd">
+    <div class="sec-num">§ 12 — Failure Playbook</div>
+    <h2 class="sec">실패 플레이북</h2>
+    <p class="sec-sub">중단 조건에 도달했을 때, 자동화가 잘못 판단할 때, revert가 필요할 때의 대응 절차.</p>
+  </div>
+
+  <h3><span class="h3n">12.1</span>중단 조건 발동 시</h3>
+
+  <table class="tbl">
+    <thead><tr><th>상황</th><th>즉시 조치</th><th>후속 조치</th></tr></thead>
+    <tbody>
+      <tr><td>같은 테스트 2회 실패</td><td>자동 재시도 중단. 러너 종료</td><td>이슈에 실패 원인 후보·시도한 것·선택지 코멘트로 게시. 사람 판단 요청</td></tr>
+      <tr><td>수정 루프 2회 초과</td><td>브랜치에 <code>needs-human-review</code> 라벨 부착</td><td>사람이 로컬 Claude Code로 개입해 직접 편집</td></tr>
+      <tr><td>변경 파일 15개 초과</td><td>PR 자동 생성 중단</td><td>이슈를 서브 이슈들로 분할 요청. 각 서브 이슈 별도 라벨</td></tr>
+      <tr><td>테스트 삭제·약화 시도</td><td>훅에서 즉시 차단</td><td>사람 개입 필수. 왜 이 테스트가 문제인지 이슈로 등록</td></tr>
+      <tr><td>보안·권한 영역 진입</td><td>settings.json이 명령 차단</td><td>R3 등급 이슈로 별도 등록. Phase 3 사이클로 처리</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">12.2</span>Revert 절차</h3>
+
+  <ol class="step">
+    <li><strong>즉시 revert</strong> — 문제 발견 시 <code>git revert &lt;merge-commit&gt;</code>. main에 revert 커밋 생성.</li>
+    <li><strong>revert PR</strong> — 자동 리뷰가 revert에도 붙는다. 규약을 따르는지 확인.</li>
+    <li><strong>원인 분석 이슈</strong> — 왜 이 변경이 문제였는지, 자동 리뷰가 왜 놓쳤는지 별도 이슈로 등록.</li>
+    <li><strong>규약 개정 검토</strong> — 같은 유형이 재발하지 않도록 CLAUDE.md 또는 settings.json에 규칙 추가.</li>
+    <li><strong>지표 기록</strong> — revert 비율에 반영. Phase 이동 판단에 사용.</li>
+  </ol>
+
+  <h3><span class="h3n">12.3</span>인프라 Apply 실패 시 (Phase 3)</h3>
+
+  <ol class="step">
+    <li><strong>자동 롤백 워크플로 트리거</strong> — terraform-apply.yml 실패 감지 시 즉시 이전 상태로 되돌리는 로직 실행.</li>
+    <li><strong>영향 범위 확인</strong> — Grafana 대시보드로 서비스 상태 확인. 실 사용자 영향 여부 판단.</li>
+    <li><strong>이슈 등록</strong> — 실패 원인 · 시도한 것 · 관찰된 영향을 상세히 기록.</li>
+    <li><strong>Prod 재시도 판단</strong> — 사람이 조직 맥락 고려해 다음 배포 창 결정.</li>
+  </ol>
+
+  <div class="call">
+    <div class="clb">플레이북의 원칙</div>
+    <p>실패는 시스템의 결함이 아니라 <strong>시스템이 자기 한계를 인식했다는 증거</strong>다. 중단 조건이 작동한다는 것은 자동화가 성숙했다는 뜻. 실패 없이 계속 진행되는 자동화가 오히려 위험 신호다.</p>
+  </div>
+</section>
+
+<footer>
+  <div><b>Execution Blueprint · R1</b> · agentic-ticketing</div>
+  <div>End of Document · 12 Sections · Companion to CONCEPT · SPEC R2.5</div>
+</footer>
+
+</main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('nav a');
+  const sections = [...document.querySelectorAll('section[id]')];
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+  sections.forEach(s => obs.observe(s));
+
+  const aside = document.querySelector('aside');
+  const toctog = document.getElementById('toctog');
+  const setOpen = (open) => {
+    aside.classList.toggle('open', open);
+    toctog.textContent = open ? 'Close' : 'TOC';
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  toctog.addEventListener('click', () => setOpen(!aside.classList.contains('open')));
+  links.forEach(a => a.addEventListener('click', () => {
+    if (window.matchMedia('(max-width: 900px)').matches) setOpen(false);
+  }));
+  window.addEventListener('resize', () => {
+    if (!window.matchMedia('(max-width: 900px)').matches && aside.classList.contains('open')) setOpen(false);
+  });
+</script>
+
+</body>
+</html>

@@ -2,191 +2,806 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>에이전틱 오케스트레이션 명세 — 문서 계열</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic Coding · Archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Noto+Sans+KR:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#f4f0e6; --paper-2:#faf6ec; --surface:#ffffff;
-    --ink:#1a1f26; --ink-2:#4a5260; --ink-3:#7a8493; --ink-4:#a6aebb;
-    --rule:#d8d0bf; --rule-soft:#e6dfce;
-    --accent:#1e5f55; --accent-2:#103d36; --accent-soft:#d9e8e3;
-    --warn:#a26420; --warn-soft:#f3e6cf;
-    --danger:#94372d; --danger-soft:#f0d8d2;
-    --serif:"Fraunces","Noto Sans KR",serif;
-    --kr:"Noto Sans KR",-apple-system,sans-serif;
+    --paper:#faf9f6;
+    --paper-2:#f4f2ec;
+    --paper-3:#eeeae1;
+    --surface:#ffffff;
+    --ink:#1a1a1a;
+    --ink-2:#3a3a3a;
+    --ink-3:#6b6b6b;
+    --ink-4:#9a9a9a;
+    --rule:#d0cec8;
+    --rule-soft:#e5e3dd;
+
+    --c-concepts:#2c3e6b;
+    --c-concepts-soft:#e0e4ee;
+    --c-specs:#0f766e;
+    --c-specs-soft:#d5e8e5;
+    --c-blueprints:#1e40af;
+    --c-blueprints-soft:#dbe4f5;
+    --c-cases:#be185d;
+    --c-cases-soft:#f5dae7;
+    --c-decisions:#b45309;
+    --c-decisions-soft:#f5e6cc;
+    --c-retros:#3d5a4e;
+    --c-retros-soft:#dce4de;
+
+    --serif:"Fraunces","Noto Sans KR",Georgia,serif;
+    --sans:"Inter","Noto Sans KR",-apple-system,sans-serif;
+    --kr:"Noto Sans KR","Inter",-apple-system,sans-serif;
     --mono:"JetBrains Mono",ui-monospace,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;scroll-padding-top:24px}
   body{
-    background:var(--paper);color:var(--ink);
-    font-family:var(--kr);font-size:15px;line-height:1.75;
-    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-    padding:max(48px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(64px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--kr);
+    font-size:15px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    word-break:keep-all;
   }
-  ::selection{background:var(--accent);color:var(--paper)}
-  .wrap{max-width:920px;margin:0 auto}
+  ::selection{background:var(--ink);color:var(--paper)}
+  a{color:inherit}
 
-  /* ===== 헤더 ===== */
-  .deptline{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
-  .deptline::after{content:"";flex:1;height:1px;background:var(--rule)}
-  h1{font-family:var(--serif);font-weight:500;font-size:clamp(28px,6vw,48px);line-height:1.12;letter-spacing:-.025em;color:var(--ink);max-width:20ch;word-break:keep-all}
-  h1 em{font-style:italic;color:var(--accent);font-weight:500}
-  .lede{margin-top:24px;font-size:15.5px;color:var(--ink-2);max-width:62ch;line-height:1.85;word-break:keep-all}
-  .meta-row{margin-top:28px;display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-3);text-transform:uppercase}
-  .meta-row b{display:block;font-family:var(--kr);font-size:13.5px;color:var(--ink);text-transform:none;letter-spacing:0;margin-top:4px;font-weight:500}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 40px}
+  @media(max-width:640px){.wrap{padding:0 22px}}
 
-  /* ===== 흐름 다이어그램 ===== */
-  .flow{margin:44px 0 8px;padding:22px;border:1px solid var(--rule);border-radius:2px;background:var(--surface)}
-  .flow .fh{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:16px}
-  .flow svg{display:block;width:100%;height:auto;max-width:100%}
-  .flow .ft{font:500 12px var(--kr)} .flow .fs{font:400 10px var(--mono);letter-spacing:.04em}
+  /* ========= COVER ========= */
+  header.cover{padding:80px 0 68px;border-bottom:2px solid var(--ink);position:relative}
+  @media(max-width:640px){header.cover{padding:48px 0 40px}}
 
-  /* ===== 문서 카드 ===== */
-  .speclist{margin:36px 0;display:flex;flex-direction:column;gap:0}
-  .toc-head{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase;border-top:1px solid var(--ink);padding-top:18px;margin-bottom:4px}
-  .card{
-    display:grid;grid-template-columns:auto 1fr auto;gap:0 22px;align-items:center;
-    text-decoration:none;color:inherit;
-    padding:22px 4px;border-bottom:1px solid var(--rule-soft);
-    transition:background .15s,padding-left .15s;
+  .cover-top{
+    display:flex;justify-content:space-between;align-items:baseline;
+    gap:24px;margin-bottom:56px;flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:11px;letter-spacing:.24em;
+    color:var(--ink-3);text-transform:uppercase;
+    font-weight:500;
   }
-  .card:hover{background:var(--paper-2);padding-left:14px}
-  .card .num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.04em;align-self:start;padding-top:4px}
-  .card .body{min-width:0}
-  .card .ctitle{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--ink);letter-spacing:-.01em;line-height:1.25;margin-bottom:5px;word-break:keep-all}
-  .card .ctitle .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;padding:2px 7px;border-radius:3px;vertical-align:middle;margin-left:8px;text-transform:uppercase;font-weight:500}
-  .b-ext{background:var(--warn-soft);color:var(--warn)}
-  .b-core{background:var(--accent-soft);color:var(--accent-2)}
-  .card .cdesc{font-size:13.5px;color:var(--ink-2);line-height:1.7;max-width:54ch;word-break:keep-all}
-  .card .ctag{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-3);margin-top:7px;text-transform:uppercase}
-  .card .arrow{font-family:var(--mono);font-size:18px;color:var(--ink-4);align-self:center;transition:color .15s,transform .15s}
-  .card:hover .arrow{color:var(--accent);transform:translateX(3px)}
+  .cover-top .ct-l{display:flex;gap:16px;align-items:center}
+  .cover-top .ct-l::before{
+    content:"";
+    width:22px;height:2px;background:var(--ink);
+  }
+  .cover-top .rev{
+    padding:3px 10px;
+    border:1px solid var(--ink);
+    border-radius:2px;
+    color:var(--ink);font-weight:600;
+  }
 
-  /* 읽는 순서 안내 */
-  .reading{margin:40px 0;padding:20px 22px;border-left:2px solid var(--accent);background:var(--paper-2);border-radius:2px}
-  .reading .rh{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;font-weight:500}
-  .reading p{font-size:13.5px;color:var(--ink-2);line-height:1.8;max-width:64ch;word-break:keep-all}
-  .reading p strong{color:var(--ink);font-weight:500}
+  h1.cover-title{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:clamp(56px,10vw,120px);
+    line-height:.94;
+    letter-spacing:-.03em;
+    color:var(--ink);
+    margin-bottom:32px;
+  }
+  h1.cover-title em{font-style:italic;font-weight:400}
 
-  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--ink);font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.04em;line-height:1.7;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
-  footer b{color:var(--ink-2);font-weight:500}
+  .cover-sub{
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:400;
+    font-size:clamp(20px,2.6vw,26px);
+    color:var(--ink-2);
+    line-height:1.45;
+    max-width:38ch;
+    margin-bottom:56px;
+  }
 
-  /* ===== 모바일 반응형 ===== */
+  .cover-lead{
+    columns:1;
+    max-width:60ch;
+    font-size:15px;
+    line-height:1.9;
+    color:var(--ink-2);
+  }
+  .cover-lead p{margin-bottom:16px}
+  .cover-lead p:last-child{margin-bottom:0}
+  .cover-lead strong{color:var(--ink);font-weight:600}
+
+  .cover-meta{
+    margin-top:56px;
+    padding-top:24px;
+    border-top:1px solid var(--rule);
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:20px 32px;
+    font-family:var(--mono);
+    font-size:10px;letter-spacing:.2em;
+    color:var(--ink-3);text-transform:uppercase;
+    font-weight:500;
+  }
+  .cover-meta b{
+    display:block;
+    font-family:var(--kr);
+    font-size:13.5px;
+    color:var(--ink);
+    text-transform:none;letter-spacing:0;
+    margin-top:6px;
+    font-weight:500;
+    word-break:keep-all;
+  }
+
+  /* ========= CATEGORY SECTIONS ========= */
+  .cat{padding:72px 0 32px;border-bottom:1px solid var(--rule)}
+  .cat:last-of-type{border-bottom:none}
+  @media(max-width:640px){.cat{padding:52px 0 24px}}
+
+  .cat-head{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:20px 32px;
+    align-items:baseline;
+    margin-bottom:40px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--rule);
+  }
   @media(max-width:640px){
-    body{padding:max(32px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(48px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
-    .lede{font-size:14.5px}
-    .card{grid-template-columns:auto 1fr;gap:4px 16px;padding:18px 2px}
-    .card .num{padding-top:2px}
-    .card .arrow{display:none}
-    .card:hover{padding-left:6px}
-    .card .ctitle{font-size:18px}
-    .card .ctitle .badge{display:inline-block;margin-left:0;margin-top:4px}
-    .flow{padding:16px;overflow-x:auto}
+    .cat-head{grid-template-columns:1fr;gap:8px}
   }
-  @media(max-width:380px){
-    .card .ctitle .badge{display:block;margin-top:6px;width:fit-content}
+  .cat-num{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:32px;
+    color:var(--ink-3);
+    line-height:1;
+    font-weight:400;
+  }
+  .cat-title-wrap{min-width:0}
+  .cat-title{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(26px,3.4vw,34px);
+    line-height:1.15;
+    letter-spacing:-.015em;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .cat-en{
+    font-family:var(--mono);
+    font-size:10.5px;letter-spacing:.24em;
+    color:var(--ink-3);text-transform:uppercase;
+    font-weight:600;
+  }
+  .cat-count{
+    font-family:var(--mono);
+    font-size:11px;letter-spacing:.14em;
+    color:var(--ink-3);text-transform:uppercase;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  .cat-count b{
+    font-size:13px;
+    color:var(--ink);
+    font-weight:600;
+    letter-spacing:0;
+    margin-right:6px;
+  }
+
+  /* ========= INDEX CARDS ========= */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:18px;
+  }
+  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    display:flex;flex-direction:column;
+    position:relative;
+    overflow:hidden;
+    transition:transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .card.filled{cursor:pointer}
+  .card.filled:hover{
+    transform:translateY(-2px);
+    border-color:var(--ink);
+    box-shadow:0 6px 20px -8px rgba(0,0,0,.15);
+  }
+  .card.placeholder{
+    background:transparent;
+    border:1px dashed var(--rule);
+  }
+
+  .card-stripe{
+    height:5px;
+    width:100%;
+    background:var(--ink-3);
+    flex:none;
+  }
+  .cat-concepts .card-stripe{background:var(--c-concepts)}
+  .cat-specs .card-stripe{background:var(--c-specs)}
+  .cat-blueprints .card-stripe{background:var(--c-blueprints)}
+  .cat-cases .card-stripe{background:var(--c-cases)}
+  .cat-decisions .card-stripe{background:var(--c-decisions)}
+  .cat-retros .card-stripe{background:var(--c-retros)}
+  .card.placeholder .card-stripe{
+    background:repeating-linear-gradient(
+      90deg,
+      var(--rule) 0 6px,
+      transparent 6px 12px
+    );
+  }
+
+  .card-body{
+    padding:22px 24px 20px;
+    flex:1;
+    display:flex;flex-direction:column;
+  }
+
+  .card-top{
+    display:flex;justify-content:space-between;align-items:baseline;
+    gap:12px;
+    margin-bottom:20px;
+    font-family:var(--mono);
+    font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;
+    font-weight:600;
+  }
+  .vol{color:var(--ink-3)}
+  .catlabel{padding:2px 8px;border-radius:2px}
+  .cat-concepts .catlabel{background:var(--c-concepts-soft);color:var(--c-concepts)}
+  .cat-specs .catlabel{background:var(--c-specs-soft);color:var(--c-specs)}
+  .cat-blueprints .catlabel{background:var(--c-blueprints-soft);color:var(--c-blueprints)}
+  .cat-cases .catlabel{background:var(--c-cases-soft);color:var(--c-cases)}
+  .cat-decisions .catlabel{background:var(--c-decisions-soft);color:var(--c-decisions)}
+  .cat-retros .catlabel{background:var(--c-retros-soft);color:var(--c-retros)}
+  .card.placeholder .catlabel{background:var(--paper-2);color:var(--ink-4)}
+  .card.placeholder .vol{color:var(--ink-4)}
+
+  .card-title{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:23px;
+    line-height:1.2;
+    letter-spacing:-.015em;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .card-subtitle{
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:400;
+    font-size:14.5px;
+    line-height:1.4;
+    color:var(--ink-3);
+    margin-bottom:18px;
+  }
+  .card.placeholder .card-title{color:var(--ink-3);font-weight:500}
+  .card.placeholder .card-subtitle{color:var(--ink-4)}
+
+  .card-desc{
+    font-size:13.5px;
+    line-height:1.7;
+    color:var(--ink-2);
+    margin-bottom:22px;
+    flex:1;
+  }
+  .card.placeholder .card-desc{color:var(--ink-3)}
+
+  .card-meta{
+    display:flex;flex-direction:column;gap:6px;
+    margin-bottom:20px;
+    padding-top:16px;
+    border-top:1px solid var(--rule-soft);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-3);
+  }
+  .card-meta .row{display:flex;justify-content:space-between;gap:12px}
+  .card-meta .row b{color:var(--ink);font-weight:600}
+
+  .card-cta{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+    padding:12px 16px;
+    background:var(--ink);
+    color:var(--paper);
+    text-decoration:none;
+    font-family:var(--mono);
+    font-size:11.5px;letter-spacing:.14em;
+    text-transform:uppercase;
+    font-weight:600;
+    transition:background .2s;
+    margin:0 -1px -1px;
+  }
+  .card-cta:hover{background:var(--c-concepts)}
+  .cat-specs .card-cta:hover{background:var(--c-specs)}
+  .cat-blueprints .card-cta:hover{background:var(--c-blueprints)}
+  .cat-cases .card-cta:hover{background:var(--c-cases)}
+  .cat-decisions .card-cta:hover{background:var(--c-decisions)}
+  .cat-retros .card-cta:hover{background:var(--c-retros)}
+  .card-cta .arr{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:16px;letter-spacing:0;
+    text-transform:none;
+    transition:transform .2s;
+  }
+  .card.filled:hover .card-cta .arr{transform:translateX(3px)}
+
+  .placeholder-cta{
+    display:flex;align-items:center;justify-content:center;
+    padding:12px 16px;
+    background:transparent;
+    border-top:1px dashed var(--rule);
+    color:var(--ink-4);
+    font-family:var(--mono);
+    font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;
+    font-weight:500;
+  }
+
+  /* ========= FOOTER ========= */
+  footer{
+    margin-top:88px;
+    padding:36px 0 60px;
+    border-top:2px solid var(--ink);
+  }
+  .foot-row{
+    display:flex;justify-content:space-between;
+    gap:24px;flex-wrap:wrap;align-items:baseline;
+  }
+  .foot-mark{
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:500;
+    font-size:22px;
+    color:var(--ink);
+    letter-spacing:-.005em;
+  }
+  .foot-mark em{color:var(--ink-3)}
+  .foot-meta{
+    font-family:var(--mono);
+    font-size:10.5px;letter-spacing:.18em;
+    color:var(--ink-3);text-transform:uppercase;
+    font-weight:500;
+    text-align:right;
+  }
+  .foot-note{
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid var(--rule);
+    font-size:12.5px;
+    color:var(--ink-3);
+    line-height:1.7;
+    max-width:60ch;
+    font-style:italic;
+    font-family:var(--serif);
   }
 </style>
 </head>
 <body>
+
 <div class="wrap">
 
-  <div class="deptline">Specification Series · Index</div>
-  <h1>에이전트에게 맡기되, <em>안심하는 법</em></h1>
-  <p class="lede">개발 과정을 에이전틱 오케스트레이션으로 전환하기 위한 다섯 편의 명세다. 거버넌스 원형에서 시작해, 보편 개념을 거쳐, 실제 프로젝트 <strong>Voyage</strong>에 정착하기까지 — 추상에서 구체로 한 방향으로 흐른다. 어느 편을 먼저 펴도 자체 완결적이지만, 순서대로 읽으면 전환의 전 경로가 닫힌다.</p>
-  <div class="meta-row">
-    <div>편수<b>5부작 · 01–05</b></div>
-    <div>예시 프로젝트<b>Voyage</b></div>
-    <div>핵심 명제<b>안심 = 런타임 보장</b></div>
+<!-- =========== COVER =========== -->
+<header class="cover">
+  <div class="cover-top">
+    <div class="ct-l">Agentic Coding · Archive</div>
+    <div>
+      <span class="rev">Rev. 1</span>
+      <span style="margin-left:14px">Maintained</span>
+    </div>
   </div>
 
-  <div class="flow">
-    <div class="fh">계열 흐름 — 추상에서 구체로</div>
-    <svg viewBox="0 0 760 90" role="img" aria-label="다섯 문서의 흐름">
-      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#a6aebb"/></marker></defs>
-      <g>
-        <circle cx="60" cy="34" r="5" fill="#94372d"/><text x="60" y="58" class="ft" fill="#1a1f26" text-anchor="middle">01</text><text x="60" y="74" class="fs" fill="#7a8493" text-anchor="middle">원형</text>
-        <line x1="78" y1="34" x2="132" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
-        <circle cx="200" cy="34" r="5" fill="#1e5f55"/><text x="200" y="58" class="ft" fill="#1a1f26" text-anchor="middle">02</text><text x="200" y="74" class="fs" fill="#7a8493" text-anchor="middle">개념</text>
-        <line x1="218" y1="34" x2="272" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
-        <circle cx="340" cy="34" r="5" fill="#2e7d6f"/><text x="340" y="58" class="ft" fill="#1a1f26" text-anchor="middle">03</text><text x="340" y="74" class="fs" fill="#7a8493" text-anchor="middle">분해</text>
-        <line x1="358" y1="34" x2="412" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
-        <circle cx="480" cy="34" r="5" fill="#a26420"/><text x="480" y="58" class="ft" fill="#1a1f26" text-anchor="middle">04</text><text x="480" y="74" class="fs" fill="#7a8493" text-anchor="middle">범용 적용</text>
-        <line x1="498" y1="34" x2="552" y2="34" stroke="#d8d0bf" marker-end="url(#ar)"/>
-        <circle cx="620" cy="34" r="5" fill="#a85a3a"/><text x="620" y="58" class="ft" fill="#1a1f26" text-anchor="middle">05</text><text x="620" y="74" class="fs" fill="#7a8493" text-anchor="middle">정착</text>
-        <text x="700" y="38" class="fs" fill="#a6aebb">구체</text>
-      </g>
-    </svg>
+  <h1 class="cover-title">Praxis <em>&amp; Principle</em></h1>
+  <p class="cover-sub">에이전틱 코딩의 원리와<br>실무 사례를 정리하는 아카이브</p>
+
+  <div class="cover-lead">
+    <p>이 아카이브는 <strong>사람과 에이전트가 함께 소프트웨어를 만드는 방식에 대한 결정과 관찰</strong>을 시간에 걸쳐 정리한다. 개별 문서는 각자 완결되지만, 아카이브 전체는 하나의 진화하는 실천 체계를 이룬다.</p>
+    <p>세 종류의 문서가 축을 이룬다. <strong>원리(Concepts)</strong>는 왜 이렇게 설계되어야 하는지에 답하고, <strong>명세(Specifications)</strong>는 무엇이 이 프로젝트인지 규정하며, <strong>청사진(Blueprints)</strong>은 어떻게 실행할지 그린다. 실제 진행이 축적되면서 <strong>사례(Case Studies)</strong>, <strong>결정 기록(Decisions)</strong>, <strong>회고(Retrospectives)</strong>가 더해진다.</p>
+    <p>지금 시점의 아카이브는 세 개의 축 문서로 시작한다. 앞으로 채워질 자리들은 dashed 카드로 표시되어 있다. 이 자리들이 채워지면서 아카이브가 성장한다.</p>
   </div>
 
-  <div class="speclist">
-    <div class="toc-head">문서 목록</div>
+  <div class="cover-meta">
+    <div>기반<b>agentic-ticketing</b></div>
+    <div>Phase<b>Phase 1 진입</b></div>
+    <div>편집<b>지속 관리</b></div>
+    <div>다음 갱신<b>Phase 1 종료 시</b></div>
+  </div>
+</header>
 
-    <a class="card" href="https://jungyh870918.github.io/agentic-code/" target="_blank" rel="noopener">
-      <div class="num">01</div>
-      <div class="body">
-        <div class="ctitle">거버넌스 원형 · Phase 1 구현 <span class="badge b-ext">외부 링크</span></div>
-        <div class="cdesc">에이전트 오케스트레이션 환경 구축의 원형 명세. 6개 거버넌스 축과 PR 자동 리뷰 구현 골격(워크플로·스크립트·행동 규약)까지.</div>
-        <div class="ctag">GitHub Pages · 새 탭에서 열림</div>
-      </div>
-      <div class="arrow">↗</div>
-    </a>
-
-    <a class="card" href="spec-02-concepts.html">
-      <div class="num">02</div>
-      <div class="body">
-        <div class="ctitle">개념서 — 보편 원리 + Voyage 예시 <span class="badge b-core">개념</span></div>
-        <div class="cdesc">전환의 보편 원리를 Voyage 실제 예시로 설명하는 학습서. 두 칼날·다섯 조각·네 축·세 빈 구멍까지. 숙지하면 남에게 가르칠 수 있는 수준.</div>
-        <div class="ctag">10 섹션 · 가르칠 수 있는 수준</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-
-    <a class="card" href="spec-03-decomposition.html">
-      <div class="num">03</div>
-      <div class="body">
-        <div class="ctitle">Voyage 완전 분해 <span class="badge b-core">분해</span></div>
-        <div class="cdesc">Voyage를 시스템 정착 단위로 해체한 명세. 5조각(A–E)·4개 직교 축·정합성 그래프·짝 제약·헤더 중앙 오케스트레이션 확정.</div>
-        <div class="ctag">8 섹션 · 4 다이어그램</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-
-    <a class="card" href="spec-04-process.html">
-      <div class="num">04</div>
-      <div class="body">
-        <div class="ctitle">11축 범용 적용 <span class="badge b-core">적용</span></div>
-        <div class="cdesc">기획·UI·UX·API·스키마·프론트·백엔드·콘텐츠·배포·출시 — 11개 개발 축을 검증 가능성으로 가른 범용 적용서. 축별 빈 구멍 지도 포함.</div>
-        <div class="ctag">10 섹션 · 빈 구멍 점검표</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-
-    <a class="card" href="spec-05-voyage.html">
-      <div class="num">05</div>
-      <div class="body">
-        <div class="ctitle">Voyage 11축 정착 <span class="badge b-core">정착</span></div>
-        <div class="cdesc">11축을 Voyage 실물에 구체 매핑한 정착판. 장면 판별·채점 삼중 구조·age_group 비용·짝 제약·Phase 0 정착 순서·일곱 빈 구멍 점검표.</div>
-        <div class="ctag">10 섹션 · 7 빈 구멍</div>
-      </div>
-      <div class="arrow">→</div>
-    </a>
+<!-- =========== CATEGORY 1 · CONCEPTS =========== -->
+<section class="cat cat-concepts">
+  <div class="cat-head">
+    <div class="cat-num">I</div>
+    <div class="cat-title-wrap">
+      <div class="cat-title">원리</div>
+      <div class="cat-en">Concepts &middot; 왜 이렇게 설계되어야 하는가</div>
+    </div>
+    <div class="cat-count"><b>1</b>Filed</div>
   </div>
 
-  <div class="reading">
-    <div class="rh">읽는 순서 제안</div>
-    <p><strong>처음이라면</strong> 02(개념)부터. 보편 원리를 Voyage 예시로 익힌 뒤, 03에서 그 분해를 깊이 보고, 04에서 다른 프로젝트에도 적용하는 법을 익히고, 05에서 Voyage 정착의 구체를 본다. <strong>구현이 급하다면</strong> 01(원형)의 Phase 1 골격과 05(정착)의 Phase 0를 먼저 펴도 된다. <strong>가르치려면</strong> 02 한 편으로 충분하다 — 끝의 "다섯 문장"이 그대로 설명 대본이 된다.</p>
+  <div class="grid">
+    <a class="card filled" href="agentic-coding-concepts.html">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Vol. I</span>
+          <span class="catlabel">Concepts</span>
+        </div>
+        <div class="card-title">에이전틱 코딩</div>
+        <div class="card-subtitle">Ten Propositions on Agentic Coding</div>
+        <div class="card-desc">사람과 에이전트의 협업을 설계하는 열 개의 근본 명제. 권한과 가역성, 사람 게이트의 재설계, 권한 강제의 이중 구조, 관찰 가능성, 신뢰 축적, 재귀 자기 검증까지 — 도구가 아닌 원칙을 다룬다.</div>
+        <div class="card-meta">
+          <div class="row"><span>Format</span><b>10 Propositions</b></div>
+          <div class="row"><span>Filed</span><b>2026-07</b></div>
+          <div class="row"><span>Status</span><b>Published · R1</b></div>
+        </div>
+      </div>
+      <div class="card-cta"><span>Open Document</span><span class="arr">→</span></div>
+    </a>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Vol. II</span>
+          <span class="catlabel">Concepts</span>
+        </div>
+        <div class="card-title">신뢰의 경제학</div>
+        <div class="card-subtitle">On the Economics of Trust in Automation</div>
+        <div class="card-desc">Phase 2 이후, 관찰된 지표들이 축적되면 자동화가 언제·어떻게 신뢰를 얻고 잃는지에 대한 두 번째 원리서 작성 예정.</div>
+        <div class="card-meta">
+          <div class="row"><span>Format</span><b>미정</b></div>
+          <div class="row"><span>Planned</span><b>Phase 2 종료 시</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========== CATEGORY 2 · SPECIFICATIONS =========== -->
+<section class="cat cat-specs">
+  <div class="cat-head">
+    <div class="cat-num">II</div>
+    <div class="cat-title-wrap">
+      <div class="cat-title">명세</div>
+      <div class="cat-en">Specifications &middot; 무엇이 이 프로젝트인가</div>
+    </div>
+    <div class="cat-count"><b>1</b>Filed</div>
   </div>
 
-  <footer>
-    <span><b>AGENTIC ORCHESTRATION</b> · SPECIFICATION SERIES · R1</span>
-    <span>INDEX · 5 DOCUMENTS · 2026.06</span>
-  </footer>
+  <div class="grid">
+    <a class="card filled" href="orchestration-spec.html">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Vol. I</span>
+          <span class="catlabel">Specifications</span>
+        </div>
+        <div class="card-title">Orchestration Spec</div>
+        <div class="card-subtitle">agentic-ticketing 프로젝트 헌법</div>
+        <div class="card-desc">프로젝트의 6개 거버넌스 축, 오케스트레이션 계층, 신뢰 경계, 가역성 원칙, Phase 로드맵을 담은 공식 명세서. 이 프로젝트의 헌법 역할을 하며 모든 자동화 판단이 이 문서를 참조한다.</div>
+        <div class="card-meta">
+          <div class="row"><span>Format</span><b>10 Sections · 4 Diagrams</b></div>
+          <div class="row"><span>Filed</span><b>2026-06</b></div>
+          <div class="row"><span>Status</span><b>Published · R2 → R2.5 예정</b></div>
+        </div>
+      </div>
+      <div class="card-cta"><span>Open Document</span><span class="arr">→</span></div>
+    </a>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Vol. II</span>
+          <span class="catlabel">Specifications</span>
+        </div>
+        <div class="card-title">Agent Contracts</div>
+        <div class="card-subtitle">Skills · Subagents · Hooks의 계약</div>
+        <div class="card-desc">Phase 2 이후 확장될 스킬과 서브에이전트의 인터페이스 명세. 입력·출력·권한·제외 사항을 계약으로 못 박아 확장이 즉흥적이지 않게 한다.</div>
+        <div class="card-meta">
+          <div class="row"><span>Format</span><b>Interface Spec</b></div>
+          <div class="row"><span>Planned</span><b>Phase 2 진입 시</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========== CATEGORY 3 · BLUEPRINTS =========== -->
+<section class="cat cat-blueprints">
+  <div class="cat-head">
+    <div class="cat-num">III</div>
+    <div class="cat-title-wrap">
+      <div class="cat-title">청사진</div>
+      <div class="cat-en">Blueprints &middot; 어떻게 실행할 것인가</div>
+    </div>
+    <div class="cat-count"><b>1</b>Filed</div>
+  </div>
+
+  <div class="grid">
+    <a class="card filled" href="agentic-ticketing-blueprint.html">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Vol. I</span>
+          <span class="catlabel">Blueprints</span>
+        </div>
+        <div class="card-title">실행 청사진</div>
+        <div class="card-subtitle">B 플랜의 파일·시나리오·확장 순서</div>
+        <div class="card-desc">agentic-ticketing 저장소의 최종 파일 구조, 각 파일의 목적과 내용, 환경·API·MCP 스펙, Phase 1/2/3의 시간 순 시나리오, 진입 조건과 실패 플레이북까지 담은 참조 문서. 이 문서를 열어 두면 어느 시점에 무엇을 만들지 즉시 확인 가능.</div>
+        <div class="card-meta">
+          <div class="row"><span>Format</span><b>12 Sections · 21 Specs</b></div>
+          <div class="row"><span>Filed</span><b>2026-07</b></div>
+          <div class="row"><span>Status</span><b>Published · R1</b></div>
+        </div>
+      </div>
+      <div class="card-cta"><span>Open Document</span><span class="arr">→</span></div>
+    </a>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Vol. II</span>
+          <span class="catlabel">Blueprints</span>
+        </div>
+        <div class="card-title">Migration Playbooks</div>
+        <div class="card-subtitle">개별 마이그레이션 실행 청사진</div>
+        <div class="card-desc">Kafka 이관, JS→TS 전환, EKS 이전 각각의 세부 실행 청사진. 큰 청사진의 특정 여정을 확대해서 그리는 도면들.</div>
+        <div class="card-meta">
+          <div class="row"><span>Format</span><b>Playbook per Migration</b></div>
+          <div class="row"><span>Planned</span><b>Phase 2 · Phase 3</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========== CATEGORY 4 · CASE STUDIES =========== -->
+<section class="cat cat-cases">
+  <div class="cat-head">
+    <div class="cat-num">IV</div>
+    <div class="cat-title-wrap">
+      <div class="cat-title">사례</div>
+      <div class="cat-en">Case Studies &middot; 실제로 무엇이 일어났는가</div>
+    </div>
+    <div class="cat-count"><b>0</b>Filed &middot; 3 Planned</div>
+  </div>
+
+  <div class="grid">
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Case 001</span>
+          <span class="catlabel">Cases</span>
+        </div>
+        <div class="card-title">NATS → Kafka 이관</div>
+        <div class="card-subtitle">이벤트 브로커 전면 교체</div>
+        <div class="card-desc">이벤트 브로커를 완전히 교체한 여정. ADR부터 서비스별 이관, cutover, 구 인프라 해체까지. 각 결정 순간과 관찰된 것을 기록.</div>
+        <div class="card-meta">
+          <div class="row"><span>Scope</span><b>5개 서비스 이관</b></div>
+          <div class="row"><span>Risk</span><b>R2 · 준 비가역</b></div>
+          <div class="row"><span>Planned</span><b>Phase 2 후반</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Case 002</span>
+          <span class="catlabel">Cases</span>
+        </div>
+        <div class="card-title">Client JS → TS 마이그레이션</div>
+        <div class="card-subtitle">Next.js 클라이언트 타입 도입</div>
+        <div class="card-desc">JavaScript로 작성된 클라이언트를 TypeScript로 전환. 자동 코드 생성이 처음 대규모로 적용되는 사례.</div>
+        <div class="card-meta">
+          <div class="row"><span>Scope</span><b>client/ 전체</b></div>
+          <div class="row"><span>Risk</span><b>R1 · 자유 가역</b></div>
+          <div class="row"><span>Planned</span><b>Phase 2 초반</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Case 003</span>
+          <span class="catlabel">Cases</span>
+        </div>
+        <div class="card-title">DigitalOcean → AWS EKS</div>
+        <div class="card-subtitle">클라우드 이전</div>
+        <div class="card-desc">17개 매뉴얼 k8s YAML을 Terraform 모듈로 변환하며 클라우드 자체를 이전. Phase 3의 최대 변환.</div>
+        <div class="card-meta">
+          <div class="row"><span>Scope</span><b>전체 인프라</b></div>
+          <div class="row"><span>Risk</span><b>R3 · 준 비가역</b></div>
+          <div class="row"><span>Planned</span><b>Phase 3 전반</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========== CATEGORY 5 · DECISIONS =========== -->
+<section class="cat cat-decisions">
+  <div class="cat-head">
+    <div class="cat-num">V</div>
+    <div class="cat-title-wrap">
+      <div class="cat-title">결정 기록</div>
+      <div class="cat-en">Decisions (ADRs) &middot; 왜 이 결정을 내렸는가</div>
+    </div>
+    <div class="cat-count"><b>0</b>Filed</div>
+  </div>
+
+  <div class="grid">
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">ADR 0001</span>
+          <span class="catlabel">Decisions</span>
+        </div>
+        <div class="card-title">베이스라인 채택</div>
+        <div class="card-subtitle">Stephen Grider ticketing 인수</div>
+        <div class="card-desc">왜 새로 만들지 않고 기존 코드를 베이스라인으로 삼았는가. 재구현 대신 점진적 변환을 택한 근거.</div>
+        <div class="card-meta">
+          <div class="row"><span>Type</span><b>Foundational</b></div>
+          <div class="row"><span>Planned</span><b>Phase 1 초반</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">ADR 0002</span>
+          <span class="catlabel">Decisions</span>
+        </div>
+        <div class="card-title">권한 강제의 이중 구조</div>
+        <div class="card-subtitle">지침과 규칙의 분리</div>
+        <div class="card-desc">CLAUDE.md와 settings.json/hooks를 왜 두 층으로 나누는가. R2.5 개정의 핵심 결정 기록.</div>
+        <div class="card-meta">
+          <div class="row"><span>Type</span><b>Governance</b></div>
+          <div class="row"><span>Planned</span><b>R2.5 개정과 함께</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">ADR 000n</span>
+          <span class="catlabel">Decisions</span>
+        </div>
+        <div class="card-title">추가될 결정들</div>
+        <div class="card-subtitle">Kafka · Terraform · EKS 채택 등</div>
+        <div class="card-desc">Phase 진행 중 등장할 큰 아키텍처 결정들이 여기 순차적으로 기록된다. 결정 시점 맥락 · 대안 · 결과를 남긴다.</div>
+        <div class="card-meta">
+          <div class="row"><span>Type</span><b>Architectural</b></div>
+          <div class="row"><span>Planned</span><b>지속적</b></div>
+          <div class="row"><span>Status</span><b>Ongoing</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========== CATEGORY 6 · RETROSPECTIVES =========== -->
+<section class="cat cat-retros">
+  <div class="cat-head">
+    <div class="cat-num">VI</div>
+    <div class="cat-title-wrap">
+      <div class="cat-title">회고</div>
+      <div class="cat-en">Retrospectives &middot; 무엇이 관찰되었는가</div>
+    </div>
+    <div class="cat-count"><b>0</b>Filed &middot; 3 Planned</div>
+  </div>
+
+  <div class="grid">
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Retro I</span>
+          <span class="catlabel">Retros</span>
+        </div>
+        <div class="card-title">Phase 1 회고</div>
+        <div class="card-subtitle">파이프라인 증명 기간</div>
+        <div class="card-desc">Phase 1 종료 시 관찰된 것들 — 자동 리뷰의 실제 품질, 규약이 어떻게 지켜졌는지, 중단 조건이 작동했는지, 지표가 목표를 충족했는지.</div>
+        <div class="card-meta">
+          <div class="row"><span>Scope</span><b>Phase 1 (2~3주)</b></div>
+          <div class="row"><span>Planned</span><b>Week 3 종료 시</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Retro II</span>
+          <span class="catlabel">Retros</span>
+        </div>
+        <div class="card-title">Phase 2 회고</div>
+        <div class="card-subtitle">사람 개입 축소 기간</div>
+        <div class="card-desc">라벨 트리거 자동화가 실제로 작동했는지, 사이클당 명령 수가 절반으로 줄었는지, 자동 코드 생성의 품질 지표가 어땠는지.</div>
+        <div class="card-meta">
+          <div class="row"><span>Scope</span><b>Phase 2 (3~4주)</b></div>
+          <div class="row"><span>Planned</span><b>Phase 2 종료 시</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+
+    <div class="card placeholder">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="vol">Retro III</span>
+          <span class="catlabel">Retros</span>
+        </div>
+        <div class="card-title">Phase 3 회고</div>
+        <div class="card-subtitle">인프라 자동화 · 완결</div>
+        <div class="card-desc">인프라 영역까지 자동화가 도달했을 때, apply 게이트가 어떻게 작동했는지, 조직 도입 관점에서 무엇이 검증됐는지. 전체 여정의 회고.</div>
+        <div class="card-meta">
+          <div class="row"><span>Scope</span><b>Phase 3 · 전 여정</b></div>
+          <div class="row"><span>Planned</span><b>Phase 3 종료 시</b></div>
+          <div class="row"><span>Status</span><b>Forthcoming</b></div>
+        </div>
+      </div>
+      <div class="placeholder-cta">Forthcoming</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========== FOOTER =========== -->
+<footer>
+  <div class="foot-row">
+    <div class="foot-mark">Praxis <em>&amp; Principle</em></div>
+    <div class="foot-meta">
+      Archive · Rev. 1<br>
+      Maintained since 2026-07
+    </div>
+  </div>
+  <div class="foot-note">
+    이 아카이브는 시간에 걸쳐 성장한다. Placeholder로 표시된 자리들이 채워지면서 항목 번호가 발행되고, 완결된 여정은 회고로 갈무리된다. 각 문서는 자기 자리에 머무르지만 전체는 진화한다.
+  </div>
+</footer>
 
 </div>
+
 </body>
 </html>
