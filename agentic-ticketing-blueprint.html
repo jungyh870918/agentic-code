@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>실행 청사진 — agentic-ticketing</title>
+<title>실행 청사진 R2 — agentic-ticketing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -22,12 +22,25 @@
     --blueprint:#1e40af;
     --blueprint-2:#1e3a8a;
     --blueprint-soft:#dbeafe;
+
+    /* Phase colors */
     --p1:#059669;
     --p1-soft:#d1fae5;
     --p2:#b45309;
     --p2-soft:#fef3c7;
     --p3:#be185d;
     --p3-soft:#fce7f3;
+
+    /* Adoption status colors */
+    --st-req:#0369a1;      /* 필수 안전 베이스라인 */
+    --st-req-soft:#e0f2fe;
+    --st-hyp:#7c3aed;      /* 가설적 자동화 */
+    --st-hyp-soft:#ede9fe;
+    --st-obs:#059669;      /* 관찰 후 채택 */
+    --st-obs-soft:#d1fae5;
+    --st-des:#64748b;      /* 현재는 설계만 */
+    --st-des-soft:#f1f5f9;
+
     --danger:#dc2626;
     --sans:"IBM Plex Sans","Noto Sans KR",-apple-system,sans-serif;
     --kr:"Noto Sans KR","IBM Plex Sans",-apple-system,sans-serif;
@@ -51,16 +64,14 @@
   }
   ::selection{background:var(--blueprint);color:var(--paper)}
 
-  /* ===== LAYOUT ===== */
   .layout{
     display:grid;
-    grid-template-columns:260px minmax(0,1fr);
+    grid-template-columns:280px minmax(0,1fr);
     max-width:1280px;
     margin:0 auto;
   }
   @media(max-width:900px){.layout{grid-template-columns:1fr}}
 
-  /* Mobile bar */
   .mbar{
     display:none;
     position:sticky;top:0;z-index:30;
@@ -80,7 +91,6 @@
   }
   @media(max-width:900px){.mbar{display:flex}}
 
-  /* ===== SIDEBAR ===== */
   aside{
     border-right:1px solid var(--rule);
     padding:36px 24px 60px;
@@ -105,17 +115,25 @@
   }
 
   .docmark{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--blueprint);text-transform:uppercase;margin-bottom:6px;font-weight:600}
-  .doctitle{font-family:var(--sans);font-size:19px;font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.015em;margin-bottom:6px}
-  .docsub{font-family:var(--kr);font-size:12px;color:var(--ink-3);margin-bottom:26px;line-height:1.55}
-  
+  .doctitle{font-family:var(--sans);font-size:20px;font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.015em;margin-bottom:6px}
+  .docsub{font-family:var(--kr);font-size:12px;color:var(--ink-3);margin-bottom:18px;line-height:1.55}
+  .rev-tag{
+    display:inline-block;
+    font-family:var(--mono);font-size:9.5px;
+    padding:3px 10px;
+    background:var(--blueprint);color:#fff;
+    border-radius:2px;letter-spacing:.14em;
+    margin-bottom:24px;font-weight:600;text-transform:uppercase;
+  }
+
   .toclabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase;margin:22px 0 10px;padding-top:14px;border-top:1px solid var(--rule-soft);font-weight:600}
   .toclabel:first-of-type{padding-top:0;border-top:none;margin-top:0}
-  
+
   nav ol{list-style:none;counter-reset:sec}
   nav li{counter-increment:sec}
   nav a{
     display:grid;
-    grid-template-columns:22px 1fr;
+    grid-template-columns:24px 1fr;
     gap:8px;
     text-decoration:none;
     color:var(--ink-2);
@@ -127,7 +145,7 @@
     transition:.15s;
   }
   nav a::before{
-    content:"§ " counter(sec);
+    content:"§ " counter(sec,decimal-leading-zero);
     font-family:var(--mono);
     font-size:9.5px;
     color:var(--ink-4);
@@ -139,12 +157,10 @@
   nav a.on{color:var(--blueprint);border-left-color:var(--blueprint);font-weight:600}
   nav a.on::before{color:var(--blueprint)}
 
-  /* ===== MAIN ===== */
   main{padding:40px 48px 100px;min-width:0}
   @media(max-width:900px){main{padding:24px 22px 60px}}
   @media(max-width:560px){main{padding:18px 16px 50px}}
 
-  /* Header */
   header.title{border-bottom:2px solid var(--ink);padding-bottom:32px;margin-bottom:52px}
   .badge-row{
     font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
@@ -154,8 +170,8 @@
   .badge-row::after{content:"";flex:1;height:1px;background:var(--rule)}
   .badge-row .stamp{
     padding:4px 10px;
-    background:var(--blueprint-soft);
-    border:1px solid var(--blueprint);
+    background:var(--blueprint);
+    color:#fff;
     border-radius:2px;
   }
   h1.doc-h1{
@@ -173,14 +189,31 @@
     color:var(--ink-2);
     line-height:1.85;
     max-width:64ch;
-    margin-bottom:36px;
+    margin-bottom:24px;
   }
   .lead strong{color:var(--ink);font-weight:600}
+
+  .change-note{
+    padding:20px 24px;
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--danger);
+    max-width:64ch;margin-bottom:32px;
+  }
+  .change-note .cn-label{
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.18em;color:var(--danger);
+    text-transform:uppercase;margin-bottom:8px;font-weight:600;
+  }
+  .change-note p{font-size:13.5px;line-height:1.75;color:var(--ink-2);margin-bottom:6px}
+  .change-note p:last-child{margin-bottom:0}
+  .change-note strong{color:var(--ink);font-weight:600}
+
   .meta-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
     gap:16px;
-    padding:20px 0;
+    padding:20px 0 0;
     border-top:1px solid var(--rule);
   }
   .meta-grid > div{
@@ -197,7 +230,6 @@
     margin-top:4px;font-weight:600;
   }
 
-  /* Sections */
   section{margin-top:80px}
   section:first-of-type{margin-top:0}
   @media(max-width:560px){section{margin-top:56px}}
@@ -267,7 +299,29 @@
     color:var(--blueprint-2);
   }
 
-  /* File tree — the centerpiece */
+  /* Adoption status legend */
+  .status-legend{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
+    background:var(--surface);
+    border:1px solid var(--rule);
+    padding:20px 22px;margin:20px 0 28px;
+    max-width:100%;
+  }
+  .status-legend .sl{padding:12px 14px;border-radius:3px;font-size:13px;line-height:1.55}
+  .status-legend .sl-req{background:var(--st-req-soft);color:var(--st-req);border-left:3px solid var(--st-req)}
+  .status-legend .sl-hyp{background:var(--st-hyp-soft);color:var(--st-hyp);border-left:3px solid var(--st-hyp)}
+  .status-legend .sl-obs{background:var(--st-obs-soft);color:var(--st-obs);border-left:3px solid var(--st-obs)}
+  .status-legend .sl-des{background:var(--st-des-soft);color:var(--st-des);border-left:3px solid var(--st-des)}
+  .status-legend .sl-tag{
+    display:block;font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;font-weight:600;text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .status-legend .sl-body{color:var(--ink-2);font-weight:400}
+
+  /* File tree */
   .tree{
     background:var(--surface);
     border:1px solid var(--rule);
@@ -285,7 +339,7 @@
   .tree .fn{color:var(--ink)}
   .tree .fd{color:var(--blueprint-2);font-weight:500}
   .tree .cm{color:var(--ink-3)}
-  .tree .ph{
+  .tree .st{
     display:inline-block;
     font-size:9.5px;letter-spacing:.08em;
     padding:1px 6px;
@@ -294,26 +348,11 @@
     font-weight:600;text-transform:uppercase;
     vertical-align:1px;
   }
-  .tree .ph-1{background:var(--p1-soft);color:var(--p1)}
-  .tree .ph-2{background:var(--p2-soft);color:var(--p2)}
-  .tree .ph-3{background:var(--p3-soft);color:var(--p3)}
-  .tree .ph-b{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--rule-soft)}
-
-  .tree-legend{
-    display:flex;flex-wrap:wrap;gap:12px 20px;
-    margin-bottom:20px;
-    font-family:var(--mono);font-size:10.5px;color:var(--ink-3);
-    text-transform:uppercase;letter-spacing:.08em;
-  }
-  .tree-legend .lg{display:flex;align-items:center;gap:6px;font-weight:600}
-  .tree-legend .sw{
-    display:inline-block;width:14px;height:14px;
-    border:1px solid var(--rule);border-radius:2px;
-  }
-  .tree-legend .sw-b{background:var(--paper-2)}
-  .tree-legend .sw-1{background:var(--p1-soft);border-color:var(--p1)}
-  .tree-legend .sw-2{background:var(--p2-soft);border-color:var(--p2)}
-  .tree-legend .sw-3{background:var(--p3-soft);border-color:var(--p3)}
+  .st-req{background:var(--st-req-soft);color:var(--st-req)}
+  .st-hyp{background:var(--st-hyp-soft);color:var(--st-hyp)}
+  .st-obs{background:var(--st-obs-soft);color:var(--st-obs)}
+  .st-des{background:var(--st-des-soft);color:var(--st-des);border:1px solid var(--rule-soft)}
+  .st-b{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--rule-soft)}
 
   /* File spec cards */
   .fspec{
@@ -335,12 +374,17 @@
     font-size:13.5px;font-weight:600;
     color:var(--ink);
   }
+  .fspec .fs-tags{display:flex;gap:6px;flex-wrap:wrap}
   .fspec .fs-tag{
     font-family:var(--mono);font-size:9.5px;
     letter-spacing:.1em;
     padding:2px 8px;border-radius:2px;
     font-weight:600;text-transform:uppercase;
   }
+  .tag-req{background:var(--st-req-soft);color:var(--st-req)}
+  .tag-hyp{background:var(--st-hyp-soft);color:var(--st-hyp)}
+  .tag-obs{background:var(--st-obs-soft);color:var(--st-obs)}
+  .tag-des{background:var(--st-des-soft);color:var(--st-des);border:1px solid var(--rule)}
   .tag-p1{background:var(--p1-soft);color:var(--p1)}
   .tag-p2{background:var(--p2-soft);color:var(--p2)}
   .tag-p3{background:var(--p3-soft);color:var(--p3)}
@@ -348,7 +392,7 @@
 
   .fspec dl{
     display:grid;
-    grid-template-columns:96px 1fr;
+    grid-template-columns:100px 1fr;
     gap:8px 20px;
     font-size:13.5px;
     line-height:1.7;
@@ -356,13 +400,44 @@
   .fspec dt{
     font-family:var(--mono);font-size:10.5px;
     color:var(--blueprint);text-transform:uppercase;
-    letter-spacing:.08em;padding-top:2px;font-weight:600;
+    letter-spacing:.06em;padding-top:2px;font-weight:600;
   }
   .fspec dd{color:var(--ink-2)}
   .fspec dd strong{color:var(--ink);font-weight:600}
   @media(max-width:560px){
     .fspec dl{grid-template-columns:1fr;gap:4px 0}
     .fspec dd{margin-bottom:12px;padding-left:12px;border-left:1px solid var(--rule-soft)}
+  }
+
+  /* Policy / Implementation blocks */
+  .polimpl{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    margin:20px 0 28px;
+    max-width:100%;
+  }
+  .polimpl-row{
+    display:grid;
+    grid-template-columns:120px 1fr;
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .polimpl-row:last-child{border-bottom:none}
+  .polimpl-row > div{padding:14px 20px}
+  .polimpl-row .pi-side{
+    background:var(--paper-2);
+    font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.08em;text-transform:uppercase;
+    font-weight:600;padding-top:16px;
+    border-right:1px solid var(--rule-soft);
+  }
+  .polimpl-row.p .pi-side{color:var(--blueprint)}
+  .polimpl-row.i .pi-side{color:var(--p2)}
+  .polimpl-row.a .pi-side{color:var(--ink-3)}
+  .polimpl-row .pi-body{font-size:13.5px;color:var(--ink-2);line-height:1.7}
+  .polimpl-row .pi-body strong{color:var(--ink);font-weight:600}
+  @media(max-width:560px){
+    .polimpl-row{grid-template-columns:1fr}
+    .polimpl-row .pi-side{border-right:none;border-bottom:1px solid var(--rule-soft);padding-top:12px}
   }
 
   /* Code blocks */
@@ -383,7 +458,6 @@
   pre .k{color:var(--blueprint);font-weight:600}
   pre .s{color:var(--p2)}
   pre .v{color:var(--p3)}
-  @media(max-width:560px){pre{padding:12px;font-size:11px}}
 
   .code-cap{
     font-family:var(--mono);font-size:10px;
@@ -463,7 +537,7 @@
     text-transform:uppercase;font-weight:600;
     margin-bottom:6px;
   }
-  .call p{margin:0;font-size:14px;color:var(--ink);max-width:none}
+  .call p{margin:0;font-size:14px;color:var(--ink);max-width:none;line-height:1.7}
   .call.warn{border-left-color:var(--p2);background:var(--p2-soft)}
   .call.warn .clb{color:var(--p2)}
   .call.danger{border-left-color:var(--danger);background:#fee2e2}
@@ -501,6 +575,32 @@
   .phase-body{padding:20px 22px 22px}
   .phase-body p{font-size:13.5px;margin-bottom:12px}
 
+  /* Risk grade blocks */
+  .grade{
+    background:var(--surface);border:1px solid var(--rule);
+    margin:12px 0;padding:16px 20px;max-width:100%;
+  }
+  .grade .g-head{
+    display:flex;align-items:baseline;gap:14px;
+    margin-bottom:10px;flex-wrap:wrap;
+  }
+  .grade .g-rom{
+    font-family:var(--mono);font-size:12.5px;font-weight:600;
+    letter-spacing:.08em;padding:2px 10px;color:#fff;border-radius:3px;
+  }
+  .g-r0 .g-rom{background:#059669}
+  .g-r1 .g-rom{background:var(--blueprint)}
+  .g-r2 .g-rom{background:var(--p2)}
+  .g-r3 .g-rom{background:var(--danger)}
+  .grade .g-name{font-size:15.5px;font-weight:600;color:var(--ink)}
+  .grade .g-body{font-size:13.5px;color:var(--ink-2);line-height:1.7}
+  .grade .g-axes{
+    margin-top:10px;
+    font-family:var(--mono);font-size:11px;color:var(--ink-3);
+    background:var(--paper-2);padding:10px 14px;border-radius:3px;
+  }
+  .grade .g-axes b{color:var(--ink);font-weight:600;letter-spacing:.02em}
+
   /* Timeline */
   .timeline{
     background:var(--surface);
@@ -533,6 +633,30 @@
   .who-r{background:var(--blueprint-soft);color:var(--blueprint)}
   .who-a{background:var(--p2-soft);color:var(--p2)}
 
+  /* Loop */
+  .loop{
+    background:var(--surface);border:1px solid var(--rule);
+    padding:20px 22px;margin:20px 0 28px;max-width:100%;
+  }
+  .loop-title{
+    font-family:var(--sans);font-size:13.5px;font-weight:600;
+    color:var(--ink);margin-bottom:12px;padding-bottom:8px;
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .loop-row{
+    display:grid;grid-template-columns:28px 1fr;
+    gap:12px;padding:8px 0;align-items:baseline;
+  }
+  .loop-num{
+    font-family:var(--mono);font-size:11px;
+    color:var(--blueprint);font-weight:600;letter-spacing:.02em;
+  }
+  .loop-what{font-size:13.5px;color:var(--ink);line-height:1.6}
+  .loop-what small{
+    display:block;color:var(--ink-3);
+    font-size:12.5px;line-height:1.55;margin-top:2px;
+  }
+
   /* Footer */
   footer{
     margin-top:80px;
@@ -550,43 +674,47 @@
 <body>
 
 <div class="mbar">
-  <div class="mt">BLUEPRINT · R1<b>실행 청사진</b></div>
+  <div class="mt">BLUEPRINT · R2<b>실행 청사진</b></div>
   <button class="toctog" id="toctog">TOC</button>
 </div>
 
 <div class="layout">
 
 <aside>
-  <div class="docmark">BLUEPRINT · R1</div>
+  <div class="docmark">BLUEPRINT · R2</div>
   <div class="doctitle">실행 청사진</div>
-  <div class="docsub">agentic-ticketing<br>파일 · 시나리오 · 확장</div>
+  <div class="docsub">agentic-ticketing<br>재구성 · 축소 · 학습</div>
+  <span class="rev-tag">Rev. R2 · Reduced</span>
 
-  <div class="toclabel">Overview</div>
+  <div class="toclabel">Foundation</div>
   <nav><ol>
-    <li><a href="#s1">B 플랜의 실체</a></li>
-    <li><a href="#s2">최종 파일 구조</a></li>
+    <li><a href="#s1">R2 개정 취지</a></li>
+    <li><a href="#s2">채택 상태 4단</a></li>
+    <li><a href="#s3">최종 파일 구조</a></li>
   </ol></nav>
 
-  <div class="toclabel">Specification</div>
-  <nav start="3"><ol style="counter-reset:sec 2">
-    <li><a href="#s3">파일별 명세 — 지침 층</a></li>
-    <li><a href="#s4">파일별 명세 — 강제 층</a></li>
-    <li><a href="#s5">파일별 명세 — 워크플로</a></li>
-    <li><a href="#s6">파일별 명세 — 문서와 스크립트</a></li>
-    <li><a href="#s7">환경과 스택 스펙</a></li>
+  <div class="toclabel">Enforcement</div>
+  <nav start="4"><ol style="counter-reset:sec 3">
+    <li><a href="#s4">위임 계약의 실체화</a></li>
+    <li><a href="#s5">파일 명세 · Phase 1 필수 5</a></li>
+    <li><a href="#s6">파일 명세 · 강제 층 확장</a></li>
+    <li><a href="#s7">워크플로 명세</a></li>
+    <li><a href="#s8">원칙과 구현의 분리</a></li>
   </ol></nav>
 
   <div class="toclabel">Execution</div>
-  <nav><ol style="counter-reset:sec 7">
-    <li><a href="#s8">Phase 1 실행 시나리오</a></li>
-    <li><a href="#s9">Phase 2 진입과 확장</a></li>
-    <li><a href="#s10">Phase 3 진입과 완결</a></li>
+  <nav start="9"><ol style="counter-reset:sec 8">
+    <li><a href="#s9">위험 판정과 게이트</a></li>
+    <li><a href="#s10">Phase 1 축소 시나리오</a></li>
+    <li><a href="#s11">Phase 2 확장</a></li>
+    <li><a href="#s12">Phase 3 완결</a></li>
   </ol></nav>
 
-  <div class="toclabel">Governance</div>
-  <nav><ol style="counter-reset:sec 10">
-    <li><a href="#s11">진입 조건과 관찰 지표</a></li>
-    <li><a href="#s12">실패 플레이북</a></li>
+  <div class="toclabel">Learning</div>
+  <nav start="13"><ol style="counter-reset:sec 12">
+    <li><a href="#s13">학습 회로 시나리오</a></li>
+    <li><a href="#s14">지표 · 등급별 세분화</a></li>
+    <li><a href="#s15">실패 플레이북</a></li>
   </ol></nav>
 </aside>
 
@@ -594,863 +722,824 @@
 
 <header class="title">
   <div class="badge-row">
-    <span class="stamp">Rev. R1</span>
+    <span class="stamp">Rev. R2</span>
     <span>Execution Blueprint</span>
     <span>agentic-ticketing</span>
   </div>
-  <h1 class="doc-h1">B 플랜의 <em>실행 청사진</em></h1>
-  <p class="lead">이 문서는 <strong>B 플랜을 어떻게 실행할 것인가</strong>를 담는다. 개념서가 왜인지, 명세서가 무엇인지 다뤘다면 이 청사진은 <strong>어떻게, 언제, 어디에</strong>를 다룬다. 파일 구조·명세·시나리오·확장 순서·관찰 지표를 하나의 참조 문서로 통합했다. 이 문서를 열어 두면 어느 시점에 어느 파일을 만들고 어느 자동화를 추가할지 즉시 확인할 수 있다.</p>
+  <h1 class="doc-h1">B 플랜 <em>재구성판</em></h1>
+  <p class="lead">이 문서는 <strong>Concepts R2 · Spec R3</strong>과 정합하는 실행 청사진이다. 개념서가 왜인지, 명세서가 무엇인지 다뤘다면 이 청사진은 <strong>어떻게 · 언제 · 어디에 · 어떤 상태에서</strong>를 다룬다. R1과의 결정적 차이는 <strong>Phase 1의 급진적 축소</strong>와 <strong>모든 항목에 채택 상태 표시</strong>다. 관찰 후 자동화 원칙과 초기 설계량의 충돌이 해소된다.</p>
+
+  <div class="change-note">
+    <div class="cn-label">R1 → R2 재구성</div>
+    <p>R1이 Phase 1에서 15개 이상의 파일·제도를 초기부터 도입하려 했다면, R2는 <strong>필수 5개</strong>만 도입하고 나머지는 관찰 후 채택 원칙에 따라 뒤로 미룬다.</p>
+    <p>각 항목에 <strong>채택 상태</strong>가 명시된다 — 필수 안전 · 가설적 자동화 · 관찰 후 채택 · 설계만. 이 표시로 <em>지금 실행하는 것</em>과 <em>미래 설계</em>가 문서 안에서 구분된다. 흐름에는 <strong>spec-ready 게이트</strong>가 추가되고, 위험 판정은 <strong>5축 병기</strong> 방식으로 변경된다.</p>
+  </div>
 
   <div class="meta-grid">
-    <div>Base<b>agentic-ticketing repo</b></div>
-    <div>Phase 진행<b>Phase 1 진입 직전</b></div>
-    <div>확장 방식<b>단계적 · 관찰 기반</b></div>
-    <div>추상 문서<b>개념서 · 명세서 R2</b></div>
+    <div>기반<b>Concepts R2 · Spec R3</b></div>
+    <div>Phase 1 필수<b>5개 파일</b></div>
+    <div>확장 원칙<b>관찰 후 채택</b></div>
+    <div>Rev.<b>R2 · Reduced</b></div>
   </div>
 </header>
 
 <!-- ============ 1 ============ -->
 <section id="s1">
   <div class="sec-hd">
-    <div class="sec-num">§ 01 — Plan B</div>
-    <h2 class="sec">B 플랜의 실체</h2>
-    <p class="sec-sub">우리 명세서(R2)와 저쪽 튜터 답변에서 채택한 네 가지 흡수 지점, 그리고 그것이 파일과 시나리오로 어떻게 실체화되는지.</p>
+    <div class="sec-num">§ 01 — Restructure Intent</div>
+    <h2 class="sec">R2 개정의 취지</h2>
+    <p class="sec-sub">R1에서 무엇이 바뀌었고 왜 바뀌었는가.</p>
   </div>
 
-  <p>B 플랜의 목표는 하나다. <strong>우리 명세서 R2의 야심(재귀 자기 검증, Phase 로드맵, 신뢰 축적 이론)을 유지하되, 저쪽 튜터가 제시한 실무 강도(권한 강제, 위험 등급 정량화, 정량적 중단 조건, PR 템플릿)를 흡수해 실행 가능한 청사진으로 완성한다</strong>.</p>
+  <p>R1은 좋은 방향의 청사진이었지만 하나의 자기 모순을 안고 있었다. <strong>"관찰 후 자동화"를 원칙으로 삼으면서 정작 관찰이 시작되기 전에 상당한 파일 구조를 확정했다는 것</strong>. Phase 1이 이름과 달리 얇지 않았다.</p>
 
-  <h3><span class="h3n">1.1</span>흡수한 네 지점</h3>
+  <p>R2는 이 모순을 두 가지 방법으로 해소한다.</p>
+
   <ul class="mk">
-    <li><strong>권한 강제의 이중 구조</strong> — <code>CLAUDE.md</code>는 지침, <code>.claude/settings.json</code>과 hooks가 실제 강제. 명세서에 원칙만 있고 강제 층이 없으면 실효성이 없다.</li>
-    <li><strong>위험 등급 R0~R3</strong> — 우리 가역성 4단(자유/비용/준비/비가역)을 R0~R3로 이름 붙여 실무 언어와 정합. PR 템플릿·라벨·자동 리뷰에 이 등급이 표면화된다.</li>
-    <li><strong>정량적 중단 조건</strong> — "막히면 올려보낸다" 원칙에 임계치를 부여. 테스트 2회 실패, 수정 루프 2회 초과, 변경 파일 15개 이상 등. 이 수치가 있어야 원칙이 실행 가능해진다.</li>
-    <li><strong>PR 템플릿의 강제 필드</strong> — "변경하지 않은 범위", "미검증 사항", "롤백 방법", "위험 등급"이 모든 PR의 필수 필드. 관찰 가능성의 실체화.</li>
+    <li><strong>Phase 1 축소.</strong> 초기 필수를 <code>CLAUDE.md</code> · <code>settings.json</code> · <code>guard-command.sh</code> · <code>pull_request_template.md</code> · 기존 CI 연결의 다섯 개로 줄인다. <code>CODEOWNERS</code> · 상세 docs · 진단 자동화 등은 실제 위험·반복 패턴이 관찰된 후 추가된다.</li>
+    <li><strong>채택 상태 명시.</strong> 각 파일·자동화에 <em>필수 안전 · 가설적 자동화 · 관찰 후 채택 · 설계만</em> 네 상태 중 하나가 부여된다. 지금 만드는 것과 나중 만들 것이 구분된다.</li>
   </ul>
 
-  <h3><span class="h3n">1.2</span>유지한 우리 관점</h3>
+  <p>추가로 개념서 R2 · 명세서 R3의 새 개념들이 청사진에 실체화된다.</p>
+
   <ul class="mk">
-    <li><strong>증명 프로젝트의 정체성</strong> — Phase 3까지 가는 여정 자체가 산출물이다. 저쪽은 회사 도입 청사진이지만 우리는 능력 증명이라는 야심을 유지.</li>
-    <li><strong>재귀 자기 검증</strong> — 저쪽에는 없는 개념. 시스템이 자기 자신의 다음 버전을 자기 원칙으로 검증한다는 특성을 살린다.</li>
-    <li><strong>신뢰 축적 이론</strong> — Phase 이동의 시점을 "관찰된 PR 수"로만 정하지 않고 신뢰 축적이라는 개념적 근거로 뒷받침.</li>
+    <li><strong>위임 계약 실체화 지점</strong> — 각 파일이 계약의 어느 성분을 담는지 표로 정리 (§ 04).</li>
+    <li><strong>spec-ready 게이트</strong> — 흐름에 삽입 (§ 09).</li>
+    <li><strong>5축 위험 판정</strong> — 자동 등급 산출 (§ 09).</li>
+    <li><strong>원칙과 구현의 분리</strong> — 각 자동화에 Policy · Implementation · Alternatives 3단 (§ 08).</li>
+    <li><strong>학습 회로 실행 시나리오</strong> — 관찰이 규약 개정으로 이어지는 실제 흐름 (§ 13).</li>
+    <li><strong>지표를 위험 등급별로 세분화</strong> — R0~R3 각각 다른 기대치 (§ 14).</li>
   </ul>
 
   <div class="call">
-    <div class="clb">Plan B — 요약</div>
-    <p>명세서 R2 → <strong>R2.5로 개정</strong>하고, kit에 <strong>4개 파일을 즉시 추가</strong>한다. Phase 1은 얇게 시작하되 강제 층은 확보한 상태. 나머지 파일들은 신뢰 축적에 따라 Phase 2·3에서 점진 추가.</p>
+    <div class="clb">이 문서의 두 개 갈래</div>
+    <p>이 청사진은 두 갈래로 읽힌다. <strong>지금 실행하는 것</strong>은 § 05 (Phase 1 필수 5개), § 09 (게이트), § 10 (Phase 1 시나리오)에 있다. <strong>미래 설계</strong>는 § 06, § 07, § 11, § 12에 있으며 채택 상태 뱃지로 구분된다.</p>
   </div>
 </section>
 
 <!-- ============ 2 ============ -->
 <section id="s2">
   <div class="sec-hd">
-    <div class="sec-num">§ 02 — File Structure</div>
-    <h2 class="sec">최종 파일 구조</h2>
-    <p class="sec-sub">Phase 1/2/3에 걸쳐 완성될 프로젝트 트리. 각 파일 옆의 뱃지가 언제 등장할지를 표시한다.</p>
+    <div class="sec-num">§ 02 — Adoption States</div>
+    <h2 class="sec">채택 상태 4단</h2>
+    <p class="sec-sub">각 항목이 지금 어떤 상태에 있는지 표시하는 네 개의 라벨.</p>
   </div>
 
-  <div class="tree-legend">
-    <div class="lg"><span class="sw sw-b"></span>베이스라인</div>
-    <div class="lg"><span class="sw sw-1"></span>Phase 1</div>
-    <div class="lg"><span class="sw sw-2"></span>Phase 2</div>
-    <div class="lg"><span class="sw sw-3"></span>Phase 3</div>
+  <p>R2에서 도입되는 핵심 개념. <strong>모든 파일·자동화·정책은 다음 네 상태 중 하나에 속한다</strong>. 이 상태가 명시되지 않으면 그 항목은 "미래 계획"과 "현재 실행"이 구분되지 않는 회색 지대에 있다.</p>
+
+  <div class="status-legend">
+    <div class="sl sl-req">
+      <span class="sl-tag">필수 안전 베이스라인</span>
+      <span class="sl-body">지금 반드시 있어야 함. 이것 없이 Phase 시작 불가. Phase 1 진입 전 완료.</span>
+    </div>
+    <div class="sl sl-hyp">
+      <span class="sl-tag">가설적 자동화</span>
+      <span class="sl-body">유용할 것 같아 설계됨. 실제 반복 패턴이 관찰되면 채택. 관찰 없이 도입하지 않음.</span>
+    </div>
+    <div class="sl sl-obs">
+      <span class="sl-tag">관찰 후 채택</span>
+      <span class="sl-body">이미 관찰됐고 채택됨. 규약 개정을 통해 정식 도입된 항목.</span>
+    </div>
+    <div class="sl sl-des">
+      <span class="sl-tag">설계만 · 미도입</span>
+      <span class="sl-body">개념적으로만 존재. 아직 파일도 만들지 않음. 미래 Phase의 진입 조건 충족 시 검토.</span>
+    </div>
   </div>
 
-  <div class="tree"><span class="fd">agentic-ticketing/</span>
-├─ <span class="fd">auth/</span> · <span class="fd">tickets/</span> · <span class="fd">orders/</span> · <span class="fd">payments/</span> · <span class="fd">expiration/</span> · <span class="fd">client/</span> · <span class="fd">common/</span>  <span class="ph ph-b">Baseline</span>
-├─ <span class="fd">infra/k8s/</span>  <span class="cm"># 17개 매뉴얼 YAML, Phase 3에서 Terraform 변환</span> <span class="ph ph-b">Baseline</span>
-│
-├─ <span class="fd">.claude/</span>
-│  ├─ <span class="fn">settings.json</span>  <span class="cm"># 권한 강제 (allow/ask/deny)</span> <span class="ph ph-1">P1</span>
-│  ├─ <span class="fn">settings.local.json.example</span>  <span class="cm"># 개인별 예시</span> <span class="ph ph-1">P1</span>
-│  ├─ <span class="fd">hooks/</span>
-│  │  ├─ <span class="fn">guard-command.sh</span>  <span class="cm"># 위험 명령 차단</span> <span class="ph ph-1">P1</span>
-│  │  ├─ <span class="fn">validate-write-scope.sh</span>  <span class="cm"># 편집 범위 검사</span> <span class="ph ph-1">P1</span>
-│  │  ├─ <span class="fn">format-changed-file.sh</span>  <span class="cm"># 변경 파일 포맷</span> <span class="ph ph-2">P2</span>
-│  │  └─ <span class="fn">record-run-event.sh</span>  <span class="cm"># 이벤트 로그</span> <span class="ph ph-2">P2</span>
-│  ├─ <span class="fd">skills/</span>
-│  │  ├─ <span class="fd">plan-change/</span><span class="fn">SKILL.md</span>  <span class="ph ph-2">P2</span>
-│  │  ├─ <span class="fd">verify-change/</span><span class="fn">SKILL.md</span>  <span class="ph ph-2">P2</span>
-│  │  └─ <span class="fd">prepare-pr/</span><span class="fn">SKILL.md</span>  <span class="ph ph-2">P2</span>
-│  └─ <span class="fd">agents/</span>
-│     └─ <span class="fn">reviewer.md</span>  <span class="cm"># 격리된 읽기 전용 리뷰</span> <span class="ph ph-3">P3</span>
-│
-├─ <span class="fd">.github/</span>
-│  ├─ <span class="fd">workflows/</span>
-│  │  ├─ <span class="fn">pr-review.yml</span>  <span class="cm"># PR 자동 리뷰</span> <span class="ph ph-b">Baseline</span>
-│  │  ├─ <span class="fn">baseline-diagnose.yml</span>  <span class="cm"># 진단 · 수동 트리거</span> <span class="ph ph-b">Baseline</span>
-│  │  ├─ <span class="fn">ci.yml</span>  <span class="cm"># 결정적 검증 통합</span> <span class="ph ph-1">P1</span>
-│  │  ├─ <span class="fn">security.yml</span>  <span class="cm"># 의존성·SAST·시크릿 스캔</span> <span class="ph ph-2">P2</span>
-│  │  ├─ <span class="fn">code-draft.yml</span>  <span class="cm"># 라벨 트리거 · 코드 초안 자동 생성</span> <span class="ph ph-2">P2</span>
-│  │  ├─ <span class="fn">terraform-plan.yml</span>  <span class="cm"># .tf 변경 시 plan 자동</span> <span class="ph ph-3">P3</span>
-│  │  ├─ <span class="fn">terraform-apply.yml</span>  <span class="cm"># workflow_dispatch만, 사람 트리거</span> <span class="ph ph-3">P3</span>
-│  │  └─ <span class="fd">_archive/</span><span class="fn">deploy-*.yaml</span>  <span class="cm"># DigitalOcean 격리</span> <span class="ph ph-b">Baseline</span>
-│  ├─ <span class="fn">CODEOWNERS</span>  <span class="cm"># 민감 파일 소유자</span> <span class="ph ph-1">P1</span>
-│  ├─ <span class="fn">pull_request_template.md</span>  <span class="cm"># 위험 등급·롤백 필수</span> <span class="ph ph-1">P1</span>
-│  ├─ <span class="fd">ISSUE_TEMPLATE/</span>
-│  │  ├─ <span class="fn">feature.yml</span>  <span class="ph ph-1">P1</span>
-│  │  ├─ <span class="fn">bug.yml</span>  <span class="ph ph-1">P1</span>
-│  │  └─ <span class="fn">chore.yml</span>  <span class="ph ph-1">P1</span>
-│  └─ <span class="fn">dependabot.yml</span>  <span class="cm"># 의존성 업데이트</span> <span class="ph ph-2">P2</span>
-│
-├─ <span class="fd">orchestrator/</span>
-│  ├─ <span class="fn">package.json</span>  <span class="ph ph-b">Baseline</span>
-│  ├─ <span class="fn">review.mjs</span>  <span class="cm"># PR diff → Claude → 코멘트</span> <span class="ph ph-b">Baseline</span>
-│  └─ <span class="fn">diagnose.mjs</span>  <span class="cm"># 코드 스캔 → 변환 후보 이슈</span> <span class="ph ph-b">Baseline</span>
-│
-├─ <span class="fd">scripts/</span>
-│  ├─ <span class="fn">verify-change.ts</span>  <span class="cm"># 결정적 검증 파이프라인</span> <span class="ph ph-2">P2</span>
-│  ├─ <span class="fn">classify-change.ts</span>  <span class="cm"># 변경 성격 자동 분류</span> <span class="ph ph-2">P2</span>
-│  ├─ <span class="fn">baseline-diff.ts</span>  <span class="cm"># 베이스라인 대비 변경 감지</span> <span class="ph ph-2">P2</span>
-│  └─ <span class="fn">emit-audit-event.ts</span>  <span class="cm"># 구조화 이벤트 발행</span> <span class="ph ph-2">P2</span>
-│
-├─ <span class="fd">docs/</span>
-│  └─ <span class="fd">agentic-development/</span>
-│     ├─ <span class="fn">architecture.md</span>  <span class="ph ph-1">P1</span>
-│     ├─ <span class="fn">authority-model.md</span>  <span class="ph ph-1">P1</span>
-│     ├─ <span class="fn">risk-model.md</span>  <span class="cm"># R0~R3 판정 기준</span> <span class="ph ph-1">P1</span>
-│     ├─ <span class="fn">workflow.md</span>  <span class="ph ph-1">P1</span>
-│     ├─ <span class="fn">verification-policy.md</span>  <span class="ph ph-2">P2</span>
-│     ├─ <span class="fn">context-policy.md</span>  <span class="ph ph-2">P2</span>
-│     ├─ <span class="fn">security-boundaries.md</span>  <span class="ph ph-2">P2</span>
-│     ├─ <span class="fn">failure-playbook.md</span>  <span class="ph ph-1">P1</span>
-│     └─ <span class="fn">adr/</span>  <span class="cm"># Architecture Decision Records</span> <span class="ph ph-1">P1</span>
-│
-├─ <span class="fd">artifacts/</span>  <span class="cm"># 실행 산출물 · gitignore</span> <span class="ph ph-2">P2</span>
-│
-├─ <span class="fn">CLAUDE.md</span>  <span class="cm"># 지침 층 (150~300줄)</span> <span class="ph ph-b">Baseline</span>
-├─ <span class="fn">.mcp.json</span>  <span class="cm"># GitHub read-only부터</span> <span class="ph ph-2">P2</span>
-└─ <span class="fn">.gitignore</span>  <span class="ph ph-b">Baseline</span>
-</div>
+  <h3><span class="h3n">2.1</span>상태 이동의 원칙</h3>
+  <p>상태는 한 방향으로만 이동한다.</p>
 
-  <p><strong>즉시 추가할 파일(Phase 1 진입 전):</strong> <code>.claude/settings.json</code>, <code>.claude/hooks/guard-command.sh</code>, <code>.claude/hooks/validate-write-scope.sh</code>, <code>.github/CODEOWNERS</code>, <code>.github/pull_request_template.md</code>. 이 다섯 파일이 R2.5 개정의 실체다.</p>
+  <p><code>설계만</code> → <code>가설적 자동화</code> → <code>관찰 후 채택</code>. 역방향은 없다. <em>가설이 관찰로 검증되지 못하면 폐기</em>되지 <em>다시 설계만으로 되돌아가지 않는다</em>. 이 원칙이 있어야 문서가 무한히 부풀지 않는다.</p>
 
-  <p><strong>Phase 1 진행 중 추가:</strong> <code>ci.yml</code> 표준화, ISSUE_TEMPLATE 세 개, <code>docs/agentic-development/</code>의 초기 문서(<code>architecture.md</code>, <code>authority-model.md</code>, <code>risk-model.md</code>, <code>workflow.md</code>, <code>failure-playbook.md</code>).</p>
+  <p><code>필수 안전 베이스라인</code>은 별도 라인이다. 이것은 Phase 시작 전에 반드시 있어야 하는 것들이며 관찰 대상이 아니다. 관찰의 전제 조건.</p>
+
+  <h3><span class="h3n">2.2</span>왜 이 구분이 필요한가</h3>
+  <p>구분이 없으면 두 종류의 실패가 발생한다.</p>
+
+  <ul class="mk">
+    <li><strong>미래 설계의 현재 도입.</strong> "언젠가 필요할 것"이 지금 만들어진다. Phase 1에 15개 파일이 있는 상태.</li>
+    <li><strong>필수의 관찰 후 도입 미룸.</strong> 진짜 필수(권한 강제, PR 템플릿)를 "관찰 후 채택"으로 미룬다. 안전 없이 실행이 시작되는 상태.</li>
+  </ul>
+
+  <p>네 상태의 명시는 이 두 실패를 방지한다.</p>
 </section>
 
 <!-- ============ 3 ============ -->
 <section id="s3">
   <div class="sec-hd">
-    <div class="sec-num">§ 03 — Guidance Layer</div>
-    <h2 class="sec">파일별 명세 · 지침 층</h2>
-    <p class="sec-sub">에이전트가 읽어서 행동을 유도받는 문서들. Claude가 매 세션에서 참조하는 자리.</p>
+    <div class="sec-num">§ 03 — File Structure</div>
+    <h2 class="sec">최종 파일 구조</h2>
+    <p class="sec-sub">완성 시점의 프로젝트 트리. Phase 뱃지와 채택 상태 뱃지가 함께 표시된다.</p>
   </div>
 
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">CLAUDE.md</span>
-      <span class="fs-tag tag-b">Baseline · Refined P1</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>에이전트의 매 API 호출에서 시스템 프롬프트로 주입되는 <strong>행동 규약의 실행용 압축본</strong>. 명세서의 원칙을 Claude가 흡수 가능한 형태로 정리한 것.</dd>
-      <dt>크기</dt>
-      <dd>150~300줄 이하. 백과사전이 아니라 라우팅 규칙. 각 도메인 상세는 하위 문서로 링크.</dd>
-      <dt>담을 것</dt>
-      <dd>프로젝트 목적 · 저장소 구조 · 기본 개발 명령 · 변경 절차 · 권한·가역성 원칙 · 테스트 기준 · 금지 행동 · PR 완료 조건 · 하위 문서 위치 · 중단 조건 참조</dd>
-      <dt>담지 말 것</dt>
-      <dd>모든 서비스 상세 설명 · API 명세 전체 · 과거 의사결정 대화 · 긴 코딩 스타일 · 수십 개의 예외 규칙</dd>
-      <dt>중요 참조</dt>
-      <dd>이 문서는 지침 층이며 <strong>실제 권한 강제는 <code>.claude/settings.json</code>과 hooks가 담당</strong>한다. "말로 하지 말라"와 "실제로 못 하게 한다"를 구분한다.</dd>
-    </dl>
-  </div>
+  <div class="tree"><span class="fd">agentic-ticketing/</span>
+├─ <span class="fd">auth/</span> · <span class="fd">tickets/</span> · <span class="fd">orders/</span> · <span class="fd">payments/</span> · <span class="fd">expiration/</span> · <span class="fd">client/</span> · <span class="fd">common/</span>  <span class="st st-b">Baseline</span>
+├─ <span class="fd">infra/k8s/</span>  <span class="cm"># 17개 매뉴얼 YAML → P3에서 Terraform 변환</span> <span class="st st-b">Baseline</span>
+│
+├─ <span class="fd">.claude/</span>
+│  ├─ <span class="fn">settings.json</span>  <span class="cm"># 권한 강제 (allow/ask/deny)</span> <span class="st st-req">필수</span>
+│  ├─ <span class="fd">hooks/</span>
+│  │  ├─ <span class="fn">guard-command.sh</span>  <span class="cm"># 위험 명령 차단</span> <span class="st st-req">필수</span>
+│  │  ├─ <span class="fn">validate-write-scope.sh</span>  <span class="cm"># 편집 범위 검사</span> <span class="st st-hyp">가설</span>
+│  │  ├─ <span class="fn">format-changed-file.sh</span>  <span class="cm"># 변경 파일 포맷</span> <span class="st st-des">설계만</span>
+│  │  └─ <span class="fn">record-run-event.sh</span>  <span class="cm"># 이벤트 로그</span> <span class="st st-des">설계만</span>
+│  ├─ <span class="fd">skills/</span>
+│  │  ├─ <span class="fd">plan-change/</span><span class="fn">SKILL.md</span>  <span class="st st-des">P2 설계</span>
+│  │  ├─ <span class="fd">verify-change/</span><span class="fn">SKILL.md</span>  <span class="st st-des">P2 설계</span>
+│  │  └─ <span class="fd">prepare-pr/</span><span class="fn">SKILL.md</span>  <span class="st st-des">P2 설계</span>
+│  └─ <span class="fd">agents/</span>
+│     └─ <span class="fn">reviewer.md</span>  <span class="cm"># 격리된 읽기 전용 리뷰</span> <span class="st st-des">P3 설계</span>
+│
+├─ <span class="fd">.github/</span>
+│  ├─ <span class="fd">workflows/</span>
+│  │  ├─ <span class="fn">pr-review.yml</span>  <span class="cm"># PR 자동 리뷰</span> <span class="st st-b">Baseline</span>
+│  │  ├─ <span class="fn">baseline-diagnose.yml</span>  <span class="cm"># 진단 · 수동 트리거</span> <span class="st st-b">Baseline</span>
+│  │  ├─ <span class="fn">ci.yml</span>  <span class="cm"># 결정적 검증</span> <span class="st st-req">필수</span>
+│  │  ├─ <span class="fn">security.yml</span>  <span class="cm"># 의존성·SAST·시크릿 스캔</span> <span class="st st-des">P2 설계</span>
+│  │  ├─ <span class="fn">code-draft.yml</span>  <span class="cm"># 라벨 트리거 · 코드 초안 자동 생성</span> <span class="st st-des">P2 설계</span>
+│  │  ├─ <span class="fn">terraform-plan.yml</span>  <span class="cm"># .tf 변경 시 plan 자동</span> <span class="st st-des">P3 설계</span>
+│  │  └─ <span class="fn">terraform-apply.yml</span>  <span class="cm"># workflow_dispatch만</span> <span class="st st-des">P3 설계</span>
+│  ├─ <span class="fn">CODEOWNERS</span>  <span class="cm"># 민감 파일 소유자</span> <span class="st st-hyp">가설</span>
+│  ├─ <span class="fn">pull_request_template.md</span>  <span class="cm"># 위험 등급·근거 필수</span> <span class="st st-req">필수</span>
+│  ├─ <span class="fd">ISSUE_TEMPLATE/</span>
+│  │  ├─ <span class="fn">feature.yml</span>  <span class="cm"># 스펙 준비도 필드 포함</span> <span class="st st-hyp">가설</span>
+│  │  ├─ <span class="fn">bug.yml</span>  <span class="st st-hyp">가설</span>
+│  │  └─ <span class="fn">chore.yml</span>  <span class="st st-hyp">가설</span>
+│  └─ <span class="fn">dependabot.yml</span>  <span class="cm"># 의존성 업데이트</span> <span class="st st-des">P2 설계</span>
+│
+├─ <span class="fd">orchestrator/</span>
+│  ├─ <span class="fn">package.json</span>  <span class="st st-b">Baseline</span>
+│  ├─ <span class="fn">review.mjs</span>  <span class="st st-b">Baseline</span>
+│  └─ <span class="fn">diagnose.mjs</span>  <span class="st st-b">Baseline</span>
+│
+├─ <span class="fd">scripts/</span>
+│  ├─ <span class="fn">verify-change.ts</span>  <span class="cm"># 결정적 검증 파이프라인</span> <span class="st st-des">P2 설계</span>
+│  ├─ <span class="fn">classify-change.ts</span>  <span class="cm"># 5축 위험 자동 판정</span> <span class="st st-hyp">가설</span>
+│  ├─ <span class="fn">spec-lint.ts</span>  <span class="cm"># 스펙 준비도 자동 검사</span> <span class="st st-hyp">가설</span>
+│  ├─ <span class="fn">baseline-diff.ts</span>  <span class="cm"># 베이스라인 대비 변경 감지</span> <span class="st st-des">P2 설계</span>
+│  └─ <span class="fn">emit-audit-event.ts</span>  <span class="cm"># 구조화 이벤트 발행</span> <span class="st st-des">P2 설계</span>
+│
+├─ <span class="fd">docs/</span>
+│  └─ <span class="fd">agentic-development/</span>
+│     ├─ <span class="fn">workflow.md</span>  <span class="cm"># 일상 사용 절차</span> <span class="st st-hyp">가설</span>
+│     ├─ <span class="fn">risk-model.md</span>  <span class="cm"># 5축과 R0~R3 판정</span> <span class="st st-hyp">가설</span>
+│     ├─ <span class="fn">delegation-contract.md</span>  <span class="cm"># 계약 실체화</span> <span class="st st-hyp">가설</span>
+│     ├─ <span class="fn">failure-playbook.md</span>  <span class="cm"># 중단·회수 절차</span> <span class="st st-hyp">가설</span>
+│     └─ <span class="fd">adr/</span>  <span class="cm"># 아키텍처 결정 기록</span> <span class="st st-hyp">가설</span>
+│
+├─ <span class="fn">CLAUDE.md</span>  <span class="cm"># 지침 층 (150~300줄)</span> <span class="st st-req">필수</span>
+├─ <span class="fn">.mcp.json</span>  <span class="cm"># GitHub read-only부터</span> <span class="st st-des">P2 설계</span>
+└─ <span class="fn">.gitignore</span>  <span class="st st-b">Baseline</span>
+</div>
 
-<div class="code-cap"><b>SPEC 03.1</b> CLAUDE.md 구성 예시</div>
-<pre><span class="c"># 에이전트 행동 규약</span>
+  <h3><span class="h3n">3.1</span>Phase 1 시작에 필요한 것</h3>
+  <p>위 트리에서 <strong>필수</strong> 뱃지가 붙은 5개만 있으면 Phase 1이 시작된다.</p>
 
-<span class="c">## 프로젝트</span>
-- 목적, 산출물 정의
-- 베이스라인 (ticketing) 참조
+  <ul class="mk">
+    <li><code>CLAUDE.md</code> — 지침 층</li>
+    <li><code>.claude/settings.json</code> — 강제 층 (권한)</li>
+    <li><code>.claude/hooks/guard-command.sh</code> — 강제 층 (위험 명령)</li>
+    <li><code>.github/pull_request_template.md</code> — 관찰 층 (근거 필드)</li>
+    <li><code>.github/workflows/ci.yml</code> — 결정적 검증</li>
+  </ul>
 
-<span class="c">## 권한 층 (4단)</span>
-- 의도 / 판단 / 실행 / 기계
+  <p>기존 baseline의 <code>pr-review.yml</code>, <code>baseline-diagnose.yml</code>, <code>orchestrator/*</code>는 이미 있으므로 별도 추가 없음.</p>
 
-<span class="c">## 신뢰 경계 (3구역)</span>
-- 내부 / 경계 / 외부
+  <p><strong>가설</strong> 뱃지가 붙은 것들(<code>validate-write-scope.sh</code>, <code>CODEOWNERS</code>, <code>ISSUE_TEMPLATE</code>, <code>docs/*</code>)은 Phase 1에서 <em>관찰이 그것들의 필요를 정당화하면</em> 추가된다. 첫 5~10개 PR을 처리하며 어떤 위반이 자주 발생하는지, 어떤 정보가 자주 누락되는지를 봐야 이것들의 정확한 모양이 정해진다.</p>
 
-<span class="c">## 위험 등급 (R0~R3)</span>
-- R0/R1: 자동 후보
-- R2: plan 승인 + 독립 리뷰
-- R3: 분석만, 명시적 승인
-
-<span class="c">## 횡단 원칙</span>
-- 관찰 가능성 · 에스컬레이션 · 상태/행동 분리
-
-<span class="c">## 베이스라인 변환 규칙</span>
-- 손대지 말 영역 (비즈니스 로직)
-- 변환 가능 영역 (인프라·의존성·타입·테스트·미들웨어)
-
-<span class="c">## 브랜치·커밋 컨벤션</span>
-- Conventional Commits
-- 한 이슈 = 한 브랜치 = 한 PR
-
-<span class="c">## 중단 조건</span>
-- 같은 테스트 2회 실패 → 사람에게
-- 수정 루프 2회 초과 → 사람에게
-- 변경 파일 15개 이상 → 분할
-- 보안·권한 영역 진입 → 즉시 중단
-
-<span class="c">## 참조 문서</span>
-- docs/agentic-development/authority-model.md
-- docs/agentic-development/risk-model.md
-- docs/agentic-development/workflow.md</pre>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">docs/agentic-development/</span>
-      <span class="fs-tag tag-p1">Phase 1 中</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>CLAUDE.md의 하위 문서. 각 도메인의 상세를 여기에 두어 CLAUDE.md는 짧게 유지.</dd>
-      <dt>P1 시점</dt>
-      <dd><strong>architecture.md</strong> · <strong>authority-model.md</strong> · <strong>risk-model.md</strong> (R0~R3 판정 기준) · <strong>workflow.md</strong> · <strong>failure-playbook.md</strong> · <strong>adr/</strong> (아키텍처 결정 기록)</dd>
-      <dt>P2 시점</dt>
-      <dd>verification-policy.md · context-policy.md · security-boundaries.md</dd>
-      <dt>ADR</dt>
-      <dd>큰 결정은 별도 ADR로. 예: <code>adr/0001-nats-to-kafka.md</code>, <code>adr/0002-terraform-adoption.md</code>. 결정 시점의 맥락과 대안을 남긴다.</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.claude/skills/*/SKILL.md</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>반복되는 절차의 패키지. <strong>역할극이 아니라 실행 가능한 명령 시퀀스</strong>.</dd>
-      <dt>초기 셋</dt>
-      <dd><strong>plan-change</strong> — 작업 목적·수용 조건·변경 영역을 받아 변경 대상·영향·위험 등급·검증 계획을 출력. <strong>verify-change</strong> — 포맷 → 린트 → 타입체크 → affected 유닛/통합 테스트 → 빌드 → diff scope validation 순으로 실행. <strong>prepare-pr</strong> — 변경 이유·구현 요약·위험·검증 결과·미검증 사항·롤백 방법을 담은 PR body 생성.</dd>
-      <dt>확장 원칙</dt>
-      <dd>새 스킬은 <strong>실제로 3회 이상 반복 관찰된 패턴</strong>만 추가. 상상으로 만들지 않는다.</dd>
-    </dl>
-  </div>
+  <p><strong>설계만</strong> 뱃지가 붙은 것들은 Phase 2·3의 진입 조건이 충족될 때 별도 판단으로 추가된다.</p>
 </section>
 
 <!-- ============ 4 ============ -->
 <section id="s4">
   <div class="sec-hd">
-    <div class="sec-num">§ 04 — Enforcement Layer</div>
-    <h2 class="sec">파일별 명세 · 강제 층</h2>
-    <p class="sec-sub">지침이 무시되거나 잘못 해석돼도 실행 자체를 차단하는 층. CLAUDE.md의 원칙이 실효성을 갖게 되는 자리.</p>
+    <div class="sec-num">§ 04 — Delegation Contract Realization</div>
+    <h2 class="sec">위임 계약의 실체화 지점</h2>
+    <p class="sec-sub">개념서 위임 계약의 세 성분이 이 프로젝트의 어떤 파일에 실체화되는가.</p>
   </div>
 
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.claude/settings.json</span>
-      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>Claude Code의 <strong>실행 계층에서 강제되는 권한 규칙</strong>. <code>defaultMode</code> + <code>allow</code>/<code>ask</code>/<code>deny</code> 배열로 구성.</dd>
-      <dt>평가 순서</dt>
-      <dd>deny → ask → allow. deny가 최우선.</dd>
-      <dt>버전</dt>
-      <dd>팀 공용은 <code>.claude/settings.json</code>, 개인 기계별은 <code>.claude/settings.local.json</code>, 개인 전역은 <code>~/.claude/settings.json</code>.</dd>
-      <dt>실효성</dt>
-      <dd>모델의 지시가 아니라 <strong>Claude Code 실행 계층에서 강제</strong>된다. 모델이 어떻게 해석하든 여기서 걸리면 실행이 차단된다.</dd>
-    </dl>
+  <p>개념서 R2와 명세서 R3에서 <strong>위임 계약</strong>은 이 프로젝트의 최상위 원칙이다. 이 계약이 추상 개념에 머무르지 않으려면 파일에 실체화되어야 한다.</p>
+
+  <table class="tbl">
+    <thead><tr><th>계약 성분</th><th>실체화 지점</th><th>Phase 1 상태</th></tr></thead>
+    <tbody>
+      <tr><td>목표</td><td>Issue 제목·본문 (ISSUE_TEMPLATE)</td><td>템플릿 없이 자유 서술로 시작</td></tr>
+      <tr><td>수용 조건</td><td>Issue 본문의 "Acceptance" 섹션</td><td>수동으로 명시</td></tr>
+      <tr><td>금지 조건</td><td>Issue 본문 · <code>CODEOWNERS</code></td><td>Issue 본문 명시로 시작</td></tr>
+      <tr><td>변경 가능 범위</td><td><code>validate-write-scope.sh</code></td><td>가설 · 관찰 후 채택</td></tr>
+      <tr><td>예산</td><td>Runner timeout · <code>CLAUDE.md</code> 상한</td><td><code>CLAUDE.md</code>에 정량 명시</td></tr>
+      <tr><td>검증 기준</td><td><code>ci.yml</code></td><td>필수 · 즉시 도입</td></tr>
+      <tr><td>에스컬레이션 조건</td><td><code>CLAUDE.md</code> · Hook logic</td><td><code>CLAUDE.md</code>에 정량 명시</td></tr>
+      <tr><td>탐색 · 판단 · 구현 위임</td><td><code>settings.json</code>의 allow 목록</td><td>필수 · 즉시 도입</td></tr>
+      <tr><td>회수 트리거</td><td>Hook 판정 · <code>CLAUDE.md</code> 규약</td><td>필수 · 즉시 도입</td></tr>
+      <tr><td>근거 제시 형식</td><td><code>pull_request_template.md</code></td><td>필수 · 즉시 도입</td></tr>
+    </tbody>
+  </table>
+
+  <p>이 표는 <strong>추상 개념이 어느 파일에 무게를 두고 있는지</strong>를 명시한다. 이 표를 참조하면 "위임 계약의 어떤 부분이 아직 실체화되지 않았는가"를 즉시 파악할 수 있다.</p>
+
+  <div class="call">
+    <div class="clb">Phase 1에서 실체화되지 않는 것</div>
+    <p>변경 가능 범위(<code>validate-write-scope.sh</code>)와 금지 조건의 강제(<code>CODEOWNERS</code>)는 Phase 1에서 <strong>가설 상태</strong>다. 관찰 후 정확한 모양이 정해진다. 이 두 항목이 Phase 1 진행 중 필요하다고 판명되면 즉시 승격된다.</p>
   </div>
-
-<div class="code-cap"><b>SPEC 04.1</b> settings.json 방향 예시</div>
-<pre>{
-  <span class="k">"$schema"</span>: <span class="s">"https://json.schemastore.org/claude-code-settings.json"</span>,
-  <span class="k">"permissions"</span>: {
-    <span class="k">"defaultMode"</span>: <span class="s">"default"</span>,
-    <span class="k">"allow"</span>: [
-      <span class="s">"Bash(git status)"</span>,
-      <span class="s">"Bash(git diff *)"</span>,
-      <span class="s">"Bash(git log *)"</span>,
-      <span class="s">"Bash(npm test *)"</span>,
-      <span class="s">"Bash(npm run lint *)"</span>,
-      <span class="s">"Bash(npm run typecheck *)"</span>
-    ],
-    <span class="k">"ask"</span>: [
-      <span class="s">"Bash(git commit *)"</span>,
-      <span class="s">"Bash(git push *)"</span>,
-      <span class="s">"Bash(npm install *)"</span>,
-      <span class="s">"Bash(npm add *)"</span>,
-      <span class="s">"Bash(kubectl *)"</span>,
-      <span class="s">"Bash(helm *)"</span>,
-      <span class="s">"Bash(terraform apply *)"</span>
-    ],
-    <span class="k">"deny"</span>: [
-      <span class="s">"Bash(git push --force *)"</span>,
-      <span class="s">"Bash(git reset --hard *)"</span>,
-      <span class="s">"Bash(git clean -fd *)"</span>,
-      <span class="s">"Bash(rm -rf /*)"</span>,
-      <span class="s">"Bash(kubectl delete *)"</span>,
-      <span class="s">"Bash(terraform destroy *)"</span>
-    ]
-  }
-}</pre>
-
-  <div class="call warn">
-    <div class="clb">권한 강제의 원칙</div>
-    <p>규약을 만들 때 스스로에게 묻는다 — <strong>"이 원칙이 지켜지지 않아도 아무 일이 일어나지 않는가?"</strong> 답이 그렇다면 그 원칙은 지침 층에만 있는 상태. 반드시 강제 층에 대응하는 규칙을 추가해야 한다.</p>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.claude/hooks/guard-command.sh</span>
-      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd><strong>PreToolUse 훅</strong>. 명령이 실행되기 전 shell 스크립트가 검사. force push, hard reset, 광범위 삭제, 운영 namespace, 운영 DB URL, <code>.github/workflows/</code> 수정, secrets 접근 등을 판정.</dd>
-      <dt>결과</dt>
-      <dd>allow / ask / deny 중 하나를 반환.</dd>
-      <dt>구현</dt>
-      <dd>LLM 훅이 아니라 <strong>결정적 shell/TypeScript 규칙</strong>. 판정에 언어 모델을 개입시키지 않는다.</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.claude/hooks/validate-write-scope.sh</span>
-      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>파일 편집 전 편집 범위 검사. 현재 task에 허용된 디렉토리인지, 생성 파일인지, protected file인지, 변경 파일 상한(15개)을 넘었는지 검사.</dd>
-      <dt>보호 대상</dt>
-      <dd><code>.github/workflows/**</code> · <code>CODEOWNERS</code> · <code>.claude/settings.json</code> · <code>infra/**</code> · <code>migrations/**</code> · 비즈니스 로직 도메인 폴더</dd>
-      <dt>기본 편집 영역</dt>
-      <dd>대상 서비스 디렉토리 + <code>common/</code> (경계 구역은 사람 승인 필요)</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.claude/hooks/format-changed-file.sh</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>PostToolUse 훅. <strong>변경된 파일 하나에만</strong> 포맷 적용. 저장소 전체 포맷은 diff를 부풀리므로 절대 금지.</dd>
-      <dt>예시</dt>
-      <dd>잘못된 형태: <code>npm run prettier -- --write .</code> / 올바른 형태: <code>prettier --write &lt;changed-file&gt;</code></dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.claude/hooks/record-run-event.sh</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>구조화된 실행 이벤트 로그. 관찰 가능성의 실체.</dd>
-      <dt>기록 이벤트</dt>
-      <dd><code>session_started</code> · <code>plan_approved</code> · <code>file_modified</code> · <code>verification_started</code> · <code>verification_completed</code> · <code>permission_denied</code> · <code>task_completed</code> · <code>task_failed</code></dd>
-      <dt>저장 위치</dt>
-      <dd>로컬은 <code>.agent-runs/</code>(gitignore). CI에서는 GitHub Actions artifact.</dd>
-      <dt>스키마</dt>
-      <dd>runId, taskId, event, baseSha, headSha, command, result, durationMs, timestamp</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.github/CODEOWNERS</span>
-      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>민감 파일 변경 시 자동 리뷰어 지정. GitHub이 강제한다.</dd>
-      <dt>소유자</dt>
-      <dd>개인 프로젝트라도 본인 계정으로 지정. 목적은 사람 수가 아니라 <strong>민감 파일을 일반 변경과 구분</strong>하는 것.</dd>
-    </dl>
-  </div>
-
-<div class="code-cap"><b>SPEC 04.2</b> CODEOWNERS 예시</div>
-<pre><span class="c"># .github/CODEOWNERS</span>
-
-<span class="c"># 인프라 · 워크플로 · 규약 = 소유자 승인 필수</span>
-/.github/                @daniel
-/infra/                  @daniel
-/.claude/                @daniel
-/CLAUDE.md               @daniel
-/docs/agentic-development/  @daniel
-
-<span class="c"># 비즈니스 로직 = 손대지 말 영역</span>
-/auth/src/               @daniel
-/tickets/src/            @daniel
-/orders/src/             @daniel
-/payments/src/           @daniel
-/expiration/src/         @daniel
-
-<span class="c"># 공유 패키지 = 경계 구역, 조심</span>
-/common/                 @daniel</pre>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.github/pull_request_template.md</span>
-      <span class="fs-tag tag-p1">Phase 1 · 즉시 추가</span>
-    </div>
-    <dl>
-      <dt>목적</dt>
-      <dd>모든 PR이 반드시 채워야 하는 필드. 관찰 가능성의 최전선.</dd>
-      <dt>강제 필드</dt>
-      <dd><strong>목적</strong> · <strong>변경 내용</strong> · <strong>변경하지 않은 범위</strong> · <strong>위험 등급 R0~R3</strong> · <strong>검증 체크리스트</strong> · <strong>미검증 사항</strong> · <strong>롤백 방법</strong> · <strong>에이전트 사용 정도</strong> · <strong>증거(Task/BaseSHA/Agent run/Test artifact)</strong></dd>
-      <dt>사람의 검토 지점</dt>
-      <dd>사람은 요약만 훑는 게 아니라 특히 <strong>변경하지 않은 범위 · 미검증 사항 · 롤백 방법 · 위험 등급</strong>을 본다.</dd>
-    </dl>
-  </div>
-
-<div class="code-cap"><b>SPEC 04.3</b> PR 템플릿 실체</div>
-<pre><span class="c">## 목적</span>
-
-<span class="c">## 변경 내용</span>
-
-<span class="c">## 변경하지 않은 범위</span>
-
-<span class="c">## 위험 등급</span>
-- [ ] R0: 문서·포맷
-- [ ] R1: 쉽게 되돌릴 수 있는 내부 코드
-- [ ] R2: 서비스 계약·데이터 흐름 영향
-- [ ] R3: 인프라·보안·DB·운영 영향
-
-<span class="c">## 검증</span>
-- [ ] format
-- [ ] lint
-- [ ] typecheck
-- [ ] unit
-- [ ] integration
-- [ ] build
-
-<span class="c">## 미검증 사항</span>
-
-<span class="c">## 롤백 방법</span>
-
-<span class="c">## 에이전트 사용</span>
-- [ ] 사용하지 않음
-- [ ] 구현 보조
-- [ ] 구현 대부분
-- [ ] 리뷰 보조
-
-<span class="c">## 증거</span>
-- Task:
-- Base SHA:
-- Agent run:
-- Test artifact:</pre>
 </section>
 
 <!-- ============ 5 ============ -->
 <section id="s5">
   <div class="sec-hd">
-    <div class="sec-num">§ 05 — Workflows</div>
-    <h2 class="sec">파일별 명세 · 워크플로</h2>
-    <p class="sec-sub">GitHub Actions 워크플로들. 각 파일이 언제 발화하고 무엇을 하는지.</p>
+    <div class="sec-num">§ 05 — Essential 5</div>
+    <h2 class="sec">파일 명세 · Phase 1 필수 5개</h2>
+    <p class="sec-sub">Phase 1 시작에 절대적으로 필요한 다섯 파일. 이것만 있으면 시작된다.</p>
   </div>
 
   <div class="fspec">
     <div class="fs-head">
-      <span class="fs-path">.github/workflows/pr-review.yml</span>
-      <span class="fs-tag tag-b">P1 · Baseline</span>
+      <span class="fs-path">CLAUDE.md</span>
+      <span class="fs-tags"><span class="fs-tag tag-req">필수 안전</span><span class="fs-tag tag-p1">Phase 1</span></span>
     </div>
     <dl>
-      <dt>트리거</dt>
-      <dd><code>pull_request: [opened, synchronize]</code></dd>
-      <dt>동작</dt>
-      <dd>PR diff 추출 → <code>orchestrator/review.mjs</code> 실행 → Claude API 호출 → 리뷰 결과를 PR 코멘트로 게시.</dd>
-      <dt>필터</dt>
-      <dd>draft 제외, bot PR 제외, generated-only 제외, diff 상한 검사, fork PR에서는 secret 미사용.</dd>
-      <dt>권한</dt>
-      <dd><code>contents: read</code>, <code>pull-requests: write</code></dd>
+      <dt>목적</dt>
+      <dd>에이전트의 매 세션에 시스템 프롬프트로 주입되는 <strong>행동 규약의 실행용 압축본</strong>.</dd>
+      <dt>크기</dt>
+      <dd>150~300줄. 백과사전 아니라 라우팅 규칙.</dd>
+      <dt>담을 것</dt>
+      <dd>프로젝트 목적 · 저장소 구조 · 기본 개발 명령 · 위임 계약 형식 · <strong>정량 회수 트리거</strong> · 브랜치·커밋 컨벤션</dd>
+      <dt>담지 말 것</dt>
+      <dd>서비스 상세 · API 명세 · 코딩 스타일 세부. 이것들은 하위 문서 링크로.</dd>
+      <dt>계약 성분</dt>
+      <dd>목표·수용·금지·예산·에스컬레이션 조건의 <strong>참조 문서</strong>. 실제 강제는 훅이 담당.</dd>
     </dl>
   </div>
 
   <div class="fspec">
     <div class="fs-head">
-      <span class="fs-path">.github/workflows/baseline-diagnose.yml</span>
-      <span class="fs-tag tag-b">P1 · Baseline</span>
+      <span class="fs-path">.claude/settings.json</span>
+      <span class="fs-tags"><span class="fs-tag tag-req">필수 안전</span><span class="fs-tag tag-p1">Phase 1</span></span>
     </div>
     <dl>
-      <dt>트리거</dt>
-      <dd><code>workflow_dispatch</code>만 (사람 수동 실행)</dd>
-      <dt>동작</dt>
-      <dd>레포 전체를 스캔 → <code>orchestrator/diagnose.mjs</code> 실행 → 변환 후보 5~10개를 GitHub Issue로 발행. 각 후보에 영역·가치·난이도·<strong>R0~R3 등급</strong>·제안 시점·근거 포함.</dd>
-      <dt>권한</dt>
-      <dd><code>contents: read</code>, <code>issues: write</code></dd>
+      <dt>목적</dt>
+      <dd>로컬 Claude Code 세션의 <strong>권한 강제</strong>. <code>allow</code> / <code>ask</code> / <code>deny</code> 배열로 실행 계층에서 판정.</dd>
+      <dt>평가 순서</dt>
+      <dd>deny → ask → allow. deny 최우선.</dd>
+      <dt>Phase 1 원칙</dt>
+      <dd>보수적. 모르는 명령은 ask에 두는 게 안전. Phase 1 관찰을 통해 무엇을 allow로 옮길지 결정.</dd>
+      <dt>실효성</dt>
+      <dd>모델 지시가 아니라 <strong>실행 계층에서 강제</strong>. 모델이 어떻게 해석하든 여기서 걸리면 실행 차단.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/hooks/guard-command.sh</span>
+      <span class="fs-tags"><span class="fs-tag tag-req">필수 안전</span><span class="fs-tag tag-p1">Phase 1</span></span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd><strong>PreToolUse 훅</strong>. 명령 실행 전 검사. force push, hard reset, 광범위 삭제, secrets 접근 등을 판정.</dd>
+      <dt>결과</dt>
+      <dd>allow / ask / deny 반환.</dd>
+      <dt>구현</dt>
+      <dd>LLM 훅 아님. <strong>결정적 shell 규칙</strong>. 언어 모델 개입 없음.</dd>
+      <dt>확장</dt>
+      <dd>Phase 1 관찰에서 발견되는 새 위험 패턴은 이 훅에 정기 추가.</dd>
+    </dl>
+  </div>
+
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.github/pull_request_template.md</span>
+      <span class="fs-tags"><span class="fs-tag tag-req">필수 안전</span><span class="fs-tag tag-p1">Phase 1</span></span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>모든 PR이 채워야 하는 필드. <strong>판단 관찰 가능성의 실체</strong>.</dd>
+      <dt>강제 필드</dt>
+      <dd>목적 · 변경 · <strong>변경하지 않은 범위</strong> · <strong>위험 5축 판정 + R0~R3 요약</strong> · 검증 체크리스트 · <strong>미검증 사항</strong> · <strong>롤백 방법</strong> · 에이전트 사용 정도 · 증거(Task/BaseSHA/Agent run)</dd>
+      <dt>사람의 검토 지점</dt>
+      <dd>변경하지 않은 범위 · 미검증 사항 · 롤백 · 위험 등급. 이 네 필드가 저인지부하 게이트의 근거.</dd>
     </dl>
   </div>
 
   <div class="fspec">
     <div class="fs-head">
       <span class="fs-path">.github/workflows/ci.yml</span>
-      <span class="fs-tag tag-p1">Phase 1 · 표준화</span>
+      <span class="fs-tags"><span class="fs-tag tag-req">필수 안전</span><span class="fs-tag tag-p1">Phase 1</span></span>
     </div>
     <dl>
-      <dt>트리거</dt>
-      <dd><code>pull_request</code> + <code>push: [main]</code></dd>
-      <dt>동작 (모든 PR)</dt>
-      <dd>checkout → Node/npm setup → frozen install → format check → lint → typecheck → unit test → affected integration test → build → manifest validation.</dd>
+      <dt>목적</dt>
+      <dd>모든 PR의 <strong>결정적 검증</strong>. AI 리뷰보다 반드시 먼저 실행.</dd>
+      <dt>실행 순서</dt>
+      <dd>format check → lint → typecheck → unit test → affected integration → build → manifest validation</dd>
       <dt>경로 최적화</dt>
-      <dd>docs-only PR은 markdown 검사만. 특정 서비스 변경은 해당 서비스 + 공유 패키지 검사만. 인프라 변경은 render + policy + validation.</dd>
-      <dt>중요 원칙</dt>
-      <dd>AI 리뷰 전에 <strong>결정적 CI가 먼저 통과</strong>해야 한다. 기계가 찾을 수 있는 오류는 기계가 먼저 제거해야 함.</dd>
+      <dd>docs-only는 markdown 검사만. 특정 서비스 변경은 해당 서비스 + 공유 패키지만.</dd>
+      <dt>원칙</dt>
+      <dd>기계가 찾을 수 있는 오류는 <strong>기계가 먼저 제거</strong>. AI 리뷰는 그 이후 의미적 검토를 담당.</dd>
     </dl>
   </div>
 
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.github/workflows/security.yml</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
-    </div>
-    <dl>
-      <dt>포함</dt>
-      <dd>dependency scanning · secret scanning · code scanning · container scan · workflow dependency pinning 검토 · IaC 정책 스캔</dd>
-      <dt>연동</dt>
-      <dd>PR 리뷰와 <strong>병렬 실행</strong>. 결과가 심각도 High 이상이면 PR에 별도 코멘트로 게시하고 배포 워크플로 자동 실패.</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.github/workflows/code-draft.yml</span>
-      <span class="fs-tag tag-p2">Phase 2 · 자동화 확장</span>
-    </div>
-    <dl>
-      <dt>트리거</dt>
-      <dd><code>issues: labeled</code> + label == <code>ready-for-draft</code></dd>
-      <dt>동작</dt>
-      <dd>이슈 본문 읽기 → Claude API로 스펙 분해 → 브랜치 자동 생성 (<code>agent/{issue}-{slug}</code>) → Claude Code 헤드리스로 코드 초안 작성 → 자동 커밋 & 푸시 → PR 자동 오픈.</dd>
-      <dt>제한</dt>
-      <dd>변경 파일 15개 이하, diff 800줄 이하, 위험 등급 R0/R1만. R2 이상은 이 워크플로에서 만들지 않고 <code>needs-plan</code> 라벨로 승격.</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.github/workflows/terraform-plan.yml</span>
-      <span class="fs-tag tag-p3">Phase 3</span>
-    </div>
-    <dl>
-      <dt>트리거</dt>
-      <dd><code>pull_request: paths: ['infra/terraform/**']</code></dd>
-      <dt>동작</dt>
-      <dd><code>terraform plan</code> 실행 → 결과를 PR 코멘트로 게시 → Claude가 plan 결과를 해석하고 <strong>리스크 평가·월 예상 비용 요약</strong>을 별도 코멘트로 추가.</dd>
-    </dl>
-  </div>
-
-  <div class="fspec">
-    <div class="fs-head">
-      <span class="fs-path">.github/workflows/terraform-apply.yml</span>
-      <span class="fs-tag tag-p3">Phase 3 · 사람 게이트</span>
-    </div>
-    <dl>
-      <dt>트리거</dt>
-      <dd><code>workflow_dispatch</code>만. 자동 트리거 절대 금지.</dd>
-      <dt>입력</dt>
-      <dd>environment 선택 필수 (<code>dev</code> / <code>staging</code> / <code>prod</code>). 드롭다운으로 실수 방지.</dd>
-      <dt>동작</dt>
-      <dd>선택 환경에 <code>terraform apply</code>. <strong>사람이 명시적으로 실행</strong>한 경우에만 발화.</dd>
-      <dt>보호</dt>
-      <dd>GitHub Environment 보호 규칙으로 <code>staging</code>·<code>prod</code>는 별도 승인 필요. 실패 시 자동 롤백 워크플로 트리거.</dd>
-    </dl>
+  <div class="call">
+    <div class="clb">이 5개면 왜 충분한가</div>
+    <p><strong>지침 층 하나</strong>(CLAUDE.md), <strong>강제 층 두 개</strong>(settings.json + guard-command.sh), <strong>관찰 층 하나</strong>(PR template), <strong>결정적 검증 하나</strong>(ci.yml). 이 조합이 위임 계약을 실체화하고 Phase 1을 시작하기에 충분하다. 다른 파일들이 지금 필요하다고 느껴진다면, <em>그것이 필요한 이유가 관찰된 것인지 상상한 것인지</em>부터 물어야 한다.</p>
   </div>
 </section>
 
 <!-- ============ 6 ============ -->
 <section id="s6">
   <div class="sec-hd">
-    <div class="sec-num">§ 06 — Documents & Scripts</div>
-    <h2 class="sec">파일별 명세 · 문서와 스크립트</h2>
-    <p class="sec-sub">사람이 참조하는 상세 문서, 그리고 결정적 검증을 담는 스크립트들.</p>
+    <div class="sec-num">§ 06 — Enforcement Expansion</div>
+    <h2 class="sec">파일 명세 · 강제 층 확장</h2>
+    <p class="sec-sub">Phase 1 관찰 이후 추가되는 강제 층 파일들. 가설 상태에서 관찰 후 채택 상태로 이동한다.</p>
   </div>
-
-  <h3><span class="h3n">6.1</span>docs/agentic-development/ 하위 문서</h3>
-
-  <table class="tbl">
-    <thead><tr><th>파일</th><th>담는 것</th><th>Phase</th></tr></thead>
-    <tbody>
-      <tr><td><code>architecture.md</code></td><td>시스템 전체 아키텍처, 서비스 간 관계, 데이터 흐름</td><td>P1</td></tr>
-      <tr><td><code>authority-model.md</code></td><td>4단 권한 층의 상세 정의, 각 층의 결정 예시</td><td>P1</td></tr>
-      <tr><td><code>risk-model.md</code></td><td><strong>R0~R3 판정 기준, 등급별 처리 방식, 예외 처리</strong></td><td>P1</td></tr>
-      <tr><td><code>workflow.md</code></td><td>일상 사용 루틴 (새 기능/버그 수정/인프라 변경 각각)</td><td>P1</td></tr>
-      <tr><td><code>failure-playbook.md</code></td><td><strong>중단 조건 도달 시 대응, 롤백 절차, 에스컬레이션 경로</strong></td><td>P1</td></tr>
-      <tr><td><code>verification-policy.md</code></td><td>검증 명령 표준, affected 스코프 결정, CI 통과 기준</td><td>P2</td></tr>
-      <tr><td><code>context-policy.md</code></td><td>세션당 컨텍스트 관리, 로딩 규칙, 세션 분리 기준</td><td>P2</td></tr>
-      <tr><td><code>security-boundaries.md</code></td><td>MCP write 권한 경계, 시크릿 관리, 네트워크 정책</td><td>P2</td></tr>
-      <tr><td><code>adr/*.md</code></td><td>큰 아키텍처 결정 기록. 결정 시점 맥락 · 대안 · 결과</td><td>P1 이후 지속</td></tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3n">6.2</span>scripts/ · 결정적 검증 도구</h3>
 
   <div class="fspec">
     <div class="fs-head">
-      <span class="fs-path">scripts/verify-change.ts</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
+      <span class="fs-path">.claude/hooks/validate-write-scope.sh</span>
+      <span class="fs-tags"><span class="fs-tag tag-hyp">가설</span><span class="fs-tag tag-p1">P1 관찰 후</span></span>
     </div>
     <dl>
       <dt>목적</dt>
-      <dd>에이전트의 기본 검증 파이프라인. <strong>하나의 명령으로 통일</strong>: <code>npm run verify:affected</code></dd>
-      <dt>순서</dt>
-      <dd>format check → lint → typecheck → affected unit tests → affected integration tests → build → diff scope validation</dd>
-      <dt>CI vs 로컬</dt>
-      <dd>로컬 에이전트는 affected만, PR CI는 <code>npm run verify</code>로 전체 서비스 단위 독립 검증, main은 전체 build 및 필요한 통합 검사.</dd>
+      <dd>파일 편집 전 편집 범위 검사. task에 허용된 디렉토리인가, protected 파일인가, 변경 규모가 예산 안인가.</dd>
+      <dt>도입 조건</dt>
+      <dd>Phase 1에서 편집 범위 위반이 관찰되면 도입. 관찰 전에 만들지 않음.</dd>
+      <dt>보호 대상 후보</dt>
+      <dd><code>.github/workflows/**</code> · <code>CODEOWNERS</code> · <code>.claude/settings.json</code> · <code>infra/**</code> · <code>migrations/**</code></dd>
+      <dt>파일 수 판정</dt>
+      <dd>파일 수는 hard deny 아닌 <strong>단계적</strong>: 10 경고 · 15 재승인 · 초과 중단. Rename이나 자동 생성으로 부풀 수 있음을 고려.</dd>
     </dl>
   </div>
 
   <div class="fspec">
     <div class="fs-head">
-      <span class="fs-path">scripts/classify-change.ts</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
+      <span class="fs-path">.github/CODEOWNERS</span>
+      <span class="fs-tags"><span class="fs-tag tag-hyp">가설</span><span class="fs-tag tag-p1">P1 관찰 후</span></span>
     </div>
     <dl>
       <dt>목적</dt>
-      <dd>변경된 파일 경로와 diff를 분석해 <strong>R0~R3 등급을 자동 판정</strong>. PR 템플릿의 등급 필드에 자동 반영.</dd>
-      <dt>판정 규칙</dt>
-      <dd><code>docs/**</code>, 포맷 변경 → R0. <code>src/**</code> 내부 코드 → R1. <code>common/**</code>, 이벤트 스키마 → R2. <code>infra/**</code>, <code>.github/workflows/**</code>, <code>migrations/**</code> → R3.</dd>
+      <dd>민감 파일 변경 시 자동 리뷰어 지정. GitHub이 강제.</dd>
+      <dt>도입 조건</dt>
+      <dd>Phase 1에서 어떤 파일이 실제로 자주 잘못 변경되는지 관찰 후 정확한 소유자 목록 결정.</dd>
+      <dt>Phase 1 처리</dt>
+      <dd>관찰 없이 만들면 실제와 어긋난다. 이슈 본문에 "손대지 말 영역"을 명시하는 것으로 대체.</dd>
     </dl>
   </div>
 
   <div class="fspec">
     <div class="fs-head">
-      <span class="fs-path">scripts/baseline-diff.ts</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
+      <span class="fs-path">.github/ISSUE_TEMPLATE/*.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-hyp">가설</span><span class="fs-tag tag-p1">P1 관찰 후</span></span>
     </div>
     <dl>
       <dt>목적</dt>
-      <dd>베이스라인(Stephen Grider 원본) 대비 변경 감지. 비즈니스 로직 침범 시 자동 경고.</dd>
+      <dd>스펙 준비도 게이트의 실체화. 이슈가 위임 가능한 상태로 등록되도록 필드 강제.</dd>
+      <dt>필수 필드 후보</dt>
+      <dd>목표 · 수용 조건 · 손대지 말 영역 · 위험 예상 · 롤백 · 데이터 마이그레이션 여부</dd>
+      <dt>도입 조건</dt>
+      <dd>Phase 1의 이슈들이 자유 서술로 처리되며, 반복적으로 누락되는 정보가 관찰되면 그 정보를 템플릿 필수 필드로 승격.</dd>
     </dl>
   </div>
 
   <div class="fspec">
     <div class="fs-head">
-      <span class="fs-path">scripts/emit-audit-event.ts</span>
-      <span class="fs-tag tag-p2">Phase 2</span>
+      <span class="fs-path">.claude/hooks/format-changed-file.sh</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P2 설계</span></span>
     </div>
     <dl>
       <dt>목적</dt>
-      <dd>구조화된 이벤트 발행. record-run-event.sh와 함께 관찰 가능성의 실체.</dd>
+      <dd>PostToolUse 훅. <strong>변경된 파일 하나에만</strong> 포맷 적용. 저장소 전체 포맷은 diff를 부풀리므로 금지.</dd>
+      <dt>도입 시점</dt>
+      <dd>Phase 2. 자동 코드 생성이 시작되면 포맷 일관성 관리 필요.</dd>
     </dl>
   </div>
 
-  <h3><span class="h3n">6.3</span>orchestrator/ · Claude API 호출 진입점</h3>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/hooks/record-run-event.sh</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P2 설계</span></span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>구조화된 실행 이벤트 로그. <strong>행위 관찰 가능성</strong>의 실체.</dd>
+      <dt>기록 이벤트</dt>
+      <dd>session_started · plan_approved · file_modified · verification_started · permission_denied · task_completed · task_failed</dd>
+      <dt>저장</dt>
+      <dd>로컬 <code>.agent-runs/</code> (gitignore). CI는 Actions artifact.</dd>
+    </dl>
+  </div>
 
-  <p>기존 세 파일이 여기 자리. <code>package.json</code>은 <code>@anthropic-ai/sdk</code> 의존. <code>review.mjs</code>는 PR diff → Claude → 코멘트, <code>diagnose.mjs</code>는 코드 스캔 → 변환 후보 이슈. Phase 2에서 <code>router.mjs</code>(모델 라우팅)와 <code>decompose.mjs</code>(이슈 스펙 분해) 추가.</p>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">.claude/agents/reviewer.md</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P3 설계</span></span>
+    </div>
+    <dl>
+      <dt>목적</dt>
+      <dd>격리된 서브에이전트. <strong>독립 검증</strong>의 실체.</dd>
+      <dt>격리 조건</dt>
+      <dd>구현자의 self-report 미제공. 원 이슈와 diff만 제공. Phase 3에서 다른 모델 계열 검토.</dd>
+      <dt>도입 시점</dt>
+      <dd>Phase 3. Phase 2에서는 리뷰가 워크플로 안에서 처리됨.</dd>
+    </dl>
+  </div>
 </section>
 
 <!-- ============ 7 ============ -->
 <section id="s7">
   <div class="sec-hd">
-    <div class="sec-num">§ 07 — Environment & Stack</div>
-    <h2 class="sec">환경과 스택 스펙</h2>
-    <p class="sec-sub">Phase 1 시작에 필요한 로컬 환경, API 키, 시크릿, MCP 도입 조건.</p>
+    <div class="sec-num">§ 07 — Workflows</div>
+    <h2 class="sec">워크플로 명세</h2>
+    <p class="sec-sub">GitHub Actions 워크플로 각각의 채택 상태와 도입 조건.</p>
   </div>
 
-  <h3><span class="h3n">7.1</span>로컬 개발 환경</h3>
-
-  <table class="tbl">
-    <thead><tr><th>도구</th><th>버전 · 정책</th><th>고정 방식</th></tr></thead>
-    <tbody>
-      <tr><td>Node.js</td><td>20 LTS 고정</td><td><code>.nvmrc</code> 또는 <code>mise</code></td></tr>
-      <tr><td>패키지 매니저</td><td>npm (베이스라인 유지)</td><td><code>packageManager</code> 필드 <code>package.json</code></td></tr>
-      <tr><td>Git</td><td>최신 안정 버전</td><td>—</td></tr>
-      <tr><td>VS Code</td><td>최신 안정 + Claude Code Extension</td><td>Workspace 설정 <code>.vscode/</code></td></tr>
-      <tr><td>Claude Code CLI</td><td>Verified baseline &gt;= 2.x</td><td>월 1회 검증 후 갱신</td></tr>
-      <tr><td>Docker</td><td>Desktop 또는 호환 런타임</td><td>—</td></tr>
-      <tr><td>GitHub CLI (gh)</td><td>최신 안정</td><td>—</td></tr>
-      <tr><td>kubectl / Helm</td><td>Phase 3 진입 시</td><td>—</td></tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3n">7.2</span>API 키와 시크릿</h3>
-
-  <table class="tbl">
-    <thead><tr><th>시크릿</th><th>어디에</th><th>목적</th><th>Phase</th></tr></thead>
-    <tbody>
-      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>GitHub Secrets (repo)</td><td>워크플로에서 Claude API 호출</td><td>P1</td></tr>
-      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>로컬 <code>~/.claude/</code></td><td>로컬 Claude Code</td><td>P1</td></tr>
-      <tr><td><code>GITHUB_TOKEN</code></td><td>자동 (workflow 기본 제공)</td><td>PR 코멘트, 이슈 발행</td><td>P1</td></tr>
-      <tr><td><code>AWS_ACCESS_KEY_ID</code></td><td>GitHub Environment secret</td><td>Terraform apply</td><td>P3</td></tr>
-      <tr><td><code>AWS_SECRET_ACCESS_KEY</code></td><td>GitHub Environment secret</td><td>Terraform apply</td><td>P3</td></tr>
-    </tbody>
-  </table>
-
-  <div class="call warn">
-    <div class="clb">시크릿 원칙</div>
-    <p>로컬 개인 사용과 CI 인증은 <strong>완전히 분리</strong>한다. CI가 개인 구독 세션에 종속되면 안 된다. 초기 소규모 프로젝트에서 API 키를 쓴다면 최소 사용 범위 · 정기 회전 · 비용 한도 · fork PR 미제공 · 로그 출력 금지 · production secret과 분리를 지킨다.</p>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">pr-review.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-b">Baseline</span><span class="fs-tag tag-p1">Phase 1</span></span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>pull_request: [opened, synchronize]</code></dd>
+      <dt>동작</dt>
+      <dd>PR diff → <code>orchestrator/review.mjs</code> → Claude API → PR 코멘트</dd>
+      <dt>실행 순서</dt>
+      <dd><strong>ci.yml이 먼저 통과한 후</strong>에만 실행. 결정적 검증 실패 상태에서 AI 리뷰는 노이즈.</dd>
+    </dl>
   </div>
 
-  <h3><span class="h3n">7.3</span>API 사용 스펙 · Claude</h3>
-
-  <table class="tbl">
-    <thead><tr><th>항목</th><th>값</th></tr></thead>
-    <tbody>
-      <tr><td>SDK</td><td><code>@anthropic-ai/sdk</code> npm</td></tr>
-      <tr><td>모델 (Phase 1)</td><td><code>claude-opus-4-8</code> (Console에서 확인된 최신 안정)</td></tr>
-      <tr><td>모델 (Phase 2 라우팅)</td><td>판단 무거움 → Opus / 코드 생성 → Claude Code 헤드리스 / 반복 요약 → 로컬 LLM</td></tr>
-      <tr><td>Context window</td><td>200k 토큰까지 사용 가능</td></tr>
-      <tr><td>Max tokens 응답</td><td>2500 (리뷰), 4000 (진단)</td></tr>
-      <tr><td>Diff 상한</td><td>200,000 chars (~50k tokens) 초과 시 자르기</td></tr>
-      <tr><td>System prompt</td><td><code>CLAUDE.md</code> 파일 내용 주입</td></tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3n">7.4</span>MCP 도입 순서</h3>
-
-  <div class="call">
-    <div class="clb">MCP 원칙</div>
-    <p>초기 MCP는 <strong>하나 이하</strong>. 로컬에서 이미 사용 가능한 것(<code>git</code>, <code>gh</code> CLI, GitHub Actions)이 있으면 MCP 안 붙인다. 복사·붙여넣기가 반복되기 시작하면 그때 GitHub read-only MCP부터.</p>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">baseline-diagnose.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-b">Baseline</span><span class="fs-tag tag-p1">Phase 1</span></span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>workflow_dispatch</code>만 (사람 수동)</dd>
+      <dt>동작</dt>
+      <dd>레포 스캔 → 변환 후보 5~10개 → GitHub Issue 발행. R0~R3 등급 · 5축 판정 포함.</dd>
+    </dl>
   </div>
 
-  <table class="tbl">
-    <thead><tr><th>MCP</th><th>도입 시점</th><th>범위</th></tr></thead>
-    <tbody>
-      <tr><td><strong>GitHub</strong></td><td>Phase 2 초반</td><td>read 중심 (issue/PR/review 조회). write는 매번 승인.</td></tr>
-      <tr><td><strong>Sentry</strong></td><td>Phase 3</td><td>read-only. 관련 오류 조회, 배포 후 회귀 확인. write 권한 절대 금지.</td></tr>
-      <tr><td><strong>Playwright</strong></td><td>Phase 3</td><td>Playwright 테스트 스위트가 먼저 있어야. 실패 화면 탐색, 재현 보조.</td></tr>
-      <tr><td><strong>Kubernetes</strong></td><td>Phase 3 후반 (조건부)</td><td>local kind/minikube read → staging read → staging 제한 write → production read. Production write는 원칙적으로 사람 전용.</td></tr>
-      <tr><td><strong>Database</strong></td><td>제한적</td><td>로컬 DB · fixture DB · read replica · schema metadata · 익명화 샘플까지만. 운영 write는 절대 금지.</td></tr>
-    </tbody>
-  </table>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">security.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P2 설계</span></span>
+    </div>
+    <dl>
+      <dt>포함</dt>
+      <dd>dependency scanning · secret scanning · code scanning · workflow dependency pinning · IaC 정책 스캔</dd>
+      <dt>연동</dt>
+      <dd>PR 리뷰와 <strong>병렬</strong>. 결과가 High 이상이면 별도 코멘트 + 배포 자동 실패.</dd>
+    </dl>
+  </div>
 
-  <h3><span class="h3n">7.5</span>GitHub Actions 권한 기본</h3>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">code-draft.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P2 설계</span></span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>issues: labeled</code> + label == <code>ready-for-draft</code> (단 <code>spec-ready</code>가 먼저 붙어야 함)</dd>
+      <dt>제한</dt>
+      <dd>변경 파일 15개 이하, diff 800줄 이하, 위험 R0/R1만. R2 이상은 <code>needs-plan</code> 라벨로 승격.</dd>
+      <dt>사전 게이트</dt>
+      <dd><strong>spec-ready 게이트 통과 필수</strong>. 이슈 lint + 사람 승인이 먼저.</dd>
+    </dl>
+  </div>
 
-<div class="code-cap"><b>SPEC 07.1</b> workflow 기본 권한</div>
-<pre><span class="k">permissions</span>:
-  <span class="k">contents</span>: read
-  <span class="k">pull-requests</span>: write   <span class="c"># 리뷰 코멘트 게시 시만</span>
-  <span class="k">issues</span>: write          <span class="c"># 진단 이슈 발행 시만</span></pre>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">terraform-plan.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P3 설계</span></span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>pull_request: paths: ['infra/terraform/**']</code></dd>
+      <dt>동작</dt>
+      <dd><code>terraform plan</code> → PR 코멘트 → Claude가 <strong>리스크·비용 요약</strong> 별도 코멘트</dd>
+    </dl>
+  </div>
 
-  <p>모든 워크플로는 기본을 <code>contents: read</code>로 두고 필요한 권한만 명시 추가한다. 코드 수정 워크플로는 별도 파일·별도 트리거로 분리한다.</p>
+  <div class="fspec">
+    <div class="fs-head">
+      <span class="fs-path">terraform-apply.yml</span>
+      <span class="fs-tags"><span class="fs-tag tag-des">P3 설계</span><span class="fs-tag tag-p3">사람 게이트</span></span>
+    </div>
+    <dl>
+      <dt>트리거</dt>
+      <dd><code>workflow_dispatch</code>만. <strong>자동 트리거 절대 금지</strong>.</dd>
+      <dt>입력</dt>
+      <dd>environment 선택 필수 (<code>dev</code> / <code>staging</code> / <code>prod</code>)</dd>
+      <dt>보호</dt>
+      <dd>GitHub Environment 보호 규칙으로 staging·prod는 별도 승인. 실패 시 자동 롤백.</dd>
+    </dl>
+  </div>
 </section>
 
 <!-- ============ 8 ============ -->
 <section id="s8">
   <div class="sec-hd">
-    <div class="sec-num">§ 08 — Phase 1 Scenario</div>
-    <h2 class="sec">Phase 1 실행 시나리오</h2>
-    <p class="sec-sub">2~3주간의 실제 진행. 셋업부터 첫 자동 흐름 관찰, 그리고 관찰된 것을 문서화까지.</p>
+    <div class="sec-num">§ 08 — Policy vs Implementation</div>
+    <h2 class="sec">원칙과 구현의 분리</h2>
+    <p class="sec-sub">각 자동화를 원칙 · 현 구현 · 대안 3단으로 표기한다. 도구가 바뀌어도 원칙이 흔들리지 않는다.</p>
   </div>
 
-  <div class="phase phase-1">
-    <div class="phase-head">
-      <span class="phase-tag">Phase 01</span>
-      <span class="phase-name">파이프라인 증명 + 베이스라인 인수</span>
-      <span class="phase-when">Week 1~3</span>
-    </div>
-    <div class="phase-body">
-      <p><strong>목표:</strong> "에이전트가 개발 프로세스에 참여한다"의 최소 증명. 관찰이 이 단계의 산출물.</p>
-      <p><strong>완료 조건:</strong> 3~5건의 실제 변환 머지, 자동 리뷰가 안정적으로 발화, 진단 이슈가 유용한 후보 발굴, 이 과정이 GitHub 안에 기록으로 남음.</p>
-    </div>
-  </div>
+  <p>이 프로젝트의 자동화는 특정 도구에 강하게 결합되어 있다. Claude Code · GitHub Actions · Anthropic API. 하지만 <strong>원칙은 도구가 아니다</strong>. 원칙과 구현을 분리해 표기하면 나중에 도구를 바꿔도 원칙이 유지된다.</p>
 
-  <h3><span class="h3n">8.1</span>Week 1 · 셋업과 첫 발화</h3>
+  <h3><span class="h3n">8.1</span>주요 자동화의 정책 · 구현 · 대안</h3>
 
-  <div class="timeline">
-    <div class="tl-row">
-      <span class="tl-when">Day 1</span>
-      <span class="tl-what">R2.5 파일 5개 추가<small>settings.json · hooks 2개 · CODEOWNERS · PR 템플릿을 <code>feat/orchestration-bootstrap</code> 브랜치에 커밋</small></span>
-      <span class="tl-who who-h">사람</span>
+  <h4>위험 명령 실행 전 차단</h4>
+  <div class="polimpl">
+    <div class="polimpl-row p">
+      <div class="pi-side">Policy</div>
+      <div class="pi-body">위험한 shell 명령은 실행 전에 결정적으로 차단된다.</div>
     </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 1</span>
-      <span class="tl-what">GitHub Secret 등록<small><code>ANTHROPIC_API_KEY</code>를 <code>Settings → Secrets → Actions</code>에</small></span>
-      <span class="tl-who who-h">사람</span>
+    <div class="polimpl-row i">
+      <div class="pi-side">Implementation</div>
+      <div class="pi-body">Claude Code의 <strong>PreToolUse hook</strong> + <code>.claude/settings.json</code>의 deny 배열</div>
     </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 1</span>
-      <span class="tl-what">Branch protection 설정<small>main에 직접 push 금지, PR 필수, required checks, CODEOWNERS 승인</small></span>
-      <span class="tl-who who-h">사람</span>
-    </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 1</span>
-      <span class="tl-what">첫 PR 열기<small>bootstrap 브랜치 → main. 이 PR 자체가 첫 자동 리뷰의 시험대</small></span>
-      <span class="tl-who who-h">사람</span>
-    </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 1</span>
-      <span class="tl-what">자동 리뷰 발화 관찰<small>1~2분 내 Claude 리뷰 코멘트 확인. 안 뜨면 head 브랜치 워크플로 트리거 이슈 확인</small></span>
-      <span class="tl-who who-r">러너</span>
-    </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 1</span>
-      <span class="tl-what">첫 머지<small>사람이 리뷰 확인 후 Merge 클릭. 1초 게이트의 첫 실행</small></span>
-      <span class="tl-who who-h">사람</span>
-    </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 2</span>
-      <span class="tl-what">Baseline Diagnose 실행<small>Actions 탭 → workflow_dispatch. 진단 이슈 자동 생성 확인</small></span>
-      <span class="tl-who who-h">사람</span>
-    </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 2</span>
-      <span class="tl-what">진단 리포트 발행<small>변환 후보 5~10개가 R0~R3 등급과 함께 이슈로 발행</small></span>
-      <span class="tl-who who-r">러너</span>
-    </div>
-    <div class="tl-row">
-      <span class="tl-when">Day 2~3</span>
-      <span class="tl-what">진단 검토와 첫 작업 이슈 등록<small>후보 중 R0/R1 두 개 선정. <code>gh issue create</code>로 작업 이슈 등록</small></span>
-      <span class="tl-who who-h">사람</span>
+    <div class="polimpl-row a">
+      <div class="pi-side">Alternatives</div>
+      <div class="pi-body">Shell wrapper CLI · Container seccomp profile · CI runner permission scope · 별도 sandbox 실행기</div>
     </div>
   </div>
 
-  <h3><span class="h3n">8.2</span>Week 1~2 · 첫 변환 사이클</h3>
-
-  <ol class="step">
-    <li><strong>이슈 확인</strong> — <code>gh issue view 5</code>로 오늘 처리할 이슈 상세 확인.</li>
-    <li><strong>브랜치 생성</strong> — <code>git checkout -b chore/auth-dockerfile-multistage</code></li>
-    <li><strong>Claude Code로 편집</strong> — <code>claude</code>. "이슈 #5 참조해서 auth/Dockerfile을 멀티스테이지로 재구성. CLAUDE.md 규약 따라 최소 변경. 비즈니스 로직은 손대지 마."</li>
-    <li><strong>settings.json이 실제로 작동</strong> — Claude Code가 <code>git push --force</code> 같은 것을 시도하면 강제 층에서 차단. 지침이 실효를 갖는 순간.</li>
-    <li><strong>검토 · 커밋 · 푸시</strong> — <code>git status</code> · <code>git diff</code> · <code>git add</code> · <code>git commit -m "chore(auth): multi-stage build"</code> · <code>git push</code></li>
-    <li><strong>PR 생성</strong> — <code>gh pr create</code>. PR 템플릿의 강제 필드 채우기 (변경하지 않은 범위, 위험 등급 R0, 롤백 방법).</li>
-    <li><strong>자동 리뷰 발화</strong> — 1~2분 내 Claude 리뷰 코멘트. 요약·발견 문제·리스크 평가·머지 의견 포함.</li>
-    <li><strong>리뷰 반영 (필요 시)</strong> — Claude Code로 재편집 → 커밋 → 푸시 → 자동 재리뷰.</li>
-    <li><strong>머지</strong> — 웹에서 Merge 클릭. 이슈는 <code>Closes #5</code>로 자동 닫힘.</li>
-    <li><strong>정리</strong> — <code>git checkout main && git pull</code>.</li>
-  </ol>
-
-  <h3><span class="h3n">8.3</span>Week 2~3 · 반복과 관찰</h3>
-
-  <p>같은 사이클로 3~5건의 변환 처리. 각 사이클마다 다음을 관찰한다.</p>
-
-  <ul class="mk">
-    <li><strong>지침이 실제로 지켜지는가</strong> — Claude가 CLAUDE.md 규약을 얼마나 정확히 따르는지</li>
-    <li><strong>강제 층이 작동하는가</strong> — settings.json/hooks가 위험 명령을 실제로 차단하는지</li>
-    <li><strong>자동 리뷰가 유용한가</strong> — 발견한 문제 채택률, 허위 양성률, 놓치는 것</li>
-    <li><strong>PR 템플릿이 실효 있는가</strong> — 강제 필드가 실제로 사람 검토 시간을 줄이는지</li>
-    <li><strong>중단 조건이 트리거되는가</strong> — 정량 조건이 실제 상황과 정합인지</li>
-  </ul>
-
-  <h3><span class="h3n">8.4</span>Week 3 · 관찰의 문서화</h3>
-
-  <p>Phase 1 종료 시점에 관찰된 것을 문서로 승격. 명세서 R2.5 → R3 개정 여부 판단.</p>
-
-  <div class="timeline">
-    <div class="tl-row">
-      <span class="tl-when">Week 3</span>
-      <span class="tl-what">docs/agentic-development/ 초안 작성<small>architecture · authority-model · risk-model · workflow · failure-playbook</small></span>
-      <span class="tl-who who-h">사람 + Claude Code</span>
+  <h4>편집 범위 제한</h4>
+  <div class="polimpl">
+    <div class="polimpl-row p">
+      <div class="pi-side">Policy</div>
+      <div class="pi-body">에이전트의 파일 편집이 위임 계약의 변경 범위를 벗어나지 못한다.</div>
     </div>
-    <div class="tl-row">
-      <span class="tl-when">Week 3</span>
-      <span class="tl-what">첫 ADR 작성<small>Phase 1에서 내린 결정들. 예: <code>adr/0001-baseline-adoption.md</code></small></span>
-      <span class="tl-who who-h">사람</span>
+    <div class="polimpl-row i">
+      <div class="pi-side">Implementation</div>
+      <div class="pi-body">Claude Code의 <strong>PreToolUse hook</strong> (<code>validate-write-scope.sh</code>)</div>
     </div>
-    <div class="tl-row">
-      <span class="tl-when">Week 3</span>
-      <span class="tl-what">지표 수집<small>PR당 검토 시간 · 리뷰 채택률 · revert 비율 · 자동 수정 루프 횟수</small></span>
-      <span class="tl-who who-h">사람</span>
+    <div class="polimpl-row a">
+      <div class="pi-side">Alternatives</div>
+      <div class="pi-body">Git worktree 격리 · 파일시스템 read-only 마운트 · Container에서 volume 제한 · CI에서 patch 범위 검증</div>
     </div>
-    <div class="tl-row">
-      <span class="tl-when">Week 3</span>
-      <span class="tl-what">Phase 2 진입 판단<small>지표 기준 충족 확인. 명세서 개정 여부 결정</small></span>
-      <span class="tl-who who-h">사람</span>
+  </div>
+
+  <h4>민감 파일 승인 강제</h4>
+  <div class="polimpl">
+    <div class="polimpl-row p">
+      <div class="pi-side">Policy</div>
+      <div class="pi-body">민감 파일 변경은 별도 승인 없이 머지되지 않는다.</div>
     </div>
+    <div class="polimpl-row i">
+      <div class="pi-side">Implementation</div>
+      <div class="pi-body">GitHub <strong>CODEOWNERS</strong> + Branch Protection의 CODEOWNERS 승인 필수 설정</div>
+    </div>
+    <div class="polimpl-row a">
+      <div class="pi-side">Alternatives</div>
+      <div class="pi-body">GitLab의 approval rules · Bitbucket의 default reviewer · 커스텀 pre-merge check · 별도 리뷰 봇</div>
+    </div>
+  </div>
+
+  <h4>결정적 검증이 AI 리뷰보다 먼저</h4>
+  <div class="polimpl">
+    <div class="polimpl-row p">
+      <div class="pi-side">Policy</div>
+      <div class="pi-body">기계가 찾을 수 있는 오류는 기계가 먼저 제거한다. AI 리뷰는 결정적 검증 통과 후에만.</div>
+    </div>
+    <div class="polimpl-row i">
+      <div class="pi-side">Implementation</div>
+      <div class="pi-body">GitHub Actions의 workflow <code>needs:</code> 종속성. <code>pr-review.yml</code>이 <code>ci.yml</code>에 needs.</div>
+    </div>
+    <div class="polimpl-row a">
+      <div class="pi-side">Alternatives</div>
+      <div class="pi-body">CircleCI workflow orchestration · Jenkins pipeline stage · 별도 orchestrator가 순서 관리</div>
+    </div>
+  </div>
+
+  <h4>인프라 apply의 사람 게이트</h4>
+  <div class="polimpl">
+    <div class="polimpl-row p">
+      <div class="pi-side">Policy</div>
+      <div class="pi-body">인프라 변경은 사람이 명시적으로 apply 트리거한다. 자동 apply 금지.</div>
+    </div>
+    <div class="polimpl-row i">
+      <div class="pi-side">Implementation</div>
+      <div class="pi-body">GitHub Actions <code>workflow_dispatch</code> only + GitHub Environments 보호 규칙</div>
+    </div>
+    <div class="polimpl-row a">
+      <div class="pi-side">Alternatives</div>
+      <div class="pi-body">Atlantis의 PR comment apply · Terraform Cloud의 manual apply · 별도 CD 도구의 approval gate</div>
+    </div>
+  </div>
+
+  <div class="call">
+    <div class="clb">분리 표기의 이득</div>
+    <p>이 3단 표기가 있으면 <strong>도구 이전이 원칙 재설계로 오인되지 않는다</strong>. 예를 들어 Claude Code를 다른 도구로 바꿔도 원칙은 그대로다. 구현란만 갱신하면 된다. 이것이 개념서 R2의 명제 XII(원칙과 구현의 분리)가 청사진에 실체화된 모습이다.</p>
   </div>
 </section>
 
 <!-- ============ 9 ============ -->
 <section id="s9">
   <div class="sec-hd">
-    <div class="sec-num">§ 09 — Phase 2 Scenario</div>
-    <h2 class="sec">Phase 2 진입과 확장</h2>
-    <p class="sec-sub">사람 개입을 얇게 만드는 시기. 라벨 하나로 자동 흐름 시작.</p>
+    <div class="sec-num">§ 09 — Risk &amp; Gates</div>
+    <h2 class="sec">위험 판정과 게이트 흐름</h2>
+    <p class="sec-sub">5축 판정 · R0~R3 요약 · spec-ready 게이트를 포함한 완성된 흐름.</p>
+  </div>
+
+  <h3><span class="h3n">9.1</span>5축 위험 판정</h3>
+  <p>모든 이슈와 PR은 다음 5축으로 판정된다. 자동 판정은 <code>classify-change.ts</code>가 담당.</p>
+
+  <table class="tbl">
+    <thead><tr><th>축</th><th>값</th><th>이 프로젝트에서의 예시</th></tr></thead>
+    <tbody>
+      <tr><td>Blast Radius</td><td>file / module / service / cross-service / infra</td><td>서비스 하나 내부 vs common/ vs 이벤트 스키마 vs k8s</td></tr>
+      <tr><td>Detectability</td><td>high / mixed / delayed</td><td>테스트가 즉시 잡음 vs 통합에서만 vs 배포 후 관찰됨</td></tr>
+      <tr><td>Reversibility</td><td>free / cost / partial / irreversible</td><td>revert 가능 vs migration 필요 vs DB 삭제</td></tr>
+      <tr><td>Data Sensitivity</td><td>public / internal / confidential / PII / financial</td><td>docs vs 내부 코드 vs auth vs payments</td></tr>
+      <tr><td>Confidence</td><td>0.0 ~ 1.0</td><td>에이전트 자체 신고. 대안 갈등 시 하락.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">9.2</span>R0~R3 요약</h3>
+
+  <div class="grade g-r0">
+    <div class="g-head">
+      <span class="g-rom">R0</span>
+      <span class="g-name">자동 처리 가능</span>
+    </div>
+    <div class="g-body">
+      <p>docs · 포맷 · 주석 · 스냅샷.</p>
+      <div class="g-axes">
+        <b>blast</b> file · <b>detect</b> high · <b>rev</b> free · <b>data</b> public
+      </div>
+    </div>
+  </div>
+
+  <div class="grade g-r1">
+    <div class="g-head">
+      <span class="g-rom">R1</span>
+      <span class="g-name">일반 코드</span>
+    </div>
+    <div class="g-body">
+      <p>내부 함수 · UI · 명확한 버그 수정 · 테스트 추가.</p>
+      <div class="g-axes">
+        <b>blast</b> module · <b>detect</b> high · <b>rev</b> free/cost · <b>data</b> internal
+      </div>
+    </div>
+  </div>
+
+  <div class="grade g-r2">
+    <div class="g-head">
+      <span class="g-rom">R2</span>
+      <span class="g-name">계약·데이터 영향</span>
+    </div>
+    <div class="g-body">
+      <p>API 스키마 · 이벤트 스키마 · common/ · 캐시 · 동시성 · 마이그레이션 초안.</p>
+      <div class="g-axes">
+        <b>blast</b> cross-service · <b>detect</b> mixed · <b>rev</b> partial · <b>data</b> internal/confidential
+      </div>
+    </div>
+  </div>
+
+  <div class="grade g-r3">
+    <div class="g-head">
+      <span class="g-rom">R3</span>
+      <span class="g-name">고위험 · 하위 분류</span>
+    </div>
+    <div class="g-body">
+      <p>인증 · 결제 · PII · 운영 DB · IAM · prod 클러스터. <strong>R3-A/B/C/D로 세분</strong>.</p>
+      <div class="g-axes">
+        <b>R3-A</b> dev 자동 · <b>R3-B</b> 이중 승인+staging · <b>R3-C</b> 사람 직접 · <b>R3-D</b> 자동화 금지
+      </div>
+    </div>
+  </div>
+
+  <h3><span class="h3n">9.3</span>완성된 흐름</h3>
+  <p>R1과 R2의 결정적 차이는 <strong>spec-ready 게이트</strong>가 흐름에 삽입되었다는 것이다.</p>
+
+<pre><span class="c"># 이슈부터 머지까지</span>
+
+Issue 등록
+  ↓
+<span class="k">spec-lint</span>          <span class="c"># 자동 · 필수 필드 · 모호 표현 검사</span>
+  ↓
+<span class="k">risk-classify</span>      <span class="c"># 자동 · 5축 판정 → R0~R3</span>
+  ↓
+<span class="k">spec-ready</span>         <span class="c"># 사람 게이트 · 스펙 승인 (플랜 승인)</span>
+  ↓
+<span class="k">ready-for-draft</span>    <span class="c"># 라벨 → code-draft.yml 트리거</span>
+  ↓
+Code draft
+  ↓
+<span class="k">verify</span>              <span class="c"># ci.yml · 결정적 검증 먼저</span>
+  ↓
+<span class="k">ai-review</span>           <span class="c"># pr-review.yml · 결정적 통과 후</span>
+  ↓
+<span class="k">security</span>            <span class="c"># security.yml · 병렬</span>
+  ↓
+<span class="k">human merge</span>         <span class="c"># 저인지부하 게이트 · 위험 등급별</span></pre>
+
+  <p>R1에서는 <code>ready-for-draft</code>가 코드 생성 트리거였다. R2에서는 <strong>spec-ready와 ready-for-draft가 두 개의 서로 다른 게이트</strong>. 전자는 스펙이 위임 가능한 상태임을 승인, 후자는 코드 생성을 시작.</p>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="s10">
+  <div class="sec-hd">
+    <div class="sec-num">§ 10 — Phase 1 Scenario</div>
+    <h2 class="sec">Phase 1 축소 시나리오</h2>
+    <p class="sec-sub">필수 5개로 시작하는 얇은 Phase 1. R1의 절반 규모.</p>
+  </div>
+
+  <div class="phase phase-1">
+    <div class="phase-head">
+      <span class="phase-tag">Phase 01 · Reduced</span>
+      <span class="phase-name">파이프라인 증명 · 관찰이 산출물</span>
+      <span class="phase-when">Week 1~3</span>
+    </div>
+    <div class="phase-body">
+      <p><strong>목표:</strong> 최소 안전 위에서 3~5개 실제 PR 흐름. 반복 패턴 관찰. 관찰 없이는 다음 자동화 추가 없음.</p>
+      <p><strong>완료 조건:</strong> 필수 5개가 실제로 작동. 3~5개 PR 처리. 반복 패턴이 <em>실제로 관찰</em>됨. 관찰이 규약 개정으로 이어진 사례 1건 이상. Phase 2 진입 조건 충족.</p>
+    </div>
+  </div>
+
+  <h3><span class="h3n">10.1</span>Week 1 · 셋업과 첫 발화</h3>
+
+  <div class="timeline">
+    <div class="tl-row">
+      <span class="tl-when">Day 1 · AM</span>
+      <span class="tl-what">필수 5개 파일 추가<small><code>CLAUDE.md</code> · <code>settings.json</code> · <code>guard-command.sh</code> · <code>pull_request_template.md</code> · <code>ci.yml</code>을 <code>feat/orchestration-bootstrap</code> 브랜치에</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1 · AM</span>
+      <span class="tl-what">GitHub Secret 등록<small><code>ANTHROPIC_API_KEY</code> · Branch protection · CODEOWNERS 없이 시작</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1 · PM</span>
+      <span class="tl-what">첫 PR — bootstrap 자체가 시험대<small>bootstrap 브랜치 → main. 이 PR이 pr-review.yml의 첫 발화 대상</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1 · PM</span>
+      <span class="tl-what">자동 리뷰 발화 관찰<small>ci.yml 통과 → pr-review.yml 실행 → Claude 리뷰 코멘트. 재귀 자기 검증의 첫 순간</small></span>
+      <span class="tl-who who-r">러너</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 1 · PM</span>
+      <span class="tl-what">첫 머지<small>사람이 리뷰 확인 후 Merge. 저인지부하 게이트의 첫 실행</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 2</span>
+      <span class="tl-what">Baseline Diagnose 실행<small>Actions 탭 → workflow_dispatch. 5축 판정과 R0~R3가 이슈에 포함된 형태로 나오는지 확인</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-when">Day 2</span>
+      <span class="tl-what">진단 이슈 검토<small>R0/R1 후보 2~3개 선정. <code>gh issue create</code>로 작업 이슈 등록. 이슈 본문에 <strong>수용 조건 · 손대지 말 영역 · 위험 예상</strong> 수동 명시</small></span>
+      <span class="tl-who who-h">사람</span>
+    </div>
+  </div>
+
+  <h3><span class="h3n">10.2</span>Week 1~2 · 첫 변환 사이클</h3>
+
+  <ol class="step">
+    <li><strong>이슈 확인</strong> — <code>gh issue view</code>로 상세 확인. 위임 계약 성분이 이슈 본문에 채워져 있는지 확인.</li>
+    <li><strong>브랜치 생성</strong> — <code>git checkout -b chore/auth-dockerfile-multistage</code></li>
+    <li><strong>Claude Code 편집</strong> — <code>claude</code> 실행. 이슈 참조 지시. settings.json + guard-command.sh가 강제 층으로 작동.</li>
+    <li><strong>강제 층 관찰</strong> — 위험 명령 시도 시 실제로 차단됨을 확인. <em>지침이 실효를 갖는 첫 순간.</em></li>
+    <li><strong>검증 · 커밋 · 푸시</strong> — 로컬에서 <code>npm test</code> 통과 확인 후 push.</li>
+    <li><strong>PR 생성</strong> — <code>gh pr create</code>. PR 템플릿 강제 필드 채우기. <strong>5축 판정</strong>과 <strong>미검증 사항</strong>이 명시적으로.</li>
+    <li><strong>ci.yml 실행</strong> — 결정적 검증이 먼저. 통과하면 pr-review.yml.</li>
+    <li><strong>자동 리뷰</strong> — 1~2분 내 리뷰 코멘트. 판단 관찰 가능성 층의 첫 축적.</li>
+    <li><strong>사람 검토</strong> — 저인지부하 게이트. 위험 등급 · 미검증 사항 · 롤백만 확인. R0이면 2분, R1이면 8분 이내.</li>
+    <li><strong>머지</strong> — Merge. <code>Closes #N</code>으로 이슈 자동 닫힘.</li>
+    <li><strong>관찰 기록</strong> — 이 사이클에서 무엇이 관찰됐는지 짧게 정리. <em>어떤 지침이 잘 지켜졌고 무엇이 자주 잘못됐는가.</em></li>
+  </ol>
+
+  <h3><span class="h3n">10.3</span>Week 2~3 · 반복과 관찰의 축적</h3>
+
+  <p>같은 사이클을 3~5회 반복. 각 사이클마다 다음을 관찰한다. <strong>이 관찰이 Phase 1의 진짜 산출물이다.</strong></p>
+
+  <ul class="mk">
+    <li><strong>어떤 명령이 자주 ask로 판정되는가</strong> — 이것들이 allow로 옮겨질 후보가 있는지</li>
+    <li><strong>어떤 편집이 위임 계약을 벗어나려 하는가</strong> — <code>validate-write-scope.sh</code>의 도입 근거가 되는가</li>
+    <li><strong>어떤 정보가 이슈 본문에서 자주 누락되는가</strong> — <code>ISSUE_TEMPLATE</code>의 필수 필드가 될 후보</li>
+    <li><strong>어떤 파일이 잘못 변경되려 하는가</strong> — <code>CODEOWNERS</code>의 대상이 될 후보</li>
+    <li><strong>자동 리뷰가 무엇을 찾고 무엇을 놓치는가</strong> — 채택률과 허위 양성률</li>
+    <li><strong>중단 조건이 실제로 트리거되는가</strong> — 조건이 예민한가 둔감한가</li>
+  </ul>
+
+  <h3><span class="h3n">10.4</span>Week 3 · 첫 학습 회로 실행</h3>
+  <p>Phase 1 종료 전 최소 1건의 학습 회로가 완결되어야 한다. 관찰이 규약 개정으로 이어지고 그 개정이 실제로 반영된 사례. 예:</p>
+
+  <p><em>"Phase 1 관찰: 3개 사이클에서 에이전트가 <code>package.json</code>을 함께 편집하려 함. 이것이 편집 범위 초과인가? 관찰 후 판단: 의존성 변경 없이 편집되는 경우는 metadata 변경뿐이므로 허용. 규약 개정: <code>CLAUDE.md</code>에 이 예외를 명시. 이후 관찰: 같은 상황에서 재차 개입 필요 없음."</em></p>
+
+  <p>이 사례가 축적되어야 Phase 2 진입 조건이 충족된다. § 13에서 학습 회로 실행이 더 자세히 다뤄진다.</p>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="s11">
+  <div class="sec-hd">
+    <div class="sec-num">§ 11 — Phase 2 Expansion</div>
+    <h2 class="sec">Phase 2 확장</h2>
+    <p class="sec-sub">사람 개입 축소 · 자동 코드 생성 · spec-ready 게이트 도입.</p>
   </div>
 
   <div class="phase phase-2">
@@ -1460,235 +1549,338 @@
       <span class="phase-when">Week 4~7 (3~4주)</span>
     </div>
     <div class="phase-body">
-      <p><strong>목표:</strong> Phase 1에서 관찰된 반복 패턴을 자동화로 승격. 사람 개입은 실행 감독에서 판단 승인으로 성격 이동.</p>
-      <p><strong>완료 조건:</strong> 라벨 하나로 코드 초안 PR이 자동 생성, 모델 라우팅 로그 확인, 한 마이그레이션이 여러 PR로 자동 분해, 사람은 마지막 승인만.</p>
+      <p><strong>목표:</strong> Phase 1 관찰된 반복 패턴을 자동화로 승격. 사람 개입이 실행 감독에서 판단 승인으로 이동.</p>
+      <p><strong>완료 조건:</strong> spec-ready 게이트가 실제 작동. 라벨 하나로 코드 초안 PR 자동 생성. 두 개 이상 성공적 변환 완결.</p>
     </div>
   </div>
 
-  <h3><span class="h3n">9.1</span>진입 조건</h3>
-
-  <p>Phase 2로 넘어가는 것은 시점(Phase 1이 끝났나)이 아니라 <strong>신뢰(관찰된 게 충분한가)</strong>가 결정한다. 최소 기준:</p>
-
+  <h3><span class="h3n">11.1</span>진입 조건 (Spec R3 § 10 참조)</h3>
   <ul class="mk">
-    <li><strong>10~20개 PR 처리 완료</strong> — 자동 리뷰의 실제 품질을 판단할 수 있는 표본 확보</li>
-    <li><strong>AI finding 채택률 40% 이상</strong> — 자동 리뷰가 노이즈 이상의 가치를 제공</li>
-    <li><strong>revert 비율 5% 이하</strong> — 머지 판단이 정확</li>
-    <li><strong>중단 조건 트리거 이력</strong> — 최소 1~2회 자동 중단이 실제로 작동한 사례</li>
-    <li><strong>docs/agentic-development/ 5개 문서 존재</strong> — Phase 2 자동화가 참조할 근거 완비</li>
+    <li>10~20개 PR 처리 완료</li>
+    <li>AI finding 채택률 &gt; 40%</li>
+    <li>Revert 비율 ≤ 5%</li>
+    <li>중단 조건 최소 1~2회 실제 작동</li>
+    <li>학습 회로 최소 1건 완료</li>
   </ul>
 
-  <h3><span class="h3n">9.2</span>추가되는 것들</h3>
+  <h3><span class="h3n">11.2</span>추가되는 것들</h3>
 
   <table class="tbl">
-    <thead><tr><th>대상</th><th>파일</th><th>역할</th></tr></thead>
+    <thead><tr><th>대상</th><th>파일</th><th>이전 상태 → 새 상태</th></tr></thead>
     <tbody>
-      <tr><td>새 워크플로</td><td><code>code-draft.yml</code></td><td>라벨 트리거로 코드 초안 → PR 자동</td></tr>
-      <tr><td>새 워크플로</td><td><code>security.yml</code></td><td>의존성·SAST·시크릿 스캔</td></tr>
-      <tr><td>새 hooks</td><td><code>format-changed-file.sh</code> · <code>record-run-event.sh</code></td><td>포맷 자동 · 이벤트 로그</td></tr>
-      <tr><td>Skills</td><td><code>plan-change</code> · <code>verify-change</code> · <code>prepare-pr</code></td><td>반복 절차 패키지화</td></tr>
-      <tr><td>MCP</td><td><code>.mcp.json</code></td><td>GitHub read-only</td></tr>
-      <tr><td>scripts</td><td><code>verify-change.ts</code> · <code>classify-change.ts</code> · <code>baseline-diff.ts</code> · <code>emit-audit-event.ts</code></td><td>결정적 검증 도구</td></tr>
-      <tr><td>Dependabot</td><td><code>dependabot.yml</code></td><td>자동 의존성 업데이트</td></tr>
+      <tr><td>새 워크플로</td><td><code>code-draft.yml</code></td><td>P2 설계 → 관찰 후 채택</td></tr>
+      <tr><td>새 워크플로</td><td><code>security.yml</code></td><td>P2 설계 → 관찰 후 채택</td></tr>
+      <tr><td>새 hooks</td><td><code>format-changed-file.sh</code> · <code>record-run-event.sh</code></td><td>P2 설계 → 관찰 후 채택</td></tr>
+      <tr><td>Skills</td><td><code>plan-change</code> · <code>verify-change</code> · <code>prepare-pr</code></td><td>P2 설계 → 관찰 후 채택</td></tr>
+      <tr><td>MCP</td><td><code>.mcp.json</code> (GitHub read-only)</td><td>P2 설계 → 관찰 후 채택</td></tr>
+      <tr><td>scripts</td><td><code>verify-change.ts</code> · <code>classify-change.ts</code> · <code>spec-lint.ts</code></td><td>가설 → 관찰 후 채택</td></tr>
     </tbody>
   </table>
 
-  <h3><span class="h3n">9.3</span>바뀌는 사이클 · 라벨로 시작하는 흐름</h3>
+  <h3><span class="h3n">11.3</span>새 사이클 · spec-ready + 라벨 트리거</h3>
 
   <ol class="step">
-    <li><strong>이슈 등록</strong> — <code>gh issue create --label "phase-2,ready-for-draft"</code>. 이제 라벨이 트리거다.</li>
-    <li><strong>자동 흐름 시작</strong> — code-draft.yml이 발화. 러너가 이슈 본문 읽고, Claude API로 스펙 분해, 브랜치 자동 생성, Claude Code 헤드리스로 코드 초안, 커밋 & 푸시, PR 오픈.</li>
-    <li><strong>자동 리뷰 발화</strong> — 방금 만든 PR을 pr-review.yml이 자동 리뷰. classify-change.ts로 R0~R3 등급 자동 판정. security.yml 병렬 실행.</li>
-    <li><strong>사람 검토</strong> — <code>gh pr view --comments</code>. 자동 리뷰와 보안 스캔 결과 확인.</li>
-    <li><strong>필요 시 지시</strong> — <code>gh pr comment --body "..."</code>. 러너가 코멘트에 반응해 재작업.</li>
-    <li><strong>머지</strong> — 만족 시 웹에서 Merge 클릭. 사이클당 명령 수가 Phase 1의 절반 이하.</li>
+    <li><strong>이슈 등록</strong> — <code>gh issue create</code>. ISSUE_TEMPLATE 사용 (Phase 1 관찰이 채운 필수 필드).</li>
+    <li><strong>spec-lint 실행</strong> — 자동. 필수 필드 · 모호 표현 · 정량 수용 조건 확인. 통과하면 자동 <code>spec-lint-passed</code> 라벨.</li>
+    <li><strong>risk-classify 실행</strong> — 자동. 5축 판정. <code>risk:R1</code> 등의 라벨 부착.</li>
+    <li><strong>spec-ready 게이트</strong> — <strong>사람이 검토</strong>. 이 스펙이 위임 가능한 상태인지 최종 판단. 통과하면 <code>spec-ready</code> 라벨.</li>
+    <li><strong>ready-for-draft 라벨</strong> — 사람이 부착. code-draft.yml 트리거.</li>
+    <li><strong>자동 흐름 시작</strong> — 브랜치 생성 · Claude Code 헤드리스 코드 초안 · 커밋 · PR 오픈.</li>
+    <li><strong>ci.yml 실행</strong> — 결정적 검증 먼저.</li>
+    <li><strong>pr-review.yml + security.yml 병렬</strong> — 두 리뷰 결과가 별도 코멘트.</li>
+    <li><strong>사람 검토</strong> — 저인지부하 게이트. 위험 등급에 비례한 시간.</li>
+    <li><strong>머지</strong> — 만족 시 Merge.</li>
   </ol>
+
+  <h3><span class="h3n">11.4</span>실제 처리할 변환들</h3>
+
+  <ul class="mk">
+    <li><strong>client JS → TS 마이그레이션</strong> — 7~10개 서브 PR. R1 대부분.</li>
+    <li><strong>공통 미들웨어 추출</strong> — <code>common/</code>으로. R2. 이중 승인 필요.</li>
+    <li><strong>결제 흐름 멱등성 강화</strong> — Stripe 처리 중복 방지. R2 · confidential.</li>
+    <li><strong>NATS → Kafka 이관</strong> — 5~7개 서브 PR. R2 · partial reversibility.</li>
+  </ul>
 
   <div class="call">
     <div class="clb">모델 라우팅</div>
-    <p>Phase 2에서 멀티 모델 시작. 판단 무거움(리뷰·스펙 분해) → Claude Opus. 코드 생성 → Claude Code 헤드리스. 값싼 반복(제목 정리·요약) → 로컬 LLM (Ollama). 각 호출이 어떤 모델로 라우팅됐는지 이벤트 로그에 기록.</p>
-  </div>
-
-  <h3><span class="h3n">9.4</span>실제 변환 작업</h3>
-
-  <p>Phase 2에서 처리할 큰 변환들. 각 변환은 계획 이슈 → ADR → 서브 이슈들 → 여러 PR로 흐른다.</p>
-
-  <ul class="mk">
-    <li><strong>client JavaScript → TypeScript 마이그레이션</strong> — 7~10개 서브 PR</li>
-    <li><strong>공통 미들웨어 추출</strong> — 서비스별 흩어진 미들웨어를 <code>common/</code>으로. 경계 구역 변경이라 사람 게이트 강화</li>
-    <li><strong>결제 흐름 멱등성 강화</strong> — Stripe 처리에 중복 방지 로직. 비즈니스 로직 근처를 만지는 미묘한 작업</li>
-    <li><strong>NATS Streaming → Kafka 이관</strong> — Phase 2의 최대 변환. 5~7개 서브 PR로 분할 (서비스별 이관)</li>
-  </ul>
-</section>
-
-<!-- ============ 10 ============ -->
-<section id="s10">
-  <div class="sec-hd">
-    <div class="sec-num">§ 10 — Phase 3 Scenario</div>
-    <h2 class="sec">Phase 3 진입과 완결</h2>
-    <p class="sec-sub">인프라 자동화. 넓어지면서 조여지는 시기.</p>
-  </div>
-
-  <div class="phase phase-3">
-    <div class="phase-head">
-      <span class="phase-tag">Phase 03</span>
-      <span class="phase-name">인프라 자동화 — IaC와 사람 게이트 재배치</span>
-      <span class="phase-when">Week 8~13 (4~6주)</span>
-    </div>
-    <div class="phase-body">
-      <p><strong>목표:</strong> 17개 매뉴얼 k8s YAML을 에이전트가 Terraform 모듈로 변환. DigitalOcean → AWS EKS 이전. 자동화가 넓어지면서 사람 게이트는 새로 강화.</p>
-      <p><strong>완료 조건:</strong> 인프라 변경이 .tf PR로 흐름, Plan 자동 리뷰, Apply 사람 명시 실행, AWS EKS 안정 운영, 사람이 kubectl을 매뉴얼로 치지 않는 상태 4주 이상.</p>
-    </div>
-  </div>
-
-  <h3><span class="h3n">10.1</span>진입 조건</h3>
-
-  <ul class="mk">
-    <li>Phase 2의 코드 변환이 최소 2회 성공적으로 완결 (예: JS→TS 마이그레이션, Kafka 이관)</li>
-    <li>자동 코드 생성의 revert 비율 5% 이하 유지</li>
-    <li>보안 스캔 통합이 안정적으로 작동</li>
-    <li>ADR 최소 3개 (Kafka, TS 마이그레이션, Terraform 채택)</li>
-  </ul>
-
-  <h3><span class="h3n">10.2</span>추가되는 것들</h3>
-
-  <table class="tbl">
-    <thead><tr><th>대상</th><th>파일 · 도구</th><th>역할</th></tr></thead>
-    <tbody>
-      <tr><td>Terraform 코드</td><td><code>infra/terraform/</code></td><td>17개 YAML의 IaC 변환 결과물</td></tr>
-      <tr><td>모듈</td><td><code>modules/vpc</code> · <code>modules/eks</code> · <code>modules/ecr</code> · <code>modules/rds</code> · <code>modules/alb</code></td><td>재사용 가능한 인프라 단위</td></tr>
-      <tr><td>새 워크플로</td><td><code>terraform-plan.yml</code></td><td>.tf 변경 시 자동 plan + Claude 해석</td></tr>
-      <tr><td>새 워크플로</td><td><code>terraform-apply.yml</code></td><td>workflow_dispatch만, 사람 트리거</td></tr>
-      <tr><td>Subagent</td><td><code>.claude/agents/reviewer.md</code></td><td>격리된 읽기 전용 리뷰. 계약 명확</td></tr>
-      <tr><td>MCP</td><td>Sentry · Playwright · k8s (read)</td><td>Phase 3의 관측·검증 통로</td></tr>
-      <tr><td>State backend</td><td>S3 + DynamoDB</td><td>Terraform state 원격 관리</td></tr>
-    </tbody>
-  </table>
-
-  <h3><span class="h3n">10.3</span>인프라 사이클 · Merge와 Apply의 분리</h3>
-
-  <p>Phase 3의 결정적 차이. Merge = plan 승인, Apply = 실제 인프라 변경. 두 개의 사람 게이트.</p>
-
-  <ol class="step">
-    <li><strong>이슈</strong> — <code>gh issue create --label "phase-3,infra,ready-for-draft"</code></li>
-    <li><strong>자동 코드 생성</strong> — code-draft.yml이 Terraform 모듈 초안 작성, PR 오픈</li>
-    <li><strong>병렬 리뷰</strong> — pr-review.yml (코드 관점) + terraform-plan.yml (인프라 관점). 각각 별도 코멘트로 게시</li>
-    <li><strong>Plan 결과 검토</strong> — 추가 리소스 · 변경 · 삭제 목록, 월 예상 비용, 리스크 평가 확인</li>
-    <li><strong>Merge (게이트 1)</strong> — 코드가 옳다는 승인. 하지만 실제 인프라는 아직 변경 안 됨</li>
-    <li><strong>Apply 트리거 (게이트 2)</strong> — <code>gh workflow run terraform-apply.yml --field environment=dev</code>. 사람이 명시적으로 실행</li>
-    <li><strong>Apply 실행 관찰</strong> — 러너가 apply 실행. 5~30분 소요. 실시간 로그.</li>
-    <li><strong>Dev 검증</strong> — Grafana 대시보드 · 통합 테스트. 문제 없으면 staging 반복</li>
-    <li><strong>Staging apply</strong> — 24시간 관측 창 후 prod로</li>
-    <li><strong>Prod apply</strong> — 배포 창 조율, 트래픽 낮은 시간. 실시간 관측 강화. 문제 감지 시 즉시 롤백 판단</li>
-  </ol>
-
-  <div class="call danger">
-    <div class="clb">Apply 게이트의 원칙</div>
-    <p>Apply는 <strong>어떤 상황에서도 자동 트리거 금지</strong>. 이유는 명세서 § 01.4 가역성 원칙 — 인프라 변경은 준 비가역이며, 프로덕션은 사용자 영향이 즉시 발생. Claude가 plan을 해석해서 리스크 요약을 미리 제공하지만, apply 결정은 조직 맥락(배포 창 · 트래픽 · 다른 진행 작업)을 아는 사람만 할 수 있음.</p>
-  </div>
-
-  <h3><span class="h3n">10.4</span>Phase 3의 최대 변환들</h3>
-
-  <ul class="mk">
-    <li><strong>k8s YAML 17개 → Terraform 모듈</strong> — 서비스별 · DB · Ingress · NATS·Kafka. 각 모듈이 별도 PR로.</li>
-    <li><strong>DigitalOcean → AWS EKS 이전</strong> — Phase 3의 정수. Stage 1~7로 분할된 마이그레이션 계획서. Blue-Green 방식.</li>
-    <li><strong>Prometheus + Grafana 자동 셋업</strong> — Helm 차트를 Terraform 모듈로 감싸서 원클릭 설치</li>
-    <li><strong>ECR 취약점 스캔 + SAST 통합</strong> — 이미지 푸시 시 자동 스캔, 심각도 High 이상이면 배포 자동 실패</li>
-    <li><strong>Secrets Manager 연동 · IAM/IRSA 자동 바인딩</strong> — 파드별 세밀 권한</li>
-    <li><strong>Blue-Green cutover 절차</strong> — DNS 스위치 순간이 결정적</li>
-    <li><strong>Drift Detection 워크플로</strong> — IaC와 실제 상태 정기 대조</li>
-  </ul>
-
-  <h3><span class="h3n">10.5</span>완결 시점의 상태</h3>
-
-  <p>Phase 3이 완결되면 시스템이 다음 상태에 도달한다.</p>
-
-  <ul class="mk">
-    <li>코드 작성부터 프로덕션 배포까지 <strong>전 과정이 관찰 가능하고 추적 가능</strong></li>
-    <li>각 단계에서 어떤 모델이 어떤 근거로 어떤 판단을 했는지 GitHub 영구 기록</li>
-    <li>사람 역할은 <strong>실행에서 판단으로 완전히 이동</strong> — 그 판단마저 Claude가 근거 정리</li>
-    <li>회사 관점에서 <strong>감사 가능성 · 개발 속도 · 인프라 안전성 동시 확보</strong></li>
-    <li>명세서 R5 개정 완료. 회고 섹션에 여정 정리. ADR 10개 이상 축적.</li>
-  </ul>
-</section>
-
-<!-- ============ 11 ============ -->
-<section id="s11">
-  <div class="sec-hd">
-    <div class="sec-num">§ 11 — Metrics & Gates</div>
-    <h2 class="sec">진입 조건과 관찰 지표</h2>
-    <p class="sec-sub">Phase 이동의 근거가 되는 지표들. 처음 3개월간은 이것만 본다.</p>
-  </div>
-
-  <table class="tbl">
-    <thead><tr><th>지표</th><th>의미</th><th>P1 → P2</th><th>P2 → P3</th></tr></thead>
-    <tbody>
-      <tr><td>PR당 에이전트 비용</td><td>자동화의 경제성</td><td>&lt; $1</td><td>&lt; $2</td></tr>
-      <tr><td>PR당 사람 검토 시간</td><td>1초 게이트가 실제 작동하는지</td><td>&lt; 10분 (평균)</td><td>&lt; 5분 (평균)</td></tr>
-      <tr><td>AI finding 채택률</td><td>자동 리뷰의 실질 가치</td><td>≥ 40%</td><td>≥ 50%</td></tr>
-      <tr><td>허위 양성률</td><td>노이즈 대비 신호</td><td>&lt; 30%</td><td>&lt; 20%</td></tr>
-      <tr><td>agent PR 수정률</td><td>자동 생성 코드의 완성도</td><td>—</td><td>&lt; 40%</td></tr>
-      <tr><td>CI 실패 재발률</td><td>수정이 근본 원인을 다루는가</td><td>&lt; 20%</td><td>&lt; 10%</td></tr>
-      <tr><td>revert 비율</td><td>머지 판단의 정확성</td><td>≤ 5%</td><td>≤ 3%</td></tr>
-      <tr><td>자동 수정 루프 횟수</td><td>중단 조건이 작동하는가</td><td>중단이 관찰됨</td><td>평균 &lt; 1회</td></tr>
-      <tr><td>평균 변경 파일 수</td><td>작업 분할이 이루어지는가</td><td>&lt; 15</td><td>&lt; 10</td></tr>
-    </tbody>
-  </table>
-
-  <div class="call">
-    <div class="clb">지표의 의미</div>
-    <p><strong>에이전트가 몇 줄 작성했는가는 주요 지표가 아니다.</strong> 자동화의 총량이 아니라 사람의 판단이 얼마나 정확한 근거 위에서 이루어지는가로 성숙도를 측정한다.</p>
+    <p>Phase 2에서 모델 라우팅 시작. 판단 무거움(리뷰·스펙 분해) → Claude Opus. 코드 생성 → Claude Code 헤드리스. 값싼 반복 → 로컬 LLM. 각 호출의 라우팅이 이벤트 로그에 기록.</p>
   </div>
 </section>
 
 <!-- ============ 12 ============ -->
 <section id="s12">
   <div class="sec-hd">
-    <div class="sec-num">§ 12 — Failure Playbook</div>
-    <h2 class="sec">실패 플레이북</h2>
-    <p class="sec-sub">중단 조건에 도달했을 때, 자동화가 잘못 판단할 때, revert가 필요할 때의 대응 절차.</p>
+    <div class="sec-num">§ 12 — Phase 3 Completion</div>
+    <h2 class="sec">Phase 3 완결</h2>
+    <p class="sec-sub">인프라 자동화 · 독립 검증 강화 · Merge와 Apply의 분리.</p>
   </div>
 
-  <h3><span class="h3n">12.1</span>중단 조건 발동 시</h3>
+  <div class="phase phase-3">
+    <div class="phase-head">
+      <span class="phase-tag">Phase 03</span>
+      <span class="phase-name">인프라 자동화 · 게이트 재배치</span>
+      <span class="phase-when">Week 8~13 (4~6주)</span>
+    </div>
+    <div class="phase-body">
+      <p><strong>목표:</strong> k8s YAML 17개 → Terraform 모듈. DigitalOcean → AWS EKS. 자동화가 넓어지면서 사람 게이트가 새로 강화.</p>
+      <p><strong>완료 조건:</strong> Merge와 Apply 분리 게이트가 실제 작동. 독립 검증 강도가 중간~강함으로 이동. 사람이 매뉴얼 kubectl을 4주 이상 실행하지 않음.</p>
+    </div>
+  </div>
+
+  <h3><span class="h3n">12.1</span>진입 조건</h3>
+  <ul class="mk">
+    <li>Phase 2 코드 변환 2건 이상 성공적 완결</li>
+    <li>자동 코드 생성 revert ≤ 5%</li>
+    <li>보안 스캔 안정 작동</li>
+    <li>ADR 3개 이상</li>
+    <li>학습 회로 최소 3건 완료</li>
+  </ul>
+
+  <h3><span class="h3n">12.2</span>Merge와 Apply의 분리</h3>
+  <p>Phase 3의 결정적 차이. <strong>Merge = plan 승인, Apply = 실제 인프라 변경.</strong> 두 개의 서로 다른 사람 게이트.</p>
+
+  <ol class="step">
+    <li><strong>이슈</strong> — <code>label: phase-3,infra,ready-for-draft</code></li>
+    <li><strong>자동 코드 생성</strong> — Terraform 모듈 초안 · PR 오픈</li>
+    <li><strong>병렬 리뷰</strong> — pr-review (코드) + terraform-plan (인프라). Plan 결과에 <strong>Claude가 리스크·비용 요약</strong> 별도 코멘트.</li>
+    <li><strong>Plan 검토</strong> — 추가·변경·삭제 리소스, 월 예상 비용, 리스크 확인</li>
+    <li><strong>Merge (게이트 1)</strong> — 코드가 옳다는 승인. <strong>실제 인프라는 아직 변경 안 됨</strong>.</li>
+    <li><strong>Apply 트리거 (게이트 2)</strong> — <code>gh workflow run terraform-apply.yml --field environment=dev</code>. 사람이 명시적 실행.</li>
+    <li><strong>Dev 검증</strong> — Grafana 대시보드 · 통합 테스트. 문제 없으면 staging.</li>
+    <li><strong>Staging apply</strong> — 24시간 관측 창 후 prod.</li>
+    <li><strong>Prod apply</strong> — 배포 창 조율. 실시간 관측 강화. 문제 시 즉시 롤백.</li>
+  </ol>
+
+  <div class="call danger">
+    <div class="clb">Apply 게이트 원칙</div>
+    <p>Apply는 <strong>어떤 상황에서도 자동 트리거 금지</strong>. 이유는 개념서 R2의 명제 III(다차원 위험 판정) — 인프라 변경은 partial reversibility에 blast_radius가 infra고 detectability가 mixed다. Claude가 plan 해석을 제공하지만 apply 결정은 조직 맥락(배포 창 · 트래픽 · 다른 진행 작업)을 아는 사람만 할 수 있다.</p>
+  </div>
+
+  <h3><span class="h3n">12.3</span>독립 검증 강화</h3>
+  <p>Phase 3에서 독립 검증이 약한 독립에서 <strong>중간 독립</strong>으로 이동한다.</p>
+
+  <ul class="mk">
+    <li><strong>reviewer.md 서브에이전트 도입</strong> — 컨텍스트 격리. 구현자 self-report 미제공.</li>
+    <li><strong>반례 탐색 지시</strong> — reviewer에 명시적으로 반례를 찾도록 프롬프트.</li>
+    <li><strong>다른 모델 계열 검토</strong> — 특히 R3 변경은 Opus 아닌 다른 계열로 이중 검증 (Phase 3 후반).</li>
+  </ul>
+
+  <h3><span class="h3n">12.4</span>Phase 3의 최대 변환들</h3>
+  <ul class="mk">
+    <li>k8s YAML 17개 → Terraform 모듈 · Blue-Green</li>
+    <li>DigitalOcean → AWS EKS 이전 · Stage 1~7</li>
+    <li>Prometheus + Grafana 자동 셋업</li>
+    <li>ECR 스캔 + SAST 통합</li>
+    <li>Secrets Manager + IAM/IRSA 바인딩</li>
+    <li>Blue-Green cutover · DNS 스위치</li>
+    <li>Drift Detection 워크플로</li>
+  </ul>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="s13">
+  <div class="sec-hd">
+    <div class="sec-num">§ 13 — Learning Loop Execution</div>
+    <h2 class="sec">학습 회로 시나리오</h2>
+    <p class="sec-sub">관찰이 규약 개정으로 이어지는 실제 흐름. 개념서 명제 X의 실체화.</p>
+  </div>
+
+  <p>학습 회로는 문서에만 존재하면 학습이 아니다. 이 프로젝트에서 학습 회로는 다음 시나리오처럼 <strong>정기 흐름</strong>으로 작동한다.</p>
+
+  <h3><span class="h3n">13.1</span>주간 학습 회로 (Phase 1~2)</h3>
+
+  <div class="loop">
+    <div class="loop-title">Weekly Loop · 주 1회 실행</div>
+    <div class="loop-row">
+      <span class="loop-num">1</span>
+      <span class="loop-what">관찰 수집<small>한 주 동안의 회수 이벤트 · 강제 층 차단 · 자동 리뷰 finding · revert · 사람 개입 로그를 스크립트로 집계.</small></span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-num">2</span>
+      <span class="loop-what">패턴 발견<small>Claude API로 로그 분석. 반복 3회 이상의 이슈 유형 · 자주 위반되는 지침 · 자주 놓치는 리뷰 카테고리 추출.</small></span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-num">3</span>
+      <span class="loop-what">개정 제안 이슈 생성<small>발견된 패턴마다 <code>type: rule-amendment</code> 라벨의 이슈 자동 생성. 어느 파일의 어느 부분을 어떻게 개정할지 명시.</small></span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-num">4</span>
+      <span class="loop-what">사람 검토<small>제안 이슈 중 채택할 것 선정. 대부분 rejeted or 수정 필요. 채택된 것만 <code>ready-for-draft</code>로 승격.</small></span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-num">5</span>
+      <span class="loop-what">개정 PR 생성<small>일반 사이클과 동일. code-draft.yml이 개정 PR 생성. <strong>이 PR을 현재 규약을 따르는 자동 리뷰가 검토</strong> — 재귀 자기 검증.</small></span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-num">6</span>
+      <span class="loop-what">머지와 적용<small>새 규약이 지침 층과 강제 층에 반영. 이후 세션부터 새 규약 적용.</small></span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-num">7</span>
+      <span class="loop-what">다음 주 검증<small>다음 주 관찰에서 개정된 규약이 실제로 반복 실패를 줄였는지 확인. 안 줄었으면 회로 재실행.</small></span>
+    </div>
+  </div>
+
+  <h3><span class="h3n">13.2</span>학습 회로의 실제 예시</h3>
+
+  <div class="call">
+    <div class="clb">가상의 첫 학습 회로</div>
+    <p><strong>관찰:</strong> Phase 1 3주간 5회의 PR에서 에이전트가 <code>package.json</code> 편집을 시도. 그중 3회는 dependency 변경 시도(위험), 2회는 script name 오타 수정(무해).</p>
+    <p><strong>패턴:</strong> <code>package.json</code>이 다목적 파일이라 편집 범위 강제만으로는 부적절.</p>
+    <p><strong>개정 제안:</strong> <code>validate-write-scope.sh</code>에 특수 규칙 추가 — <code>package.json</code> 편집 시 diff 내용 검사. dependency 관련 라인 변경이면 ask, script/metadata만 변경이면 allow.</p>
+    <p><strong>재귀 검토:</strong> 이 제안 PR을 현재 규약이 리뷰. 규약과 정합적인지, 강제 층 자기 검증 질문("이 원칙이 지켜지지 않아도 아무 일이 안 일어나는가")을 통과하는지 확인.</p>
+    <p><strong>결과:</strong> 머지 후 다음 주 관찰에서 <code>package.json</code> 관련 개입이 3회 → 0회로 감소. 학습 회로 완결.</p>
+  </div>
+
+  <h3><span class="h3n">13.3</span>학습이 없는 상태의 신호</h3>
+  <p>학습 회로가 형식만 남고 실질이 없는 상태의 신호는 다음이다.</p>
+
+  <ul class="mk">
+    <li><strong>같은 지시를 사람이 계속 반복한다.</strong> "이 부분은 손대지 마라"를 매번 이슈에 써야 한다면 그것은 규약이 되어야 하는 신호.</li>
+    <li><strong>규약 개정이 없다.</strong> Phase 진행 중 몇 주간 <code>CLAUDE.md</code>나 <code>settings.json</code>에 커밋이 없다면 학습이 정지된 상태.</li>
+    <li><strong>같은 유형의 revert가 반복된다.</strong> 특정 카테고리 실패가 반복되는데 규약에 반영이 없다면 회로가 끊겨 있다.</li>
+  </ul>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="s14">
+  <div class="sec-hd">
+    <div class="sec-num">§ 14 — Metrics by Grade</div>
+    <h2 class="sec">지표 · 위험 등급별 세분화</h2>
+    <p class="sec-sub">R0~R3 각각 다른 기대치. 단일 지표의 함정을 피한다.</p>
+  </div>
+
+  <p>R1에서 지표를 단일 값으로 목표했다. R2에서는 <strong>위험 등급별로 세분화</strong>한다. 같은 지표가 R0에서는 너무 길고 R3에서는 너무 짧을 수 있다.</p>
+
+  <h3><span class="h3n">14.1</span>검토 시간 (중앙값)</h3>
+
+  <table class="tbl">
+    <thead><tr><th>등급</th><th>Phase 1~2</th><th>Phase 3</th><th>의미</th></tr></thead>
+    <tbody>
+      <tr><td>R0</td><td>&lt; 2분</td><td>&lt; 1분</td><td>이것이 정말 R0인가만 확인</td></tr>
+      <tr><td>R1</td><td>&lt; 8분</td><td>&lt; 5분</td><td>구현이 목표 달성하는가</td></tr>
+      <tr><td>R2</td><td>&lt; 20분</td><td>&lt; 15분</td><td>계약 변경 영향 이해</td></tr>
+      <tr><td>R3</td><td colspan="2">시간 최소화 목표 없음</td><td>지금 실행되어야 하는가</td></tr>
+    </tbody>
+  </table>
+
+  <p>R3에서 시간이 짧다는 것은 성숙도가 아니라 부실 검토의 신호다.</p>
+
+  <h3><span class="h3n">14.2</span>AI 리뷰의 지표</h3>
+
+  <table class="tbl">
+    <thead><tr><th>지표</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3</th></tr></thead>
+    <tbody>
+      <tr><td>Precision (제안 중 유효 비율)</td><td>측정만</td><td>≥ 40%</td><td>≥ 50%</td></tr>
+      <tr><td>허위 양성률</td><td>측정만</td><td>&lt; 30%</td><td>&lt; 20%</td></tr>
+      <tr><td>Severity weighted precision</td><td>—</td><td>측정 시작</td><td>≥ 60%</td></tr>
+      <tr><td>Duplicate finding rate</td><td>—</td><td>측정 시작</td><td>&lt; 15%</td></tr>
+      <tr><td>Already-caught-by-CI rate</td><td>측정만</td><td>&lt; 30%</td><td>&lt; 15%</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Recall proxy</strong>도 추적: 사람이 나중에 발견한 누락 건수. 채택률만 최적화하면 리뷰가 지나치게 보수적이 되어 놓치는 것이 늘어난다.</p>
+
+  <h3><span class="h3n">14.3</span>안전성 지표 (DORA-inspired)</h3>
+
+  <table class="tbl">
+    <thead><tr><th>지표</th><th>목표</th><th>의미</th></tr></thead>
+    <tbody>
+      <tr><td>Revert 비율</td><td>≤ 5% (P2) → ≤ 3% (P3)</td><td>단독으로는 함정. 아래와 함께 봄</td></tr>
+      <tr><td>Change failure rate</td><td>&lt; 15%</td><td>배포 중 실패로 이어진 변경 비율</td></tr>
+      <tr><td>Detection latency</td><td>P2에서 측정 시작</td><td>배포 후 문제 발견까지 시간</td></tr>
+      <tr><td>Rollback latency</td><td>&lt; 30분</td><td>문제 발견부터 롤백 완료까지</td></tr>
+      <tr><td>Hotfix 비율</td><td>&lt; 10%</td><td>정식 흐름 우회 배포 비율. Revert 0% + Hotfix 20%는 위험 상태</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="h3n">14.4</span>비용 지표 — Phase 1은 기록만</h3>
+
+  <table class="tbl">
+    <thead><tr><th>지표</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3</th></tr></thead>
+    <tbody>
+      <tr><td>PR당 에이전트 비용</td><td>기록만</td><td>&lt; $1</td><td>&lt; $2</td></tr>
+      <tr><td>이슈당 스펙 분해 비용</td><td>—</td><td>기록 시작</td><td>&lt; $0.5</td></tr>
+      <tr><td>Phase 총 비용</td><td>기록만</td><td>기록</td><td>목표 설정</td></tr>
+    </tbody>
+  </table>
+
+  <p>Phase 1에서 비용을 목표로 잡지 않는다. 이유는 초기에 비용 최적화를 강제하면 <em>품질보다 토큰 절약을 최적화</em>하게 된다. 성공률 · 검토 시간 절감 · 결함률 · 반복성이 먼저 안정되어야 비용 최적화가 의미있다.</p>
+
+  <h3><span class="h3n">14.5</span>학습 지표</h3>
+
+  <ul class="mk">
+    <li><strong>같은 유형 실패의 시간별 감소</strong> — 학습 회로가 실제 작동하는지</li>
+    <li><strong>사람 반복 지시 감소</strong> — 규약이 프로젝트 패턴을 흡수하는지</li>
+    <li><strong>규약 개정 근거의 관찰 추적률</strong> — 개정이 즉흥적이지 않은지</li>
+    <li><strong>주간 회로 완결률</strong> — 회로가 실제로 돌고 있는지</li>
+  </ul>
+
+  <div class="call">
+    <div class="clb">지표의 원칙</div>
+    <p>이 프로젝트는 <strong>에이전트가 몇 줄 작성했는가</strong>를 지표로 두지 않는다. 자동화의 총량이 아니라 사람의 판단이 얼마나 정확한 근거 위에서 이루어지는가로 성숙도를 측정한다.</p>
+  </div>
+</section>
+
+<!-- ============ 15 ============ -->
+<section id="s15">
+  <div class="sec-hd">
+    <div class="sec-num">§ 15 — Failure Playbook</div>
+    <h2 class="sec">실패 플레이북</h2>
+    <p class="sec-sub">중단 조건 발동 · 잘못된 자동 판단 · revert 필요 시의 대응 절차.</p>
+  </div>
+
+  <h3><span class="h3n">15.1</span>중단 조건 발동 (Spec R3 § 12 참조)</h3>
 
   <table class="tbl">
     <thead><tr><th>상황</th><th>즉시 조치</th><th>후속 조치</th></tr></thead>
     <tbody>
-      <tr><td>같은 테스트 2회 실패</td><td>자동 재시도 중단. 러너 종료</td><td>이슈에 실패 원인 후보·시도한 것·선택지 코멘트로 게시. 사람 판단 요청</td></tr>
-      <tr><td>수정 루프 2회 초과</td><td>브랜치에 <code>needs-human-review</code> 라벨 부착</td><td>사람이 로컬 Claude Code로 개입해 직접 편집</td></tr>
-      <tr><td>변경 파일 15개 초과</td><td>PR 자동 생성 중단</td><td>이슈를 서브 이슈들로 분할 요청. 각 서브 이슈 별도 라벨</td></tr>
-      <tr><td>테스트 삭제·약화 시도</td><td>훅에서 즉시 차단</td><td>사람 개입 필수. 왜 이 테스트가 문제인지 이슈로 등록</td></tr>
-      <tr><td>보안·권한 영역 진입</td><td>settings.json이 명령 차단</td><td>R3 등급 이슈로 별도 등록. Phase 3 사이클로 처리</td></tr>
+      <tr><td>같은 테스트 2회 실패</td><td>자동 재시도 중단. 러너 종료</td><td>이슈에 실패 원인 후보·시도·선택지 코멘트. 인계 패킷 출력</td></tr>
+      <tr><td>수정 루프 2회 초과</td><td>브랜치에 <code>needs-human-review</code> 라벨</td><td>사람이 로컬 Claude Code로 개입</td></tr>
+      <tr><td>변경 파일 상한 초과</td><td>단계적: 경고 → 재승인 → 중단</td><td>이슈를 서브 이슈들로 분할</td></tr>
+      <tr><td>테스트 삭제·약화 시도</td><td>훅에서 즉시 차단</td><td>사람 개입 필수. 왜 이 테스트가 문제인지 이슈 등록</td></tr>
+      <tr><td>보안·권한 영역 진입</td><td>settings.json 차단</td><td>R3 이슈로 별도 등록. Phase 3 사이클로 처리</td></tr>
+      <tr><td>확신도 &lt; 0.5</td><td>재승인 요청</td><td>사람이 근거 검토 후 계속·중단 결정</td></tr>
     </tbody>
   </table>
 
-  <h3><span class="h3n">12.2</span>Revert 절차</h3>
+  <h3><span class="h3n">15.2</span>Revert 절차</h3>
 
   <ol class="step">
-    <li><strong>즉시 revert</strong> — 문제 발견 시 <code>git revert &lt;merge-commit&gt;</code>. main에 revert 커밋 생성.</li>
-    <li><strong>revert PR</strong> — 자동 리뷰가 revert에도 붙는다. 규약을 따르는지 확인.</li>
-    <li><strong>원인 분석 이슈</strong> — 왜 이 변경이 문제였는지, 자동 리뷰가 왜 놓쳤는지 별도 이슈로 등록.</li>
-    <li><strong>규약 개정 검토</strong> — 같은 유형이 재발하지 않도록 CLAUDE.md 또는 settings.json에 규칙 추가.</li>
-    <li><strong>지표 기록</strong> — revert 비율에 반영. Phase 이동 판단에 사용.</li>
+    <li><strong>즉시 revert</strong> — <code>git revert &lt;merge-commit&gt;</code>. main에 revert 커밋 생성.</li>
+    <li><strong>Revert PR도 자동 리뷰</strong> — 이 리뷰가 규약을 따르는지 확인.</li>
+    <li><strong>원인 분석 이슈</strong> — 왜 이 변경이 문제였는지, 자동 리뷰가 왜 놓쳤는지 별도 이슈로.</li>
+    <li><strong>학습 회로 트리거</strong> — 이 revert가 반복 패턴이면 규약 개정 제안으로 승격.</li>
+    <li><strong>지표 기록</strong> — revert 비율 · change failure rate · rollback latency에 반영.</li>
   </ol>
 
-  <h3><span class="h3n">12.3</span>인프라 Apply 실패 시 (Phase 3)</h3>
+  <h3><span class="h3n">15.3</span>인프라 Apply 실패 (Phase 3)</h3>
 
   <ol class="step">
-    <li><strong>자동 롤백 워크플로 트리거</strong> — terraform-apply.yml 실패 감지 시 즉시 이전 상태로 되돌리는 로직 실행.</li>
-    <li><strong>영향 범위 확인</strong> — Grafana 대시보드로 서비스 상태 확인. 실 사용자 영향 여부 판단.</li>
-    <li><strong>이슈 등록</strong> — 실패 원인 · 시도한 것 · 관찰된 영향을 상세히 기록.</li>
+    <li><strong>자동 롤백 워크플로</strong> — terraform-apply.yml 실패 감지 시 이전 상태로 되돌리는 로직 실행.</li>
+    <li><strong>영향 범위 확인</strong> — Grafana · 통합 테스트로 사용자 영향 판단.</li>
+    <li><strong>이슈 등록</strong> — 실패 원인 · 시도한 것 · 영향을 상세 기록.</li>
     <li><strong>Prod 재시도 판단</strong> — 사람이 조직 맥락 고려해 다음 배포 창 결정.</li>
   </ol>
 
+  <h3><span class="h3n">15.4</span>학습 회로 실패</h3>
+  <p>학습 회로가 정지된 상태(§ 13.3 신호)가 감지되면 다음을 수행한다.</p>
+
+  <ul class="mk">
+    <li><strong>Phase 진행 일시 중단.</strong> 새 사이클 시작 전 회로를 되살린다.</li>
+    <li><strong>회고 조기 소환.</strong> Phase 종료를 기다리지 않고 지금 관찰된 것 정리.</li>
+    <li><strong>규약 개정 우선순위.</strong> 반복 관찰된 실패를 규약에 반영하기 전에는 새 자동화 추가 없음.</li>
+  </ul>
+
   <div class="call">
     <div class="clb">플레이북의 원칙</div>
-    <p>실패는 시스템의 결함이 아니라 <strong>시스템이 자기 한계를 인식했다는 증거</strong>다. 중단 조건이 작동한다는 것은 자동화가 성숙했다는 뜻. 실패 없이 계속 진행되는 자동화가 오히려 위험 신호다.</p>
+    <p>실패는 시스템 결함이 아니라 <strong>시스템이 자기 한계를 인식했다는 증거</strong>다. 중단 조건이 작동한다는 것은 자동화가 성숙했다는 뜻. 실패 없이 계속 진행되는 자동화가 오히려 위험 신호다.</p>
   </div>
 </section>
 
 <footer>
-  <div><b>Execution Blueprint · R1</b> · agentic-ticketing</div>
-  <div>End of Document · 12 Sections · Companion to CONCEPT · SPEC R2.5</div>
+  <div><b>Execution Blueprint · R2</b> · agentic-ticketing</div>
+  <div>Companion to Concepts R2 · Spec R3 · End of Document</div>
 </footer>
 
 </main>
